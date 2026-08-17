@@ -1,0 +1,287 @@
+{
+  "metadata": {
+    "review_id": "REV-2024-009812",
+    "document_id": "DOC-2024-IN-009812",
+    "company_name": "Apex Global Technologies Limited",
+    "review_timestamp": "2026-08-17T18:35:00Z",
+    "engine_version": "2.0.0",
+    "analyzed_periods": {
+      "current_period": "FY2024",
+      "previous_period": "FY2023",
+      "base_period": "FY2022"
+    }
+  },
+
+  "financial_metrics": {
+    "liquidity": {
+      "current_ratio": 2.44,
+      "quick_ratio": 2.30,
+      "cash_ratio": 0.49
+    },
+    "leverage": {
+      "debt_to_equity": 0.16,
+      "debt_ratio": 0.10,
+      "interest_coverage_ratio": 15.27
+    },
+    "profitability": {
+      "gross_profit_margin_pct": 90.79,
+      "operating_margin_pct": 17.50,
+      "net_profit_margin_pct": 14.21,
+      "return_on_assets_pct": 18.38,
+      "return_on_equity_pct": 29.27
+    },
+    "efficiency": {
+      "asset_turnover_ratio": 1.29,
+      "receivables_turnover_ratio": 5.61,
+      "days_sales_outstanding": 65.08,
+      "inventory_turnover_ratio": 3.75
+    }
+  },
+
+  "analytical_metrics": {
+    "growth_rates": {
+      "revenue_growth_pct": 17.97,
+      "cogs_growth_pct": 14.39,
+      "expense_growth_pct": 17.11,
+      "gross_profit_growth_pct": 18.34,
+      "operating_profit_growth_pct": 21.73,
+      "net_profit_growth_pct": 25.98,
+      "asset_growth_pct": 16.27,
+      "liability_growth_pct": 16.12,
+      "equity_growth_pct": 16.35,
+      "cash_growth_pct": 26.30,
+      "debt_growth_pct": -6.78
+    },
+    "unusual_fluctuations": [
+      {
+        "metric": "Other Current Liabilities",
+        "current_value": 42.00,
+        "previous_value": 9.40,
+        "change_pct": 346.81,
+        "threshold_pct": 30.0,
+        "severity": "HIGH",
+        "direction": "INCREASE",
+        "note": "Sudden jump in unearned revenue / advance billing."
+      },
+      {
+        "metric": "Other Operating Expenses",
+        "current_value": 612.00,
+        "previous_value": 525.40,
+        "change_pct": 16.48,
+        "threshold_pct": 20.0,
+        "severity": "PASSED",
+        "direction": "INCREASE",
+        "note": "Within expected operational tolerance."
+      },
+      {
+        "metric": "Other Income",
+        "current_value": 82.50,
+        "previous_value": 65.40,
+        "change_pct": 26.15,
+        "threshold_pct": 25.0,
+        "severity": "REVIEW",
+        "direction": "INCREASE",
+        "note": "Treasury and forex gains slightly above normal variance."
+      }
+    ],
+    "unusual_gain_analysis": {
+      "profit_growth_pct": 25.98,
+      "revenue_growth_pct": 17.97,
+      "profit_vs_revenue_divergence_pp": 8.01,
+      "other_income_growth_pct": 26.15,
+      "other_income_to_revenue_pct": 2.37,
+      "total_gain_amount": 14.60,
+      "gain_to_profit_pct": 2.95,
+      "investment_gain": 14.60,
+      "asset_disposal_gain": 0.00,
+      "one_time_gain": 0.00,
+      "divergence_trigger_status": "NORMAL"
+    }
+  },
+
+  "checks": {
+    "mathematical_accuracy": {
+      "score": 100.0,
+      "status": "PASSED",
+      "equations": {
+        "balance_sheet_reconciliation": {
+          "formula": "Assets = Liabilities + Equity",
+          "assets": 2691.00,
+          "liabilities_plus_equity": 2691.00,
+          "difference": 0.00,
+          "is_balanced": true
+        },
+        "gross_profit_equation": {
+          "formula": "Revenue - COGS = Gross Profit",
+          "revenue": 3480.00,
+          "cogs": 320.40,
+          "calculated_gross_profit": 3159.60,
+          "reported_gross_profit": 3159.60,
+          "difference": 0.00
+        },
+        "operating_income_equation": {
+          "formula": "Gross Profit - Operating Expenses = Operating Income",
+          "gross_profit": 3159.60,
+          "operating_expenses": 2550.60,
+          "calculated_operating_income": 609.00,
+          "reported_operating_income": 609.00,
+          "difference": 0.00
+        },
+        "net_income_equation": {
+          "formula": "Operating Income + Other Income - Interest - Tax = Net Income",
+          "operating_income": 609.00,
+          "other_income": 82.50,
+          "interest": 42.50,
+          "tax": 154.45,
+          "calculated_net_income": 494.55,
+          "reported_net_income": 494.55,
+          "difference": 0.00
+        }
+      },
+      "subtotal_accuracy_pct": 100.0,
+      "cross_cast_accuracy_pct": 100.0,
+      "rounding_difference": 0.00
+    },
+
+    "cash_flow": {
+      "score": 100.0,
+      "status": "PASSED",
+      "opening_cash": 245.60,
+      "operating_cash_flow": 577.55,
+      "investing_cash_flow": -224.70,
+      "financing_cash_flow": -288.25,
+      "expected_closing_cash": 310.20,
+      "reported_closing_cash": 310.20,
+      "cash_difference": 0.00,
+      "cash_reconciliation_status": "RECONCILED",
+      "bs_cash_vs_cf_cash_status": "MATCHED"
+    },
+
+    "prior_year_tieout": {
+      "score": 100.0,
+      "status": "PASSED",
+      "items": [
+        {
+          "line_item": "Cash and Cash Equivalents",
+          "opening_balance_fy24": 245.60,
+          "reported_closing_fy23": 245.60,
+          "difference": 0.00,
+          "tie_out_status": "MATCHED"
+        },
+        {
+          "line_item": "Share Capital",
+          "opening_balance_fy24": 120.00,
+          "reported_closing_fy23": 120.00,
+          "difference": 0.00,
+          "tie_out_status": "MATCHED"
+        },
+        {
+          "line_item": "Total Non-Current Assets",
+          "opening_balance_fy24": 1054.00,
+          "reported_closing_fy23": 1054.00,
+          "difference": 0.00,
+          "tie_out_status": "MATCHED"
+        },
+        {
+          "line_item": "Total Liabilities",
+          "opening_balance_fy24": 862.20,
+          "reported_closing_fy23": 862.20,
+          "difference": 0.00,
+          "tie_out_status": "MATCHED"
+        }
+      ]
+    },
+
+    "internal_consistency": {
+      "score": 96.0,
+      "status": "PASSED",
+      "cross_statement_matches": 8,
+      "cross_statement_mismatches": 0,
+      "statement_to_notes_matches": 4,
+      "statement_to_notes_mismatches": 0,
+      "comparisons": [
+        {
+          "check": "Balance Sheet Cash ↔ Cash Flow Closing Cash",
+          "bs_amount": 310.20,
+          "cf_amount": 310.20,
+          "status": "MATCHED"
+        },
+        {
+          "check": "Income Statement Net Income ↔ Cash Flow Net Income (PBT base)",
+          "is_amount": 649.00,
+          "cf_amount": 649.00,
+          "status": "MATCHED"
+        },
+        {
+          "check": "Balance Sheet Debt ↔ Debt Disclosure Note 20",
+          "bs_amount": 180.00,
+          "disclosure_amount": 180.00,
+          "status": "MATCHED"
+        },
+        {
+          "check": "Balance Sheet Receivables ↔ Receivables Note 12",
+          "bs_amount": 620.50,
+          "disclosure_amount": 620.50,
+          "status": "MATCHED"
+        }
+      ]
+    },
+
+    "related_disclosure": {
+      "score": 95.0,
+      "status": "PASSED",
+      "number_of_related_parties": 4,
+      "number_of_related_transactions": 12,
+      "total_related_party_value": 63.80,
+      "disclosed_related_party_value": 63.80,
+      "undisclosed_mismatched_value": 0.00,
+      "disclosure_difference": 0.00,
+      "disclosure_consistency_pct": 100.0
+    },
+
+    "document_quality": {
+      "score": 98.4,
+      "status": "PASSED",
+      "extraction_completeness_pct": 98.4,
+      "required_statement_availability": "ALL_PRESENT",
+      "missing_critical_values_count": 0,
+      "source_coverage_pct": 99.1,
+      "data_quality_status": "EXCELLENT"
+    }
+  },
+
+  "findings": {
+    "critical": 0,
+    "high": 1,
+    "review": 2,
+    "passed": 24,
+    "details": [
+      {
+        "id": "FINDING-001",
+        "severity": "HIGH",
+        "category": "UNUSUAL_FLUCTUATION",
+        "title": "Other Current Liabilities surged by 346.8%",
+        "description": "Other current liabilities increased from INR 9.40 Cr in FY23 to INR 42.00 Cr in FY24.",
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 28" }
+      },
+      {
+        "id": "FINDING-002",
+        "severity": "REVIEW",
+        "category": "UNUSUAL_GAIN",
+        "title": "Other Income grew 26.15% (INR 82.50 Cr)",
+        "description": "Growth in other income outpaced baseline operational revenue growth.",
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 30" }
+      },
+      {
+        "id": "FINDING-003",
+        "severity": "REVIEW",
+        "category": "RELATED_DISCLOSURE",
+        "title": "Related Party Software Purchase of INR 44.10 Cr",
+        "description": "Associate purchase transactions constitute 69.1% of total related party dealings.",
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 77, "note_ref": "Note 40" }
+      }
+    ]
+  },
+
+  "overall_score": 94
+}

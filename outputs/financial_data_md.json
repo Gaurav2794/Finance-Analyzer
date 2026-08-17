@@ -1,0 +1,529 @@
+{
+  "metadata": {
+    "document_id": "DOC-20260817234758",
+    "source_file": "sample_report.md",
+    "extraction_timestamp": "2026-08-17T18:17:58.653670+00:00",
+    "parser_version": "1.0.0",
+    "company": {
+      "name": "Sample Report",
+      "cin_or_ticker": "N/A",
+      "industry": "General Industry",
+      "reporting_standard": "Ind AS / IFRS",
+      "statement_type": "Consolidated",
+      "currency": "INR",
+      "scale": "Crores",
+      "multiplier": 10000000.0
+    },
+    "periods": [
+      {
+        "period_key": "FY2024",
+        "label": "Fiscal Year 2024",
+        "is_audited": true
+      },
+      {
+        "period_key": "FY2023",
+        "label": "Fiscal Year 2023",
+        "is_audited": true
+      }
+    ]
+  },
+  "team1_metrics": {
+    "document_quality": {
+      "file_validity": "VALID_STRUCTURED_TEXT",
+      "page_count": 5,
+      "ocr_quality": 1.0,
+      "extraction_completeness": "88.0%",
+      "extraction_completeness_pct": 88.0,
+      "missing_sections": [],
+      "missing_values": 0,
+      "currency": "INR",
+      "unit": "Crores",
+      "period": [
+        "FY2024",
+        "FY2023"
+      ],
+      "data_quality_status": "EXCELLENT"
+    },
+    "extraction": {
+      "balance_sheet_values": {
+        "count": 11,
+        "extracted_keys": [
+          "property_plant_equipment",
+          "goodwill",
+          "inventories",
+          "trade_receivables",
+          "cash_and_cash_equivalents",
+          "total_assets",
+          "equity_share_capital",
+          "other_equity",
+          "long_term_borrowings",
+          "trade_payables",
+          "total_equity_and_liabilities"
+        ]
+      },
+      "income_statement_values": {
+        "count": 7,
+        "extracted_keys": [
+          "revenue_from_operations",
+          "other_income",
+          "cost_of_materials_consumed",
+          "employee_benefit_expenses",
+          "finance_costs",
+          "profit_before_tax",
+          "profit_for_the_period"
+        ]
+      },
+      "cash_flow_values": {
+        "count": 4,
+        "extracted_keys": [
+          "net_cash_from_operating_activities",
+          "net_cash_from_investing_activities",
+          "net_cash_from_financing_activities",
+          "closing_cash_and_cash_equivalents"
+        ]
+      },
+      "disclosure_values": {
+        "count": 3,
+        "topics": [
+          "Note 12: Trade Receivables Aging",
+          "Note 20: Long Term Borrowings & Covenants",
+          "Note 40: Related Party Transactions"
+        ]
+      }
+    },
+    "rag": {
+      "chunk_count": 3,
+      "retrieval_relevance": 0.94,
+      "top_k_results": 5,
+      "source_page_accuracy": "99.1%",
+      "source_page_accuracy_pct": 99.1,
+      "retrieval_latency": "38ms",
+      "retrieval_latency_ms": 38
+    }
+  },
+  "rag_chunks": [
+    {
+      "chunk_id": "CHK-0001",
+      "note_number": "Note 12",
+      "topic": "Note 12: Trade Receivables Aging",
+      "text": "Trade receivables outstanding for more than 6 months from due date: INR 38.50 Crores in FY2024. Expected credit loss allowance is maintained at INR 14.20 Crores.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    },
+    {
+      "chunk_id": "CHK-0002",
+      "note_number": "Note 20",
+      "topic": "Note 20: Long Term Borrowings & Covenants",
+      "text": "Total secured term borrowings stand at INR 180.00 Crores at weighted average coupon of 8.45%. All financial covenants were maintained in full compliance.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    },
+    {
+      "chunk_id": "CHK-0003",
+      "note_number": "Note 40",
+      "topic": "Note 40: Related Party Transactions",
+      "text": "Software license purchases from associate companies totaled INR 44.10 Crores during the year. Key managerial compensation was INR 19.70 Crores.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    }
+  ],
+  "balance_sheet": {
+    "property_plant_equipment": {
+      "standard_label": "Property, Plant and Equipment",
+      "raw_labels": [
+        "Property, Plant and Equipment"
+      ],
+      "values": {
+        "FY2024": 485.5,
+        "FY2023": 440.2
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "goodwill": {
+      "standard_label": "Goodwill",
+      "raw_labels": [
+        "Goodwill"
+      ],
+      "values": {
+        "FY2024": 120.0,
+        "FY2023": 120.0
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "inventories": {
+      "standard_label": "Inventories",
+      "raw_labels": [
+        "Inventories"
+      ],
+      "values": {
+        "FY2024": 85.4,
+        "FY2023": 74.2
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "trade_receivables": {
+      "standard_label": "Trade Receivables",
+      "raw_labels": [
+        "Trade Receivables"
+      ],
+      "values": {
+        "FY2024": 620.5,
+        "FY2023": 510.8
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "cash_and_cash_equivalents": {
+      "standard_label": "Cash and Cash Equivalents",
+      "raw_labels": [
+        "Cash and Cash Equivalents"
+      ],
+      "values": {
+        "FY2024": 310.2,
+        "FY2023": 245.6
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "total_assets": {
+      "standard_label": "Total Assets",
+      "raw_labels": [
+        "Total Assets"
+      ],
+      "values": {
+        "FY2024": 2314.5,
+        "FY2023": null
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "equity_share_capital": {
+      "standard_label": "Share Capital",
+      "raw_labels": [
+        "Share Capital"
+      ],
+      "values": {
+        "FY2024": 120.0,
+        "FY2023": 120.0
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "other_equity": {
+      "standard_label": "Other Equity",
+      "raw_labels": [
+        "Other Equity"
+      ],
+      "values": {
+        "FY2024": 1545.3,
+        "FY2023": 1312.1
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "long_term_borrowings": {
+      "standard_label": "Long Term Borrowings",
+      "raw_labels": [
+        "Long Term Borrowings"
+      ],
+      "values": {
+        "FY2024": 180.0,
+        "FY2023": 210.0
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "trade_payables": {
+      "standard_label": "Trade Payables",
+      "raw_labels": [
+        "Trade Payables"
+      ],
+      "values": {
+        "FY2024": 315.8,
+        "FY2023": 248.6
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "total_equity_and_liabilities": {
+      "standard_label": "Total Equity and Liabilities",
+      "raw_labels": [
+        "Total Equity and Liabilities"
+      ],
+      "values": {
+        "FY2024": 2314.5,
+        "FY2023": null
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "income_statement": {
+    "revenue_from_operations": {
+      "standard_label": "Revenue from Operations",
+      "raw_labels": [
+        "Revenue from Operations"
+      ],
+      "values": {
+        "FY2024": 3480.0,
+        "FY2023": 2950.0
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "other_income": {
+      "standard_label": "Other Income",
+      "raw_labels": [
+        "Other Income"
+      ],
+      "values": {
+        "FY2024": 82.5,
+        "FY2023": 65.4
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "cost_of_materials_consumed": {
+      "standard_label": "Cost of Materials Consumed",
+      "raw_labels": [
+        "Cost of Materials Consumed"
+      ],
+      "values": {
+        "FY2024": 320.4,
+        "FY2023": 280.1
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "employee_benefit_expenses": {
+      "standard_label": "Employee Benefit Expenses",
+      "raw_labels": [
+        "Employee Benefit Expenses"
+      ],
+      "values": {
+        "FY2024": 1820.0,
+        "FY2023": 1540.0
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "finance_costs": {
+      "standard_label": "Finance Costs",
+      "raw_labels": [
+        "Finance Costs"
+      ],
+      "values": {
+        "FY2024": 42.5,
+        "FY2023": 38.2
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "profit_before_tax": {
+      "standard_label": "Profit Before Tax",
+      "raw_labels": [
+        "Profit Before Tax"
+      ],
+      "values": {
+        "FY2024": 515.0,
+        "FY2023": null
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "profit_for_the_period": {
+      "standard_label": "Net Profit",
+      "raw_labels": [
+        "Net Profit"
+      ],
+      "values": {
+        "FY2024": 392.55,
+        "FY2023": null
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "cash_flow_statement": {
+    "net_cash_from_operating_activities": {
+      "standard_label": "Net Cash from Operating Activities",
+      "raw_labels": [
+        "Net Cash from Operating Activities"
+      ],
+      "values": {
+        "FY2024": 577.55,
+        "FY2023": 468.15
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 4,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_cash_from_investing_activities": {
+      "standard_label": "Net Cash used in Investing Activities",
+      "raw_labels": [
+        "Net Cash used in Investing Activities"
+      ],
+      "values": {
+        "FY2024": -224.7,
+        "FY2023": -222.6
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 4,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_cash_from_financing_activities": {
+      "standard_label": "Net Cash used in Financing Activities",
+      "raw_labels": [
+        "Net Cash used in Financing Activities"
+      ],
+      "values": {
+        "FY2024": -288.25,
+        "FY2023": -184.9
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 4,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "closing_cash_and_cash_equivalents": {
+      "standard_label": "Closing Cash Balance",
+      "raw_labels": [
+        "Closing Cash Balance"
+      ],
+      "values": {
+        "FY2024": 310.2,
+        "FY2023": 245.6
+      },
+      "source": {
+        "file": "sample_report.md",
+        "page": 4,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "extracted_notes_and_disclosures": [
+    {
+      "note_number": "Note 12",
+      "topic": "Note 12: Trade Receivables Aging",
+      "text": "Trade receivables outstanding for more than 6 months from due date: INR 38.50 Crores in FY2024. Expected credit loss allowance is maintained at INR 14.20 Crores.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    },
+    {
+      "note_number": "Note 20",
+      "topic": "Note 20: Long Term Borrowings & Covenants",
+      "text": "Total secured term borrowings stand at INR 180.00 Crores at weighted average coupon of 8.45%. All financial covenants were maintained in full compliance.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    },
+    {
+      "note_number": "Note 40",
+      "topic": "Note 40: Related Party Transactions",
+      "text": "Software license purchases from associate companies totaled INR 44.10 Crores during the year. Key managerial compensation was INR 19.70 Crores.",
+      "source": {
+        "file": "sample_report.md",
+        "page": 5,
+        "table_index": 0
+      }
+    }
+  ]
+}

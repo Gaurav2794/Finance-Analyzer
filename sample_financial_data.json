@@ -1,0 +1,573 @@
+{
+  "metadata": {
+    "document_id": "DOC-2024-IN-009812",
+    "source_file": "Apex_Technologies_Annual_Report_FY2024.pdf",
+    "extraction_timestamp": "2026-08-17T18:30:00Z",
+    "parser_version": "1.0.0",
+    "company": {
+      "name": "Apex Global Technologies Limited",
+      "cin_or_ticker": "L72200MH2005PLC154890",
+      "industry": "Information Technology & Consulting",
+      "reporting_standard": "Ind AS / IFRS",
+      "statement_type": "Consolidated",
+      "currency": "INR",
+      "scale": "Crores",
+      "multiplier": 10000000
+    },
+    "periods": [
+      {
+        "period_key": "FY2024",
+        "label": "Year Ended March 31, 2024",
+        "start_date": "2023-04-01",
+        "end_date": "2024-03-31",
+        "is_audited": true
+      },
+      {
+        "period_key": "FY2023",
+        "label": "Year Ended March 31, 2023",
+        "start_date": "2022-04-01",
+        "end_date": "2023-03-31",
+        "is_audited": true
+      },
+      {
+        "period_key": "FY2022",
+        "label": "Year Ended March 31, 2022",
+        "start_date": "2021-04-01",
+        "end_date": "2022-03-31",
+        "is_audited": true
+      }
+    ]
+  },
+
+  "team1_metrics": {
+    "document_quality": {
+      "file_validity": "VALID_DIGITAL_PDF",
+      "page_count": 114,
+      "ocr_quality": 0.98,
+      "extraction_completeness": "98.4%",
+      "extraction_completeness_pct": 98.4,
+      "missing_sections": [],
+      "missing_values": 0,
+      "currency": "INR",
+      "unit": "Crores",
+      "period": ["FY2024", "FY2023", "FY2022"],
+      "data_quality_status": "EXCELLENT"
+    },
+    "extraction": {
+      "balance_sheet_values": {
+        "count": 37,
+        "extracted_keys": ["property_plant_equipment", "capital_work_in_progress", "goodwill", "intangible_assets", "right_of_use_assets", "investments_non_current", "trade_receivables", "cash_and_cash_equivalents", "total_assets", "total_equity", "long_term_borrowings", "trade_payables", "total_liabilities"]
+      },
+      "income_statement_values": {
+        "count": 14,
+        "extracted_keys": ["revenue_from_operations", "other_income", "total_income", "cost_of_materials_consumed", "employee_benefit_expenses", "finance_costs", "depreciation_and_amortization", "other_operating_expenses", "profit_before_tax", "profit_for_the_period"]
+      },
+      "cash_flow_values": {
+        "count": 8,
+        "extracted_keys": ["operating_profit_before_working_capital_changes", "net_cash_from_operating_activities", "net_cash_from_investing_activities", "net_cash_from_financing_activities", "opening_cash_and_cash_equivalents", "closing_cash_and_cash_equivalents"]
+      },
+      "disclosure_values": {
+        "count": 4,
+        "topics": ["Trade Receivables Aging", "Borrowings and Debt Disclosures", "Contingent Liabilities", "Related Party Disclosures"]
+      }
+    },
+    "rag": {
+      "chunk_count": 284,
+      "retrieval_relevance": 0.94,
+      "top_k_results": 5,
+      "source_page_accuracy": "99.1%",
+      "source_page_accuracy_pct": 99.1,
+      "retrieval_latency": "142ms",
+      "retrieval_latency_ms": 142
+    }
+  },
+
+  "balance_sheet": {
+    "assets": {
+      "non_current_assets": {
+        "property_plant_equipment": {
+          "standard_label": "Property, Plant and Equipment",
+          "raw_labels": ["Property, Plant & Equipment", "Tangible Fixed Assets"],
+          "values": { "FY2024": 485.50, "FY2023": 440.20, "FY2022": 395.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 4" }
+        },
+        "capital_work_in_progress": {
+          "standard_label": "Capital Work-in-Progress",
+          "raw_labels": ["Capital Work-in-Progress", "CWIP"],
+          "values": { "FY2024": 35.80, "FY2023": 42.10, "FY2022": 28.40 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 4" }
+        },
+        "goodwill": {
+          "standard_label": "Goodwill",
+          "raw_labels": ["Goodwill on Consolidation"],
+          "values": { "FY2024": 120.00, "FY2023": 120.00, "FY2022": 85.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 5" }
+        },
+        "intangible_assets": {
+          "standard_label": "Other Intangible Assets",
+          "raw_labels": ["Other Intangible Assets", "Software & Patents"],
+          "values": { "FY2024": 65.40, "FY2023": 58.90, "FY2022": 44.30 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 5" }
+        },
+        "right_of_use_assets": {
+          "standard_label": "Right-of-Use Assets",
+          "raw_labels": ["ROU Assets", "Leasehold Assets"],
+          "values": { "FY2024": 145.20, "FY2023": 132.80, "FY2022": 110.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 6" }
+        },
+        "financial_assets_non_current": {
+          "investments": {
+            "standard_label": "Non-Current Investments",
+            "raw_labels": ["Investments in Joint Ventures & Bonds"],
+            "values": { "FY2024": 180.60, "FY2023": 155.00, "FY2022": 130.20 },
+            "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 7" }
+          },
+          "other_financial_assets": {
+            "standard_label": "Other Non-Current Financial Assets",
+            "raw_labels": ["Security Deposits & Long Term Advances"],
+            "values": { "FY2024": 42.10, "FY2023": 38.40, "FY2022": 32.00 },
+            "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 8" }
+          }
+        },
+        "deferred_tax_assets_net": {
+          "standard_label": "Deferred Tax Assets (Net)",
+          "raw_labels": ["Deferred Tax Assets (Net)"],
+          "values": { "FY2024": 52.30, "FY2023": 44.50, "FY2022": 38.20 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 9" }
+        },
+        "other_non_current_assets": {
+          "standard_label": "Other Non-Current Assets",
+          "raw_labels": ["Capital Advances & Prepaid Taxes"],
+          "values": { "FY2024": 28.50, "FY2023": 22.10, "FY2022": 19.40 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 10" }
+        },
+        "total_non_current_assets": {
+          "standard_label": "Total Non-Current Assets",
+          "raw_labels": ["Total Non-Current Assets"],
+          "values": { "FY2024": 1155.40, "FY2023": 1054.00, "FY2022": 883.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42 }
+        }
+      },
+
+      "current_assets": {
+        "inventories": {
+          "standard_label": "Inventories",
+          "raw_labels": ["Inventories & Hardware Stocks"],
+          "values": { "FY2024": 85.40, "FY2023": 74.20, "FY2022": 62.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 11" }
+        },
+        "trade_receivables": {
+          "standard_label": "Trade Receivables",
+          "raw_labels": ["Trade Receivables", "Accounts Receivable", "Sundry Debtors"],
+          "values": { "FY2024": 620.50, "FY2023": 510.80, "FY2022": 435.20 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 12" }
+        },
+        "cash_and_cash_equivalents": {
+          "standard_label": "Cash and Cash Equivalents",
+          "raw_labels": ["Cash & Cash Equivalents", "Cash and Bank Balances"],
+          "values": { "FY2024": 310.20, "FY2023": 245.60, "FY2022": 185.40 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 13" }
+        },
+        "bank_balances_other": {
+          "standard_label": "Other Bank Balances",
+          "raw_labels": ["Other Bank Balances", "Earmarked Balances with Banks"],
+          "values": { "FY2024": 95.00, "FY2023": 80.00, "FY2022": 65.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 14" }
+        },
+        "current_investments": {
+          "standard_label": "Current Investments",
+          "raw_labels": ["Mutual Funds & Liquid Treasury"],
+          "values": { "FY2024": 210.00, "FY2023": 175.50, "FY2022": 140.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 15" }
+        },
+        "other_current_financial_assets": {
+          "standard_label": "Other Current Financial Assets",
+          "raw_labels": ["Unbilled Revenue & Accrued Interest"],
+          "values": { "FY2024": 145.80, "FY2023": 120.30, "FY2022": 95.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 16" }
+        },
+        "other_current_assets": {
+          "standard_label": "Other Current Assets",
+          "raw_labels": ["Prepaid Expenses & GST Input Credit"],
+          "values": { "FY2024": 68.70, "FY2023": 54.10, "FY2022": 42.90 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42, "note_ref": "Note 17" }
+        },
+        "total_current_assets": {
+          "standard_label": "Total Current Assets",
+          "raw_labels": ["Total Current Assets"],
+          "values": { "FY2024": 1535.60, "FY2023": 1260.50, "FY2022": 1026.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42 }
+        }
+      },
+
+      "total_assets": {
+        "standard_label": "Total Assets",
+        "raw_labels": ["TOTAL ASSETS"],
+        "values": { "FY2024": 2691.00, "FY2023": 2314.50, "FY2022": 1909.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 42 }
+      }
+    },
+
+    "equity_and_liabilities": {
+      "equity": {
+        "equity_share_capital": {
+          "standard_label": "Equity Share Capital",
+          "raw_labels": ["Equity Share Capital", "Share Capital"],
+          "values": { "FY2024": 120.00, "FY2023": 120.00, "FY2022": 120.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 18" }
+        },
+        "other_equity": {
+          "standard_label": "Other Equity / Reserves & Surplus",
+          "raw_labels": ["Other Equity", "Reserves and Surplus", "Retained Earnings"],
+          "values": { "FY2024": 1545.30, "FY2023": 1312.10, "FY2022": 1062.80 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 19" }
+        },
+        "non_controlling_interests": {
+          "standard_label": "Non-Controlling Interests",
+          "raw_labels": ["Minority Interest", "Non-Controlling Interests"],
+          "values": { "FY2024": 24.50, "FY2023": 20.20, "FY2022": 16.40 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+        },
+        "total_equity": {
+          "standard_label": "Total Equity",
+          "raw_labels": ["Total Equity"],
+          "values": { "FY2024": 1689.80, "FY2023": 1452.30, "FY2022": 1199.20 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+        }
+      },
+
+      "non_current_liabilities": {
+        "long_term_borrowings": {
+          "standard_label": "Long-Term Borrowings",
+          "raw_labels": ["Long Term Borrowings", "Non-Current Borrowings", "Term Loans"],
+          "values": { "FY2024": 180.00, "FY2023": 210.00, "FY2022": 195.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 20" }
+        },
+        "lease_liabilities_non_current": {
+          "standard_label": "Non-Current Lease Liabilities",
+          "raw_labels": ["Lease Liabilities - Non Current"],
+          "values": { "FY2024": 115.40, "FY2023": 105.20, "FY2022": 88.60 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 21" }
+        },
+        "long_term_provisions": {
+          "standard_label": "Long-Term Provisions",
+          "raw_labels": ["Long Term Provisions", "Employee Benefit Obligations"],
+          "values": { "FY2024": 45.20, "FY2023": 39.80, "FY2022": 33.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 22" }
+        },
+        "total_non_current_liabilities": {
+          "standard_label": "Total Non-Current Liabilities",
+          "raw_labels": ["Total Non-Current Liabilities"],
+          "values": { "FY2024": 371.20, "FY2023": 380.40, "FY2022": 335.30 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+        }
+      },
+
+      "current_liabilities": {
+        "short_term_borrowings": {
+          "standard_label": "Short-Term Borrowings",
+          "raw_labels": ["Short Term Borrowings", "Working Capital Loan", "Bank Overdraft"],
+          "values": { "FY2024": 95.00, "FY2023": 85.00, "FY2022": 72.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 24" }
+        },
+        "lease_liabilities_current": {
+          "standard_label": "Current Lease Liabilities",
+          "raw_labels": ["Lease Liabilities - Current"],
+          "values": { "FY2024": 38.60, "FY2023": 32.40, "FY2022": 26.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 21" }
+        },
+        "trade_payables": {
+          "total": {
+            "standard_label": "Trade Payables",
+            "raw_labels": ["Trade Payables", "Accounts Payable", "Sundry Creditors"],
+            "values": { "FY2024": 315.80, "FY2023": 248.60, "FY2022": 194.20 },
+            "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 25" }
+          },
+          "msme_dues": {
+            "standard_label": "Trade Payables - MSME",
+            "raw_labels": ["Total Outstanding dues of Micro and Small Enterprises"],
+            "values": { "FY2024": 18.50, "FY2023": 14.20, "FY2022": 11.00 },
+            "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 25" }
+          },
+          "non_msme_dues": {
+            "standard_label": "Trade Payables - Other than MSME",
+            "raw_labels": ["Total Outstanding dues of Creditors other than MSME"],
+            "values": { "FY2024": 297.30, "FY2023": 234.40, "FY2022": 183.20 },
+            "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 25" }
+          }
+        },
+        "other_current_financial_liabilities": {
+          "standard_label": "Other Current Financial Liabilities",
+          "raw_labels": ["Accrued Salaries, Unclaimed Dividend & Capital Creditors"],
+          "values": { "FY2024": 82.40, "FY2023": 62.10, "FY2022": 41.80 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 26" }
+        },
+        "short_term_provisions": {
+          "standard_label": "Short-Term Provisions",
+          "raw_labels": ["Short-Term Provisions", "Provision for Compensated Absences"],
+          "values": { "FY2024": 32.20, "FY2023": 25.80, "FY2022": 21.00 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 27" }
+        },
+        "current_tax_liabilities_net": {
+          "standard_label": "Current Tax Liabilities (Net)",
+          "raw_labels": ["Current Tax Liabilities (Net)", "Provision for Income Tax"],
+          "values": { "FY2024": 24.00, "FY2023": 18.50, "FY2022": 12.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+        },
+        "other_current_liabilities": {
+          "standard_label": "Other Current Liabilities",
+          "raw_labels": ["Unearned / Advance Revenue & Statutory Dues"],
+          "values": { "FY2024": 42.00, "FY2023": 9.40, "FY2022": 6.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43, "note_ref": "Note 28" }
+        },
+        "total_current_liabilities": {
+          "standard_label": "Total Current Liabilities",
+          "raw_labels": ["Total Current Liabilities"],
+          "values": { "FY2024": 630.00, "FY2023": 481.80, "FY2022": 374.50 },
+          "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+        }
+      },
+
+      "total_liabilities": {
+        "standard_label": "Total Liabilities",
+        "raw_labels": ["Total Liabilities"],
+        "values": { "FY2024": 1001.20, "FY2023": 862.20, "FY2022": 709.80 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+      },
+
+      "total_equity_and_liabilities": {
+        "standard_label": "Total Equity and Liabilities",
+        "raw_labels": ["TOTAL EQUITY AND LIABILITIES"],
+        "values": { "FY2024": 2691.00, "FY2023": 2314.50, "FY2022": 1909.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 43 }
+      }
+    }
+  },
+
+  "income_statement": {
+    "revenue_from_operations": {
+      "standard_label": "Revenue from Operations",
+      "raw_labels": ["Revenue from Operations", "Sale of Services and Products", "Gross Turnover"],
+      "values": { "FY2024": 3480.00, "FY2023": 2950.00, "FY2022": 2420.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 29" }
+    },
+    "other_income": {
+      "standard_label": "Other Income",
+      "raw_labels": ["Other Income", "Interest & Dividend Income", "Forex Gain"],
+      "values": { "FY2024": 82.50, "FY2023": 65.40, "FY2022": 48.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 30" }
+    },
+    "total_income": {
+      "standard_label": "Total Income / Total Revenue",
+      "raw_labels": ["Total Income", "Total Revenue"],
+      "values": { "FY2024": 3562.50, "FY2023": 3015.40, "FY2022": 2468.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+    },
+
+    "expenses": {
+      "cost_of_materials_consumed": {
+        "standard_label": "Cost of Materials & Hardware Consumed",
+        "raw_labels": ["Cost of Materials Consumed", "Hardware & Software Licenses", "COGS"],
+        "values": { "FY2024": 320.40, "FY2023": 280.10, "FY2022": 235.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 31" }
+      },
+      "employee_benefit_expenses": {
+        "standard_label": "Employee Benefit Expenses",
+        "raw_labels": ["Employee Benefit Expense", "Salaries and Wages", "Staff Costs"],
+        "values": { "FY2024": 1820.00, "FY2023": 1540.00, "FY2022": 1280.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 32" }
+      },
+      "finance_costs": {
+        "standard_label": "Finance Costs",
+        "raw_labels": ["Finance Costs", "Interest Expense"],
+        "values": { "FY2024": 42.50, "FY2023": 38.20, "FY2022": 32.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 33" }
+      },
+      "depreciation_and_amortization": {
+        "standard_label": "Depreciation and Amortization Expense",
+        "raw_labels": ["Depreciation & Amortisation Expense"],
+        "values": { "FY2024": 118.60, "FY2023": 104.20, "FY2022": 89.50 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 34" }
+      },
+      "other_operating_expenses": {
+        "standard_label": "Other Expenses",
+        "raw_labels": ["Other Operating Expenses", "Administrative & Sales Overhead"],
+        "values": { "FY2024": 612.00, "FY2023": 525.40, "FY2022": 435.50 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 35" }
+      },
+      "total_expenses": {
+        "standard_label": "Total Expenses",
+        "raw_labels": ["Total Expenses"],
+        "values": { "FY2024": 2913.50, "FY2023": 2487.90, "FY2022": 2072.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+      }
+    },
+
+    "operating_profit": {
+      "standard_label": "Operating Profit / Operating Income",
+      "raw_labels": ["Operating Profit", "EBIT before Other Income"],
+      "values": { "FY2024": 609.00, "FY2023": 500.30, "FY2022": 380.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+    },
+    "gross_profit": {
+      "standard_label": "Gross Profit",
+      "raw_labels": ["Gross Profit"],
+      "values": { "FY2024": 3159.60, "FY2023": 2669.90, "FY2022": 2185.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+    },
+    "profit_before_tax": {
+      "standard_label": "Profit Before Tax (PBT)",
+      "raw_labels": ["Profit Before Tax", "PBT"],
+      "values": { "FY2024": 649.00, "FY2023": 515.00, "FY2022": 396.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+    },
+
+    "tax_expense": {
+      "current_tax": {
+        "standard_label": "Current Tax Expense",
+        "raw_labels": ["Current Tax"],
+        "values": { "FY2024": 162.25, "FY2023": 128.75, "FY2022": 99.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 37" }
+      },
+      "deferred_tax": {
+        "standard_label": "Deferred Tax",
+        "raw_labels": ["Deferred Tax Charge / (Credit)"],
+        "values": { "FY2024": -7.80, "FY2023": -6.30, "FY2022": -4.20 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 37" }
+      },
+      "total_tax_expense": {
+        "standard_label": "Total Tax Expense",
+        "raw_labels": ["Total Tax Expense"],
+        "values": { "FY2024": 154.45, "FY2023": 122.45, "FY2022": 94.80 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+      }
+    },
+
+    "profit_for_the_period": {
+      "standard_label": "Profit for the Year / Net Income / PAT",
+      "raw_labels": ["Profit for the Period", "Net Profit After Tax", "PAT"],
+      "values": { "FY2024": 494.55, "FY2023": 392.55, "FY2022": 301.20 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45 }
+    },
+
+    "earnings_per_share": {
+      "basic_eps_inr": {
+        "standard_label": "Basic EPS (INR)",
+        "raw_labels": ["Basic Earnings Per Share (INR)"],
+        "values": { "FY2024": 41.21, "FY2023": 32.71, "FY2022": 25.10 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 38" }
+      },
+      "diluted_eps_inr": {
+        "standard_label": "Diluted EPS (INR)",
+        "raw_labels": ["Diluted Earnings Per Share (INR)"],
+        "values": { "FY2024": 40.85, "FY2023": 32.40, "FY2022": 24.90 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 45, "note_ref": "Note 38" }
+      }
+    }
+  },
+
+  "cash_flow_statement": {
+    "operating_activities": {
+      "profit_before_tax": {
+        "standard_label": "Profit Before Tax",
+        "raw_labels": ["Profit Before Tax"],
+        "values": { "FY2024": 649.00, "FY2023": 515.00, "FY2022": 396.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      },
+      "operating_profit_before_working_capital_changes": {
+        "standard_label": "Operating Profit Before Working Capital Changes",
+        "raw_labels": ["Operating Profit before Working Capital Changes"],
+        "values": { "FY2024": 778.80, "FY2023": 632.60, "FY2022": 499.80 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      },
+      "cash_generated_from_operations": {
+        "standard_label": "Cash Generated from Operations",
+        "raw_labels": ["Cash generated from Operations"],
+        "values": { "FY2024": 734.30, "FY2023": 590.90, "FY2022": 461.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      },
+      "net_cash_from_operating_activities": {
+        "standard_label": "Net Cash Flows from Operating Activities",
+        "raw_labels": ["Net Cash from Operating Activities", "CFO", "Operating Cash Flow"],
+        "values": { "FY2024": 577.55, "FY2023": 468.15, "FY2022": 368.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      }
+    },
+
+    "investing_activities": {
+      "purchase_of_ppe_and_intangibles": {
+        "standard_label": "Purchase of Property, Plant, Equipment & Intangibles (CapEx)",
+        "raw_labels": ["Capital Expenditure on Fixed Assets & CWIP"],
+        "values": { "FY2024": -190.20, "FY2023": -185.50, "FY2022": -155.00 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      },
+      "net_cash_from_investing_activities": {
+        "standard_label": "Net Cash Flows from / (used in) Investing Activities",
+        "raw_labels": ["Net Cash used in Investing Activities", "CFI", "Investing Cash Flow"],
+        "values": { "FY2024": -224.70, "FY2023": -222.60, "FY2022": -183.30 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 47 }
+      }
+    },
+
+    "financing_activities": {
+      "net_cash_from_financing_activities": {
+        "standard_label": "Net Cash Flows from / (used in) Financing Activities",
+        "raw_labels": ["Net Cash used in Financing Activities", "CFF", "Financing Cash Flow"],
+        "values": { "FY2024": -288.25, "FY2023": -184.90, "FY2022": -143.70 },
+        "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 48 }
+      }
+    },
+
+    "net_change_in_cash_and_cash_equivalents": {
+      "standard_label": "Net Increase / (Decrease) in Cash and Cash Equivalents",
+      "raw_labels": ["Net increase in Cash and cash equivalents"],
+      "values": { "FY2024": 64.60, "FY2023": 60.65, "FY2022": 41.00 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 48 }
+    },
+    "opening_cash_and_cash_equivalents": {
+      "standard_label": "Cash and Cash Equivalents at the Beginning of Year",
+      "raw_labels": ["Cash and Cash Equivalents at beginning of the year", "Opening Cash"],
+      "values": { "FY2024": 245.60, "FY2023": 184.95, "FY2022": 144.40 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 48 }
+    },
+    "closing_cash_and_cash_equivalents": {
+      "standard_label": "Cash and Cash Equivalents at the End of Year",
+      "raw_labels": ["Cash and Cash Equivalents at end of the year", "Reported Closing Cash"],
+      "values": { "FY2024": 310.20, "FY2023": 245.60, "FY2022": 185.40 },
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 48 }
+    }
+  },
+
+  "extracted_notes_and_disclosures": [
+    {
+      "note_number": "Note 12",
+      "topic": "Trade Receivables Aging",
+      "text": "Trade receivables outstanding for more than 6 months from due date: INR 38.50 Crores in FY2024. Total Trade Receivables balance: INR 620.50 Crores.",
+      "disclosed_value": 620.50,
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 58 }
+    },
+    {
+      "note_number": "Note 20",
+      "topic": "Borrowings and Debt Disclosures",
+      "text": "Total Long-Term Borrowings as on March 31, 2024 is INR 180.00 Crores (FY2023: INR 210.00 Crores). Secured bank loans carry interest rate of 8.45% p.a.",
+      "disclosed_value": 180.00,
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 63 }
+    },
+    {
+      "note_number": "Note 39",
+      "topic": "Contingent Liabilities",
+      "text": "Disputed direct tax demands under appeal INR 22.80 Crores; disputed indirect tax demands INR 6.40 Crores.",
+      "disclosed_value": 29.20,
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 74 }
+    },
+    {
+      "note_number": "Note 40",
+      "topic": "Related Party Disclosures",
+      "text": "Total transactions with related parties during FY2024: KMP compensation INR 19.70 Crores, purchase of software support services from associate entity INR 44.10 Crores. Total related-party transaction value: INR 63.80 Crores.",
+      "disclosed_value": 63.80,
+      "related_party_count": 4,
+      "transaction_count": 12,
+      "source": { "file": "Apex_Technologies_Annual_Report_FY2024.pdf", "page": 77 }
+    }
+  ]
+}

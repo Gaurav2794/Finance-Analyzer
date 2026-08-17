@@ -1,0 +1,884 @@
+{
+  "metadata": {
+    "document_id": "DOC-20260817234551",
+    "source_file": "sample_financials.xlsx",
+    "extraction_timestamp": "2026-08-17T18:15:51.525154+00:00",
+    "parser_version": "1.0.0",
+    "company": {
+      "name": "Sample Financials",
+      "cin_or_ticker": "N/A",
+      "industry": "General Industry",
+      "reporting_standard": "Ind AS / IFRS",
+      "statement_type": "Consolidated",
+      "currency": "INR",
+      "scale": "Crores",
+      "multiplier": 10000000.0
+    },
+    "periods": [
+      {
+        "period_key": "FY2024",
+        "label": "Fiscal Year 2024",
+        "is_audited": true
+      },
+      {
+        "period_key": "FY2023",
+        "label": "Fiscal Year 2023",
+        "is_audited": true
+      },
+      {
+        "period_key": "FY2022",
+        "label": "Fiscal Year 2022",
+        "is_audited": true
+      }
+    ]
+  },
+  "team1_metrics": {
+    "document_quality": {
+      "file_validity": "VALID_EXCEL_WORKBOOK",
+      "page_count": 3,
+      "ocr_quality": 1.0,
+      "extraction_completeness": "100.0%",
+      "extraction_completeness_pct": 100.0,
+      "missing_sections": [],
+      "missing_values": 0,
+      "currency": "INR",
+      "unit": "Crores",
+      "period": [
+        "FY2024",
+        "FY2023",
+        "FY2022"
+      ],
+      "data_quality_status": "EXCELLENT"
+    },
+    "extraction": {
+      "balance_sheet_values": {
+        "count": 24,
+        "extracted_keys": [
+          "property_plant_equipment",
+          "capital_work_in_progress",
+          "goodwill",
+          "intangible_assets",
+          "right_of_use_assets",
+          "investments_non_current",
+          "total_non_current_assets",
+          "inventories",
+          "trade_receivables",
+          "cash_and_cash_equivalents",
+          "bank_balances_other",
+          "current_investments",
+          "total_current_assets",
+          "total_assets",
+          "equity_share_capital",
+          "other_equity",
+          "total_equity",
+          "long_term_borrowings",
+          "total_non_current_liabilities",
+          "short_term_borrowings",
+          "trade_payables",
+          "other_current_liabilities",
+          "total_current_liabilities",
+          "total_equity_and_liabilities"
+        ]
+      },
+      "income_statement_values": {
+        "count": 13,
+        "extracted_keys": [
+          "revenue_from_operations",
+          "other_income",
+          "total_income",
+          "cost_of_materials_consumed",
+          "employee_benefit_expenses",
+          "finance_costs",
+          "depreciation_and_amortization",
+          "other_operating_expenses",
+          "total_expenses",
+          "operating_profit",
+          "profit_before_tax",
+          "total_tax_expense",
+          "profit_for_the_period"
+        ]
+      },
+      "cash_flow_values": {
+        "count": 7,
+        "extracted_keys": [
+          "operating_profit_before_working_capital_changes",
+          "net_cash_from_operating_activities",
+          "property_plant_equipment",
+          "net_cash_from_investing_activities",
+          "net_cash_from_financing_activities",
+          "net_change_in_cash_and_cash_equivalents",
+          "cash_and_cash_equivalents"
+        ]
+      },
+      "disclosure_values": {
+        "count": 0,
+        "topics": []
+      }
+    },
+    "rag": {
+      "chunk_count": 0,
+      "retrieval_relevance": 0.0,
+      "top_k_results": 5,
+      "source_page_accuracy": "0.0%",
+      "source_page_accuracy_pct": 0.0,
+      "retrieval_latency": "38ms",
+      "retrieval_latency_ms": 38
+    }
+  },
+  "rag_chunks": [],
+  "balance_sheet": {
+    "property_plant_equipment": {
+      "standard_label": "Property, Plant & Equipment",
+      "raw_labels": [
+        "Property, Plant & Equipment"
+      ],
+      "values": {
+        "FY2024": 485.5,
+        "FY2023": 440.2,
+        "FY2022": 395.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 4"
+      }
+    },
+    "capital_work_in_progress": {
+      "standard_label": "Capital Work-in-Progress",
+      "raw_labels": [
+        "Capital Work-in-Progress"
+      ],
+      "values": {
+        "FY2024": 35.8,
+        "FY2023": 42.1,
+        "FY2022": 28.4
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 4"
+      }
+    },
+    "goodwill": {
+      "standard_label": "Goodwill on Consolidation",
+      "raw_labels": [
+        "Goodwill on Consolidation"
+      ],
+      "values": {
+        "FY2024": 120.0,
+        "FY2023": 120.0,
+        "FY2022": 85.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 5"
+      }
+    },
+    "intangible_assets": {
+      "standard_label": "Other Intangible Assets",
+      "raw_labels": [
+        "Other Intangible Assets"
+      ],
+      "values": {
+        "FY2024": 65.4,
+        "FY2023": 58.9,
+        "FY2022": 44.3
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 5"
+      }
+    },
+    "right_of_use_assets": {
+      "standard_label": "Right-of-Use Assets",
+      "raw_labels": [
+        "Right-of-Use Assets"
+      ],
+      "values": {
+        "FY2024": 145.2,
+        "FY2023": 132.8,
+        "FY2022": 110.5
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 6"
+      }
+    },
+    "investments_non_current": {
+      "standard_label": "Non-Current Investments",
+      "raw_labels": [
+        "Non-Current Investments"
+      ],
+      "values": {
+        "FY2024": 180.6,
+        "FY2023": 155.0,
+        "FY2022": 130.2
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 7"
+      }
+    },
+    "total_non_current_assets": {
+      "standard_label": "Total Non-Current Assets",
+      "raw_labels": [
+        "Total Non-Current Assets"
+      ],
+      "values": {
+        "FY2024": 1155.4,
+        "FY2023": 1054.0,
+        "FY2022": 883.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "inventories": {
+      "standard_label": "Inventories",
+      "raw_labels": [
+        "Inventories"
+      ],
+      "values": {
+        "FY2024": 85.4,
+        "FY2023": 74.2,
+        "FY2022": 62.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 11"
+      }
+    },
+    "trade_receivables": {
+      "standard_label": "Trade Receivables",
+      "raw_labels": [
+        "Trade Receivables"
+      ],
+      "values": {
+        "FY2024": 620.5,
+        "FY2023": 510.8,
+        "FY2022": 435.2
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 12"
+      }
+    },
+    "cash_and_cash_equivalents": {
+      "standard_label": "Cash & Cash Equivalents",
+      "raw_labels": [
+        "Cash & Cash Equivalents"
+      ],
+      "values": {
+        "FY2024": 310.2,
+        "FY2023": 245.6,
+        "FY2022": 185.4
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 13"
+      }
+    },
+    "bank_balances_other": {
+      "standard_label": "Other Bank Balances",
+      "raw_labels": [
+        "Other Bank Balances"
+      ],
+      "values": {
+        "FY2024": 95.0,
+        "FY2023": 80.0,
+        "FY2022": 65.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 14"
+      }
+    },
+    "current_investments": {
+      "standard_label": "Current Investments",
+      "raw_labels": [
+        "Current Investments"
+      ],
+      "values": {
+        "FY2024": 210.0,
+        "FY2023": 175.5,
+        "FY2022": 140.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 15"
+      }
+    },
+    "total_current_assets": {
+      "standard_label": "Total Current Assets",
+      "raw_labels": [
+        "Total Current Assets"
+      ],
+      "values": {
+        "FY2024": 1535.6,
+        "FY2023": 1260.5,
+        "FY2022": 1026.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "total_assets": {
+      "standard_label": "TOTAL ASSETS",
+      "raw_labels": [
+        "TOTAL ASSETS"
+      ],
+      "values": {
+        "FY2024": 2691.0,
+        "FY2023": 2314.5,
+        "FY2022": 1909.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "equity_share_capital": {
+      "standard_label": "Equity Share Capital",
+      "raw_labels": [
+        "Equity Share Capital"
+      ],
+      "values": {
+        "FY2024": 120.0,
+        "FY2023": 120.0,
+        "FY2022": 120.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 18"
+      }
+    },
+    "other_equity": {
+      "standard_label": "Other Equity",
+      "raw_labels": [
+        "Other Equity"
+      ],
+      "values": {
+        "FY2024": 1545.3,
+        "FY2023": 1312.1,
+        "FY2022": 1062.8
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 19"
+      }
+    },
+    "total_equity": {
+      "standard_label": "Total Equity",
+      "raw_labels": [
+        "Total Equity"
+      ],
+      "values": {
+        "FY2024": 1689.8,
+        "FY2023": 1452.3,
+        "FY2022": 1199.2
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "long_term_borrowings": {
+      "standard_label": "Long-Term Borrowings",
+      "raw_labels": [
+        "Long-Term Borrowings"
+      ],
+      "values": {
+        "FY2024": 180.0,
+        "FY2023": 210.0,
+        "FY2022": 195.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 20"
+      }
+    },
+    "total_non_current_liabilities": {
+      "standard_label": "Total Non-Current Liabilities",
+      "raw_labels": [
+        "Total Non-Current Liabilities"
+      ],
+      "values": {
+        "FY2024": 371.2,
+        "FY2023": 380.4,
+        "FY2022": 335.3
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "short_term_borrowings": {
+      "standard_label": "Short-Term Borrowings",
+      "raw_labels": [
+        "Short-Term Borrowings"
+      ],
+      "values": {
+        "FY2024": 95.0,
+        "FY2023": 85.0,
+        "FY2022": 72.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 24"
+      }
+    },
+    "trade_payables": {
+      "standard_label": "Trade Payables",
+      "raw_labels": [
+        "Trade Payables"
+      ],
+      "values": {
+        "FY2024": 315.8,
+        "FY2023": 248.6,
+        "FY2022": 194.2
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 25"
+      }
+    },
+    "other_current_liabilities": {
+      "standard_label": "Other Current Liabilities",
+      "raw_labels": [
+        "Other Current Liabilities"
+      ],
+      "values": {
+        "FY2024": 42.0,
+        "FY2023": 9.4,
+        "FY2022": 6.5
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": "Note 28"
+      }
+    },
+    "total_current_liabilities": {
+      "standard_label": "Total Current Liabilities",
+      "raw_labels": [
+        "Total Current Liabilities"
+      ],
+      "values": {
+        "FY2024": 630.0,
+        "FY2023": 481.8,
+        "FY2022": 374.5
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "total_equity_and_liabilities": {
+      "standard_label": "TOTAL EQUITY AND LIABILITIES",
+      "raw_labels": [
+        "TOTAL EQUITY AND LIABILITIES"
+      ],
+      "values": {
+        "FY2024": 2691.0,
+        "FY2023": 2314.5,
+        "FY2022": 1909.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 1,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "income_statement": {
+    "revenue_from_operations": {
+      "standard_label": "Revenue from Operations",
+      "raw_labels": [
+        "Revenue from Operations"
+      ],
+      "values": {
+        "FY2024": 3480.0,
+        "FY2023": 2950.0,
+        "FY2022": 2420.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 29"
+      }
+    },
+    "other_income": {
+      "standard_label": "Other Income",
+      "raw_labels": [
+        "Other Income"
+      ],
+      "values": {
+        "FY2024": 82.5,
+        "FY2023": 65.4,
+        "FY2022": 48.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 30"
+      }
+    },
+    "total_income": {
+      "standard_label": "Total Revenue",
+      "raw_labels": [
+        "Total Revenue"
+      ],
+      "values": {
+        "FY2024": 3562.5,
+        "FY2023": 3015.4,
+        "FY2022": 2468.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "cost_of_materials_consumed": {
+      "standard_label": "Cost of Materials Consumed",
+      "raw_labels": [
+        "Cost of Materials Consumed"
+      ],
+      "values": {
+        "FY2024": 320.4,
+        "FY2023": 280.1,
+        "FY2022": 235.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 31"
+      }
+    },
+    "employee_benefit_expenses": {
+      "standard_label": "Employee Benefit Expenses",
+      "raw_labels": [
+        "Employee Benefit Expenses"
+      ],
+      "values": {
+        "FY2024": 1820.0,
+        "FY2023": 1540.0,
+        "FY2022": 1280.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 32"
+      }
+    },
+    "finance_costs": {
+      "standard_label": "Finance Costs",
+      "raw_labels": [
+        "Finance Costs"
+      ],
+      "values": {
+        "FY2024": 42.5,
+        "FY2023": 38.2,
+        "FY2022": 32.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 33"
+      }
+    },
+    "depreciation_and_amortization": {
+      "standard_label": "Depreciation & Amortisation Expense",
+      "raw_labels": [
+        "Depreciation & Amortisation Expense"
+      ],
+      "values": {
+        "FY2024": 118.6,
+        "FY2023": 104.2,
+        "FY2022": 89.5
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 34"
+      }
+    },
+    "other_operating_expenses": {
+      "standard_label": "Other Expenses",
+      "raw_labels": [
+        "Other Expenses"
+      ],
+      "values": {
+        "FY2024": 612.0,
+        "FY2023": 525.4,
+        "FY2022": 435.5
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 35"
+      }
+    },
+    "total_expenses": {
+      "standard_label": "Total Expenses",
+      "raw_labels": [
+        "Total Expenses"
+      ],
+      "values": {
+        "FY2024": 2913.5,
+        "FY2023": 2487.9,
+        "FY2022": 2072.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "operating_profit": {
+      "standard_label": "Operating Profit",
+      "raw_labels": [
+        "Operating Profit"
+      ],
+      "values": {
+        "FY2024": 609.0,
+        "FY2023": 500.3,
+        "FY2022": 380.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "profit_before_tax": {
+      "standard_label": "Profit Before Tax",
+      "raw_labels": [
+        "Profit Before Tax"
+      ],
+      "values": {
+        "FY2024": 649.0,
+        "FY2023": 515.0,
+        "FY2022": 396.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "total_tax_expense": {
+      "standard_label": "Tax Expense",
+      "raw_labels": [
+        "Tax Expense"
+      ],
+      "values": {
+        "FY2024": 154.45,
+        "FY2023": 122.45,
+        "FY2022": 94.8
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": "Note 37"
+      }
+    },
+    "profit_for_the_period": {
+      "standard_label": "Profit for the Period",
+      "raw_labels": [
+        "Profit for the Period"
+      ],
+      "values": {
+        "FY2024": 494.55,
+        "FY2023": 392.55,
+        "FY2022": 301.2
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 2,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "cash_flow_statement": {
+    "operating_profit_before_working_capital_changes": {
+      "standard_label": "Operating Profit before Working Capital Changes",
+      "raw_labels": [
+        "Operating Profit before Working Capital Changes"
+      ],
+      "values": {
+        "FY2024": 778.8,
+        "FY2023": 632.6,
+        "FY2022": 499.8
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_cash_from_operating_activities": {
+      "standard_label": "Net Cash Flows from Operating Activities",
+      "raw_labels": [
+        "Net Cash Flows from Operating Activities"
+      ],
+      "values": {
+        "FY2024": 577.55,
+        "FY2023": 468.15,
+        "FY2022": 368.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "property_plant_equipment": {
+      "standard_label": "Purchase of Fixed Assets (CapEx)",
+      "raw_labels": [
+        "Purchase of Fixed Assets (CapEx)"
+      ],
+      "values": {
+        "FY2024": -190.2,
+        "FY2023": -185.5,
+        "FY2022": -155.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_cash_from_investing_activities": {
+      "standard_label": "Net Cash used in Investing Activities",
+      "raw_labels": [
+        "Net Cash used in Investing Activities"
+      ],
+      "values": {
+        "FY2024": -224.7,
+        "FY2023": -222.6,
+        "FY2022": -183.3
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_cash_from_financing_activities": {
+      "standard_label": "Net Cash used in Financing Activities",
+      "raw_labels": [
+        "Net Cash used in Financing Activities"
+      ],
+      "values": {
+        "FY2024": -288.25,
+        "FY2023": -184.9,
+        "FY2022": -143.7
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "net_change_in_cash_and_cash_equivalents": {
+      "standard_label": "Net Increase in Cash and Cash Equivalents",
+      "raw_labels": [
+        "Net Increase in Cash and Cash Equivalents"
+      ],
+      "values": {
+        "FY2024": 64.6,
+        "FY2023": 60.65,
+        "FY2022": 41.0
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    },
+    "cash_and_cash_equivalents": {
+      "standard_label": "Cash and Cash Equivalents at End of Year",
+      "raw_labels": [
+        "Cash and Cash Equivalents at End of Year"
+      ],
+      "values": {
+        "FY2024": 310.2,
+        "FY2023": 245.6,
+        "FY2022": 185.4
+      },
+      "source": {
+        "file": "sample_financials.xlsx",
+        "page": 3,
+        "table_index": 0,
+        "note_ref": null
+      }
+    }
+  },
+  "extracted_notes_and_disclosures": []
+}
