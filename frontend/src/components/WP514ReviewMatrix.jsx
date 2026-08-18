@@ -602,13 +602,13 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                 return (
                   <div
                     key={cat.id}
+                    className="interactive-card animate-fade-in"
                     style={{
                       border: isExpanded ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--border-subtle)",
                       borderRadius: "10px",
                       overflow: "hidden",
                       background: "var(--bg-card)",
                       boxShadow: isExpanded ? "0 4px 12px rgba(0, 0, 0, 0.04)" : "0 1px 3px rgba(0,0,0,0.02)",
-                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
                     {/* Category Summary Card Header (Click to Expand / Collapse) */}
@@ -676,7 +676,7 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                                 height: "100%",
                                 width: `${passRate}%`,
                                 background: passRate === 100 ? "#10B981" : passRate >= 60 ? "#F59E0B" : "#EF4444",
-                                transition: "width 0.3s ease",
+                                transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
                               }}
                             />
                           </div>
@@ -712,9 +712,9 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                     {/* Detailed Checks Sub-table when expanded */}
                     {isExpanded && (
                       <div
+                        className="animate-slide-down"
                         style={{
                           overflowX: "auto",
-                          animation: "fadeIn 0.2s ease-in-out",
                         }}
                       >
                         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
