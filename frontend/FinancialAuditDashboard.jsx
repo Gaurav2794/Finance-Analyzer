@@ -49,6 +49,7 @@ import {
   X,
   FileCheck2,
   ArrowLeft,
+  Scale,
 } from "lucide-react";
 
 /* ============================================================
@@ -622,23 +623,35 @@ export default function FinancialAuditDashboard() {
               <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Financial Ratios</h2>
               <button onClick={() => { window.location.hash = "#report"; }} style={{ fontSize: "12px", color: "var(--color-primary)", background: "none", border: "none", fontWeight: 600, cursor: "pointer" }}>View All</button>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {[
-                { name: "Current Ratio", val: ratios.current_ratio, icon: Activity, status: ratios.current_ratio >= 1.5 ? "Healthy" : "Needs Review" },
-                { name: "Debt to Equity", val: ratios.debt_to_equity, icon: Layers, status: ratios.debt_to_equity <= 2 ? "Healthy" : "Elevated" },
-                { name: "Net Margin", val: ratios.net_margin_pct != null ? `${Number(ratios.net_margin_pct).toFixed(2)}%` : null, icon: TrendingUp, status: "Profitability" },
-                { name: "ROE", val: ratios.roe_pct != null ? `${Number(ratios.roe_pct).toFixed(2)}%` : null, icon: Award, status: "Efficiency" },
+                { name: "Current Ratio", val: ratios.current_ratio, icon: Scale, status: ratios.current_ratio >= 1.5 ? "Healthy" : "Needs Review", color: ratios.current_ratio >= 1.5 ? "#059669" : "#D97706", pct: Math.min(100, (ratios.current_ratio || 0) * 40) },
+                { name: "Debt to Equity", val: ratios.debt_to_equity, icon: Layers, status: ratios.debt_to_equity <= 2 ? "Healthy" : "Elevated", color: ratios.debt_to_equity <= 2 ? "#059669" : "#DC2626", pct: Math.min(100, (ratios.debt_to_equity || 0) * 35) },
+                { name: "Net Margin", val: ratios.net_margin_pct != null ? `${Number(ratios.net_margin_pct).toFixed(2)}%` : null, icon: TrendingUp, status: "Profitability", color: "#059669", pct: Math.min(100, Math.max(10, (ratios.net_margin_pct || 0) * 2)) },
+                { name: "ROE", val: ratios.roe_pct != null ? `${Number(ratios.roe_pct).toFixed(2)}%` : null, icon: Award, status: "Efficiency", color: "#3B82F6", pct: Math.min(100, Math.max(10, (ratios.roe_pct || 0) * 2)) },
               ].map((r, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "14px" }}>
-                  <div style={{ width: "40px", height: "40px", borderRadius: "10px", background: "var(--bg-main)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)", flexShrink: 0 }}>
-                    <r.icon size={18} />
+                <div key={i} className="interactive-card" style={{ padding: "10px 12px", background: "var(--bg-main)", borderRadius: "10px", display: "flex", flexDirection: "column", gap: "6px" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <div style={{ width: "26px", height: "26px", borderRadius: "6px", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", color: r.color, flexShrink: 0 }}>
+                        <r.icon size={14} />
+                      </div>
+                      <div>
+                        <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>{r.name}</div>
+                      </div>
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                      <span style={{ fontSize: "10px", fontWeight: 700, color: r.color, background: "var(--bg-card)", padding: "2px 6px", borderRadius: "4px", border: "1px solid var(--border-light)" }}>
+                        {r.status}
+                      </span>
+                      <span style={{ fontSize: "13px", fontWeight: 800, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                        {r.val != null ? r.val : "N/A"}
+                      </span>
+                    </div>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>{r.name}</div>
-                    <div style={{ fontSize: "11px", color: "var(--text-secondary)", marginTop: "2px" }}>{r.status}</div>
-                  </div>
-                  <div style={{ fontSize: "14px", fontWeight: 700, color: r.val != null ? "var(--text-primary)" : "var(--text-muted)", fontStyle: r.val == null ? "italic" : "normal" }}>
-                    {r.val != null ? r.val : "N/A"}
+                  {/* Visual gauge bar */}
+                  <div style={{ height: "4px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
+                    <div style={{ height: "100%", width: `${r.val != null ? r.pct : 0}%`, background: r.color, borderRadius: "2px", transition: "width 0.4s ease" }} />
                   </div>
                 </div>
               ))}

@@ -13,7 +13,17 @@ import {
   Scale,
   Calendar,
   Building,
-  FileSpreadsheet
+  FileSpreadsheet,
+  Calculator,
+  TrendingUp,
+  Coins,
+  Repeat,
+  FileSearch,
+  CheckCircle2,
+  Activity,
+  Percent,
+  Sliders,
+  SpellCheck
 } from "lucide-react";
 
 /* ────────────────────────────────────────────────────────────
@@ -81,6 +91,21 @@ function StatusBadge({ status }) {
       {cfg.label}
     </span>
   );
+}
+
+function getCategoryIcon(catId, catName) {
+  const c = `${catId || ""} ${catName || ""}`.toLowerCase();
+  if (c.includes("math") || c.includes("accuracy")) return Calculator;
+  if (c.includes("cash") || c.includes("flow")) return Coins;
+  if (c.includes("prior") || c.includes("tie")) return Repeat;
+  if (c.includes("consistency") || c.includes("internal")) return Layers;
+  if (c.includes("comparison") || c.includes("analytical")) return Activity;
+  if (c.includes("ratio") || c.includes("key")) return Percent;
+  if (c.includes("fluctuation") || c.includes("unusual")) return TrendingUp;
+  if (c.includes("gain") || c.includes("loss")) return Scale;
+  if (c.includes("related") || c.includes("party")) return FileSearch;
+  if (c.includes("language") || c.includes("spelling") || c.includes("grammar")) return SpellCheck;
+  return FileCheck2;
 }
 
 export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
@@ -252,99 +277,162 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          2. EXECUTIVE SUMMARY METRICS
+          2. EXECUTIVE SUMMARY METRICS WITH VISUAL ICONS
           ──────────────────────────────────────────────────────────── */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-          gap: "12px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gap: "14px",
         }}
       >
-        <div className="fd-card" style={{ padding: "16px", textAlign: "center" }}>
-          <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)" }}>TOTAL CHECKS</div>
-          <div style={{ fontSize: "24px", fontWeight: 700, color: "var(--text-primary)", marginTop: "4px" }}>
-            {overall.total_checks ?? checks.length}
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Layers size={20} color="var(--text-primary)" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>TOTAL CHECKS</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", marginTop: "2px" }}>
+              {overall.total_checks ?? checks.length}
+            </div>
           </div>
         </div>
 
-        <div className="fd-card" style={{ padding: "16px", textAlign: "center", borderTop: "3px solid #10b981" }}>
-          <div style={{ fontSize: "11px", fontWeight: 600, color: "#059669" }}>PASSED</div>
-          <div style={{ fontSize: "24px", fontWeight: 700, color: "#059669", marginTop: "4px" }}>
-            {overall.passed ?? 0}
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #10b981" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(16, 185, 129, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CheckCircle2 size={20} color="#059669" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#059669", letterSpacing: "0.04em" }}>PASSED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#059669", marginTop: "2px" }}>
+              {overall.passed ?? 0}
+            </div>
           </div>
         </div>
 
-        <div className="fd-card" style={{ padding: "16px", textAlign: "center", borderTop: "3px solid #f59e0b" }}>
-          <div style={{ fontSize: "11px", fontWeight: 600, color: "#d97706" }}>REVIEW REQUIRED</div>
-          <div style={{ fontSize: "24px", fontWeight: 700, color: "#d97706", marginTop: "4px" }}>
-            {overall.review ?? 0}
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #f59e0b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(245, 158, 11, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} color="#d97706" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#d97706", letterSpacing: "0.04em" }}>REVIEW REQUIRED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#d97706", marginTop: "2px" }}>
+              {overall.review ?? 0}
+            </div>
           </div>
         </div>
 
-        <div className="fd-card" style={{ padding: "16px", textAlign: "center", borderTop: "3px solid #ef4444" }}>
-          <div style={{ fontSize: "11px", fontWeight: 600, color: "#dc2626" }}>FAILED</div>
-          <div style={{ fontSize: "24px", fontWeight: 700, color: "#dc2626", marginTop: "4px" }}>
-            {overall.failed ?? 0}
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #ef4444" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertOctagon size={20} color="#dc2626" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#dc2626", letterSpacing: "0.04em" }}>FAILED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#dc2626", marginTop: "2px" }}>
+              {overall.failed ?? 0}
+            </div>
           </div>
         </div>
 
-        <div className="fd-card" style={{ padding: "16px", textAlign: "center", borderTop: "3px solid #64748b" }}>
-          <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b" }}>NOT IN FILING</div>
-          <div style={{ fontSize: "24px", fontWeight: 700, color: "#64748b", marginTop: "4px" }}>
-            {overall.not_available ?? 0}
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #64748b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(100, 116, 139, 0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <HelpCircle size={20} color="#64748b" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", letterSpacing: "0.04em" }}>NOT IN FILING</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#64748b", marginTop: "2px" }}>
+              {overall.not_available ?? 0}
+            </div>
           </div>
         </div>
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          3. CATEGORIES OVERVIEW GRID
+          3. CATEGORIES OVERVIEW GRID WITH VISUAL ICONS & BARS
           ──────────────────────────────────────────────────────────── */}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-          <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-            WP-514 Audit Review Categories ({categories.length})
-          </h3>
-          <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-            Select a category to filter check detail
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+          <div>
+            <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              WP-514 Audit Review Categories ({categories.length})
+            </h3>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "2px 0 0" }}>
+              Click any category card to filter and highlight check details below.
+            </p>
           </div>
         </div>
 
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-            gap: "12px",
+            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+            gap: "14px",
           }}
         >
           {categories.map((cat) => {
             const isSelected = selectedCatId === cat.id;
+            const CatIcon = getCategoryIcon(cat.id, cat.name);
+            const catScore = cat.score ?? 100;
+            const scoreColor = catScore >= 80 ? "#059669" : catScore >= 60 ? "#D97706" : "#DC2626";
+
             return (
               <div
                 key={cat.id}
                 onClick={() => setSelectedCatId((prev) => (prev === cat.id ? "ALL" : cat.id))}
-                className="fd-card hover-scale"
+                className="fd-card interactive-card"
                 style={{
-                  padding: "14px",
+                  padding: "16px",
                   cursor: "pointer",
                   border: isSelected ? "2px solid var(--color-primary)" : "1px solid var(--border-subtle)",
-                  background: isSelected ? "rgba(16, 185, 129, 0.04)" : "white",
+                  background: isSelected ? "rgba(16, 185, 129, 0.05)" : "var(--bg-card)",
                   display: "flex",
                   flexDirection: "column",
                   justifyContent: "space-between",
-                  gap: "10px",
+                  gap: "12px",
+                  boxShadow: isSelected ? "0 4px 14px rgba(16, 185, 129, 0.15)" : "0 1px 3px rgba(0,0,0,0.03)",
                 }}
               >
                 <div>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "8px" }}>
-                    <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                      {cat.name}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "34px",
+                          height: "34px",
+                          borderRadius: "8px",
+                          background: isSelected ? "var(--color-primary-soft)" : "rgba(16, 185, 129, 0.08)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <CatIcon size={18} color={isSelected ? "var(--color-primary)" : "#059669"} />
+                      </div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3 }}>
+                        {cat.name}
+                      </div>
                     </div>
                     <StatusBadge status={cat.status} />
                   </div>
+
+                  {/* Visual Category Score Bar */}
                   {cat.score !== null && cat.score !== undefined && (
-                    <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "4px" }}>
-                      Score: <strong>{cat.score.toFixed(1)}</strong> / 100
+                    <div style={{ marginTop: "12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+                        <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Category Score</span>
+                        <strong style={{ color: scoreColor }}>{cat.score.toFixed(0)} / 100</strong>
+                      </div>
+                      <div style={{ height: "4px", width: "100%", background: "#F1F5F9", borderRadius: "2px", overflow: "hidden" }}>
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${Math.min(100, Math.max(0, cat.score))}%`,
+                            background: scoreColor,
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -355,12 +443,14 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                     justifyContent: "space-between",
                     fontSize: "11px",
                     color: "var(--text-muted)",
-                    paddingTop: "6px",
+                    paddingTop: "8px",
                     borderTop: "1px dashed var(--border-subtle)",
                   }}
                 >
-                  <span>{cat.total_checks} checks</span>
-                  <span>{cat.findings_count} findings</span>
+                  <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>{cat.total_checks} verification checks</span>
+                  <span style={{ fontWeight: 600, color: cat.findings_count > 0 ? "#D97706" : "var(--text-muted)" }}>
+                    {cat.findings_count} {cat.findings_count === 1 ? "finding" : "findings"}
+                  </span>
                 </div>
               </div>
             );
