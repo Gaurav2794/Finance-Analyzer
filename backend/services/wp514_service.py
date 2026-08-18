@@ -66,7 +66,7 @@ class WP514Service:
         checks.extend(checks_ac)
 
         # 6. RATIOS
-        cat_rt, checks_rt = cls._build_ratios(review_result, finding_map)
+        cat_rt, checks_rt = cls._build_ratios(review_result, finding_map, financial_data)
         categories.append(cat_rt)
         checks.extend(checks_rt)
 
@@ -578,7 +578,8 @@ class WP514Service:
     def _build_ratios(
         cls,
         review_result: Dict[str, Any],
-        finding_map: Dict[str, Any]
+        finding_map: Dict[str, Any],
+        financial_data: Optional[Dict[str, Any]] = None
     ) -> tuple[Dict[str, Any], List[Dict[str, Any]]]:
         rt_data = (
             review_result.get("analytical_metrics", {}).get("ratios") or
@@ -586,34 +587,115 @@ class WP514Service:
         )
         status = rt_data.get("status", "PASSED")
         score = rt_data.get("score") or 100.0
+        all_ratios = rt_data.get("all_ratios", {}) or {}
         checks: List[Dict[str, Any]] = []
 
+        curr = ""
+        if financial_data:
+            periods = financial_data.get("metadata", {}).get("periods", [])
+            if periods and isinstance(periods[0], dict):
+                curr = periods[0].get("period_key", "")
+        bs = (financial_data.get("balance_sheet", {}) if financial_data else {})
+        is_statement = (financial_data.get("income_statement", {}) if financial_data else {})
+
         ratio_groups = [
-            ("Liquidity", ["current_ratio", "quick_ratio", "cash_ratio"]),
-            ("Leverage", ["debt_to_equity", "debt_ratio", "interest_coverage_ratio"]),
-            ("Profitability", ["gross_profit_margin_pct", "operating_margin_pct", "net_profit_margin_pct", "return_on_assets_pct", "return_on_equity_pct"]),
-            ("Efficiency", ["asset_turnover_ratio", "inventory_turnover_ratio", "receivables_turnover_ratio"])
+            ("Liquidity", [
+                ("current_ratio", ["current_ratio", "current"], "Current Ratio", False),
+                ("quick_ratio", ["quick_ratio", "quick"], "Quick Ratio", False),
+                ("cash_ratio", ["cash_ratio", "cash"], "Cash Ratio", False),
+            ]),
+            ("Leverage", [
+                ("debt_to_equity", ["debt_to_equity", "debt_equity"], "Debt to Equity", False),
+                ("debt_ratio", ["debt_ratio", "total_debt_ratio"], "Debt Ratio", False),
+                ("interest_coverage_ratio", ["interest_coverage_ratio", "interest_coverage"], "Interest Coverage Ratio", False),
+            ]),
+            ("Profitability", [
+                ("gross_profit_margin_pct", ["gross_profit_margin", "gross_profit_margin_pct", "gross_margin"], "Gross Profit Margin", True),
+                ("operating_margin_pct", ["operating_margin", "operating_margin_pct"], "Operating Margin", True),
+                ("net_profit_margin_pct", ["net_profit_margin", "net_profit_margin_pct", "net_margin"], "Net Profit Margin", True),
+                ("return_on_assets_pct", ["return_on_assets", "return_on_assets_pct", "roa"], "Return on Assets (ROA)", True),
+                ("return_on_equity_pct", ["return_on_equity", "return_on_equity_pct", "roe"], "Return on Equity (ROE)", True),
+            ]),
+            ("Efficiency", [
+                ("asset_turnover_ratio", ["asset_turnover", "asset_turnover_ratio"], "Asset Turnover", False),
+                ("inventory_turnover_ratio", ["inventory_turnover", "inventory_turnover_ratio"], "Inventory Turnover", False),
+                ("receivables_turnover_ratio", ["receivables_turnover", "receivables_turnover_ratio"], "Receivables Turnover", False),
+            ])
         ]
 
         idx = 1
-        for grp_name, r_keys in ratio_groups:
-            grp_dict = rt_data.get(grp_name.lower(), {})
-            for rk in r_keys:
-                r_item = grp_dict.get(rk)
-                if r_item is None:
-                    continue
+        for grp_name, r_items in ratio_groups:
+            grp_dict = rt_data.get(grp_name.lower(), {}) if isinstance(rt_data, dict) else {}
+            for canonical_key, aliases, default_label, is_pct in r_items:
+                search_keys = [canonical_key] + aliases
+                val: Optional[float] = None
+                label = default_label
+                formula: Optional[str] = None
+                source = None
+                item_status = "NOT_AVAILABLE"
 
-                if isinstance(r_item, dict):
-                    val = r_item.get("value")
-                    label = r_item.get("label") or rk.replace("_", " ").title()
-                    formula = r_item.get("formula")
+                # 1. Search in all_ratios
+                for k in search_keys:
+                    r_item = all_ratios.get(k)
+                    if r_item is not None and isinstance(r_item, dict):
+                        raw_v = r_item.get("value") or r_item.get("raw_decimal_value")
+                        if raw_v is not None:
+                            try:
+                                val = float(raw_v)
+                                label = r_item.get("ratio_name") or label
+                                formula = r_item.get("formula")
+                                source = r_item.get("source")
+                                item_status = r_item.get("status", "PASSED")
+                                break
+                            except (TypeError, ValueError):
+                                pass
+
+                # 2. Search in category dict
+                if val is None and isinstance(grp_dict, dict):
+                    for k in search_keys:
+                        r_item = grp_dict.get(k)
+                        if r_item is not None:
+                            if isinstance(r_item, (int, float)):
+                                val = float(r_item)
+                                item_status = "PASSED"
+                                break
+                            elif isinstance(r_item, dict):
+                                raw_v = r_item.get("value") or r_item.get("raw_decimal_value")
+                                if raw_v is not None:
+                                    try:
+                                        val = float(raw_v)
+                                        label = r_item.get("ratio_name") or r_item.get("label") or label
+                                        formula = r_item.get("formula")
+                                        source = r_item.get("source")
+                                        item_status = r_item.get("status", "PASSED")
+                                        break
+                                    except (TypeError, ValueError):
+                                        pass
+
+                # 3. Search in financial_data statements (Audit Master fallback)
+                if val is None and curr:
+                    for k in search_keys:
+                        stmt_v = None
+                        if isinstance(bs, dict) and k in bs:
+                            v_map = bs[k].get("values", {})
+                            stmt_v = v_map.get(curr)
+                        elif isinstance(is_statement, dict) and k in is_statement:
+                            v_map = is_statement[k].get("values", {})
+                            stmt_v = v_map.get(curr)
+                        if stmt_v is not None:
+                            try:
+                                val = float(stmt_v)
+                                if is_pct and abs(val) <= 1.0 and val != 0:
+                                    val = val * 100.0
+                                item_status = "PASSED"
+                                break
+                            except (TypeError, ValueError):
+                                pass
+
+                if val is not None:
+                    val_str = f"{val:.2f}%" if is_pct else f"{val:.2f}"
                 else:
-                    val = r_item
-                    label = rk.replace("_", " ").title()
-                    formula = None
-
-                is_pct = "pct" in rk or "margin" in rk or "return" in rk
-                val_str = f"{val:.2f}%" if (val is not None and is_pct) else (f"{val:.2f}x" if val is not None else None)
+                    val_str = None
 
                 checks.append({
                     "id": f"WP514-RT-{idx:02d}",
@@ -625,7 +707,7 @@ class WP514Service:
                     "difference": None,
                     "difference_percent": None,
                     "threshold": None,
-                    "source": None,
+                    "source": source,
                     "evidence": f"Formula: {formula}" if formula else f"Category: {grp_name}",
                     "finding_id": None,
                 })

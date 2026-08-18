@@ -35,37 +35,68 @@ def _previous_period(fd: Dict[str, Any]) -> str:
     return ""
 
 
-def _val(statement: Dict[str, Any], key: str, period: str) -> Optional[float]:
-    """Extract a value from a statement dict for the given period key."""
-    entry = statement.get(key, {})
-    if isinstance(entry, dict):
-        v = entry.get("values", {}).get(period)
-        if v is not None:
-            try:
-                return float(v)
-            except (TypeError, ValueError):
-                pass
+def _val(statement: Dict[str, Any], *keys: str, period: str) -> Optional[float]:
+    """Extract a value from a statement dict for candidate keys and given period key."""
+    if not isinstance(statement, dict):
+        return None
+    for k in keys:
+        entry = statement.get(k, {})
+        if isinstance(entry, dict):
+            values_map = entry.get("values", {})
+            if isinstance(values_map, dict):
+                v = values_map.get(period)
+                if v is not None:
+                    try:
+                        return float(v)
+                    except (TypeError, ValueError):
+                        pass
+        elif isinstance(entry, (int, float)):
+            return float(entry)
     return None
 
 
 def _growth_pct(current: Optional[float], previous: Optional[float]) -> Optional[float]:
-    """
-    DO NOT USE for UI display — growth_pct must come from Team 2.
-    This is only used inside the dashboard endpoint to pull
-    growth_pct from Team 2's analytical_metrics.growth.
-    """
-    return None  # Always get from Team 2
+    """DO NOT recalculate — growth_pct must come from Team 2."""
+    return None
 
 
-def _get_growth(rr: Dict[str, Any], canonical_key: str) -> Optional[float]:
-    """Pull growth % from Team 2 analytical_metrics.growth.metrics."""
-    try:
-        metric = rr["analytical_metrics"]["growth"]["metrics"][canonical_key]
-        v = metric.get("percentage_change")
-        if v is not None:
-            return float(v)
-    except (KeyError, TypeError):
-        pass
+def _get_growth(rr: Dict[str, Any], *canonical_keys: str) -> Optional[float]:
+    """Pull growth % from Team 2 analytical_metrics.growth."""
+    if not isinstance(rr, dict):
+        return None
+    for k in canonical_keys:
+        try:
+            metric = rr["analytical_metrics"]["growth"]["metrics"][k]
+            if isinstance(metric, dict):
+                v = metric.get("percentage_change")
+                if v is not None:
+                    return float(v)
+        except (KeyError, TypeError):
+            pass
+        try:
+            growth_rates = rr["analytical_metrics"]["growth"]["growth_rates"]
+            if isinstance(growth_rates, dict):
+                v = growth_rates.get(f"{k}_growth_pct") or growth_rates.get(k)
+                if v is not None:
+                    return float(v)
+        except (KeyError, TypeError):
+            pass
+    return None
+
+
+def _get_growth_metric_val(rr: Dict[str, Any], *canonical_keys: str, which: str = "current_value") -> Optional[float]:
+    """Pull metric amount from Team 2 analytical_metrics.growth.metrics."""
+    if not isinstance(rr, dict):
+        return None
+    for k in canonical_keys:
+        try:
+            m = rr["analytical_metrics"]["growth"]["metrics"][k]
+            if isinstance(m, dict):
+                v = m.get(which)
+                if v is not None:
+                    return float(v)
+        except (KeyError, TypeError):
+            pass
     return None
 
 
@@ -86,52 +117,95 @@ def _check_score(rr: Dict[str, Any], key: str) -> Optional[float]:
 
 # ── Ratio extraction ──────────────────────────────────────────────────────────
 
-def _ratios(rr: Dict[str, Any]) -> Dict[str, Any]:
+def _ratios(
+    rr: Dict[str, Any],
+    fd: Optional[Dict[str, Any]] = None,
+    period: str = ""
+) -> Dict[str, Any]:
     """
-    Pull ratios from Team 2 analytical_metrics.ratios.
-    Returns a flat dict compatible with the UI's RatioTile component.
+    Pull ratios from Team 2 analytical_metrics.ratios with fallback to Team 1 extracted metrics.
+    Returns a flat dict matching the UI's RatioTile component.
     """
-    try:
-        r = rr["analytical_metrics"]["ratios"]
-    except (KeyError, TypeError):
-        return {}
-
-    def _extract_val(group: str, *keys: str) -> Optional[float]:
+    r_dict = {}
+    all_r = {}
+    if isinstance(rr, dict):
         try:
-            group_dict = r.get(group, {})
-            for k in keys:
-                item = group_dict.get(k)
-                if item is not None:
-                    if isinstance(item, (int, float)):
-                        return round(float(item), 4)
-                    if isinstance(item, dict):
-                        v = item.get("value") or item.get("raw_decimal_value")
-                        if v is not None:
+            r_dict = rr.get("analytical_metrics", {}).get("ratios", {}) or {}
+            all_r = r_dict.get("all_ratios", {}) or {}
+        except (KeyError, TypeError):
+            r_dict = {}
+            all_r = {}
+
+    bs = (fd.get("balance_sheet", {}) if isinstance(fd, dict) else {})
+    is_statement = (fd.get("income_statement", {}) if isinstance(fd, dict) else {})
+
+    def _extract_ratio(canonical: str, *aliases: str, is_percentage: bool = False) -> Optional[float]:
+        search_keys = [canonical] + list(aliases)
+        # 1. Search in Team 2 all_ratios dict
+        for k in search_keys:
+            item = all_r.get(k)
+            if item is not None:
+                if isinstance(item, (int, float)):
+                    return round(float(item), 4)
+                if isinstance(item, dict):
+                    v = item.get("value") or item.get("raw_decimal_value")
+                    if v is not None:
+                        try:
                             return round(float(v), 4)
-        except (ValueError, TypeError):
-            pass
+                        except (ValueError, TypeError):
+                            pass
+
+        # 2. Search in Team 2 ratio categories
+        for grp in ["liquidity", "leverage", "profitability", "efficiency"]:
+            grp_dict = r_dict.get(grp, {})
+            if isinstance(grp_dict, dict):
+                for k in search_keys:
+                    item = grp_dict.get(k)
+                    if item is not None:
+                        if isinstance(item, (int, float)):
+                            return round(float(item), 4)
+                        if isinstance(item, dict):
+                            v = item.get("value") or item.get("raw_decimal_value")
+                            if v is not None:
+                                try:
+                                    return round(float(v), 4)
+                                except (ValueError, TypeError):
+                                    pass
+
+        # 3. Fallback to Team 1 extracted balance sheet / income statement / metrics
+        if period:
+            for k in search_keys:
+                raw_v = _val(bs, k, period=period)
+                if raw_v is None:
+                    raw_v = _val(is_statement, k, period=period)
+                if raw_v is not None:
+                    # Normalize raw decimal to percentage if ratio is a percentage
+                    if is_percentage and abs(raw_v) <= 1.0 and raw_v != 0:
+                        raw_v = raw_v * 100.0
+                    return round(float(raw_v), 4)
+
         return None
 
     return {
         # Liquidity
-        "current_ratio": _extract_val("liquidity", "current_ratio"),
-        "quick_ratio": _extract_val("liquidity", "quick_ratio"),
-        "cash_ratio": _extract_val("liquidity", "cash_ratio"),
+        "current_ratio": _extract_ratio("current_ratio", "current"),
+        "quick_ratio": _extract_ratio("quick_ratio", "quick"),
+        "cash_ratio": _extract_ratio("cash_ratio", "cash"),
         # Leverage
-        "debt_to_equity": _extract_val("leverage", "debt_to_equity"),
-        "debt_ratio": _extract_val("leverage", "debt_ratio"),
-        "interest_coverage_ratio": _extract_val("leverage", "interest_coverage_ratio"),
+        "debt_to_equity": _extract_ratio("debt_to_equity", "debt_equity"),
+        "debt_ratio": _extract_ratio("debt_ratio", "total_debt_ratio"),
+        "interest_coverage_ratio": _extract_ratio("interest_coverage_ratio", "interest_coverage"),
         # Profitability
-        "gross_profit_margin_pct": _extract_val("profitability", "gross_profit_margin", "gross_profit_margin_pct"),
-        "operating_margin_pct": _extract_val("profitability", "operating_margin", "operating_margin_pct"),
-        "net_margin_pct": _extract_val("profitability", "net_profit_margin", "net_profit_margin_pct"),
-        "return_on_assets_pct": _extract_val("profitability", "return_on_assets", "return_on_assets_pct"),
-        "roe_pct": _extract_val("profitability", "return_on_equity", "return_on_equity_pct"),
+        "gross_profit_margin_pct": _extract_ratio("gross_profit_margin_pct", "gross_profit_margin", "gross_margin", is_percentage=True),
+        "operating_margin_pct": _extract_ratio("operating_margin_pct", "operating_margin", is_percentage=True),
+        "net_margin_pct": _extract_ratio("net_profit_margin_pct", "net_profit_margin", "net_margin", is_percentage=True),
+        "return_on_assets_pct": _extract_ratio("return_on_assets_pct", "return_on_assets", "roa", is_percentage=True),
+        "roe_pct": _extract_ratio("return_on_equity_pct", "return_on_equity", "roe", is_percentage=True),
         # Efficiency
-        "asset_turnover_ratio": _extract_val("efficiency", "asset_turnover", "asset_turnover_ratio"),
-        "receivables_turnover_ratio": _extract_val("efficiency", "receivables_turnover", "receivables_turnover_ratio"),
-        "days_sales_outstanding": _extract_val("efficiency", "days_sales_outstanding"),
-        "inventory_turnover_ratio": _extract_val("efficiency", "inventory_turnover", "inventory_turnover_ratio"),
+        "asset_turnover_ratio": _extract_ratio("asset_turnover_ratio", "asset_turnover"),
+        "receivables_turnover_ratio": _extract_ratio("receivables_turnover_ratio", "receivables_turnover"),
+        "days_sales_outstanding": _extract_ratio("days_sales_outstanding", "dso"),
+        "inventory_turnover_ratio": _extract_ratio("inventory_turnover_ratio", "inventory_turnover"),
     }
 
 
@@ -174,13 +248,50 @@ def _unusual_gain(rr: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         return None
 
 
-def _growth_rates(rr: Dict[str, Any]) -> Dict[str, Any]:
+def _growth_rates(rr: Dict[str, Any], fd: Optional[Dict[str, Any]] = None, period: str = "") -> Dict[str, Any]:
+    rates = {}
     try:
-        metrics = rr["analytical_metrics"]["growth"]["metrics"]
-        return {k: v.get("percentage_change") for k, v in metrics.items()
-                if isinstance(v, dict)}
+        metrics = rr.get("analytical_metrics", {}).get("growth", {}).get("metrics", {})
+        if isinstance(metrics, dict):
+            for k, v in metrics.items():
+                if isinstance(v, dict):
+                    chg = v.get("percentage_change")
+                    if chg is not None:
+                        rates[k] = float(chg)
     except (KeyError, TypeError):
-        return {}
+        pass
+
+    # Populate explicit growth indicators from growth_rates or Team 1
+    rates["revenue"] = rates.get("revenue") or _get_growth(rr, "revenue")
+    rates["gross_profit"] = rates.get("gross_profit") or _get_growth(rr, "gross_profit")
+    rates["operating_expenses"] = rates.get("operating_expenses") or _get_growth(rr, "operating_expenses", "total_expenses")
+    rates["net_profit"] = rates.get("net_profit") or _get_growth(rr, "net_profit", "profit")
+    rates["receivables"] = rates.get("receivables") or _get_growth(rr, "receivables", "trade_receivables")
+    rates["inventory"] = rates.get("inventory") or _get_growth(rr, "inventory", "inventories")
+    rates["finance_costs"] = rates.get("finance_costs") or _get_growth(rr, "finance_costs")
+    rates["cash"] = rates.get("cash") or _get_growth(rr, "cash")
+    rates["assets"] = rates.get("assets") or _get_growth(rr, "assets")
+    rates["debt"] = rates.get("debt") or _get_growth(rr, "debt")
+    rates["operating_cash_flow"] = rates.get("operating_cash_flow") or _get_growth(rr, "operating_cash_flow")
+
+    if fd and period:
+        bs = fd.get("balance_sheet", {})
+        if rates.get("profit") is None:
+            rates["profit"] = _val(bs, "profit_growth", period=period)
+        if rates.get("receivables") is None:
+            rates["receivables"] = _val(bs, "receivables_growth", period=period)
+        if rates.get("inventory") is None:
+            rates["inventory"] = _val(bs, "inventory_growth", period=period)
+        if rates.get("cash") is None:
+            rates["cash"] = _val(bs, "cash_growth", period=period)
+        if rates.get("assets") is None:
+            rates["assets"] = _val(bs, "asset_growth", period=period)
+        if rates.get("debt") is None:
+            rates["debt"] = _val(bs, "debt_growth", period=period)
+        if rates.get("operating_cash_flow") is None:
+            rates["operating_cash_flow"] = _val(bs, "net_cash_from_operating_activities", period=period)
+
+    return rates
 
 
 # ── Main dashboard builder ────────────────────────────────────────────────────
@@ -232,6 +343,137 @@ def build_dashboard(
         "team1_metrics": fd.get("team1_metrics", {}),
     }
 
+    # Helper to resolve core financial line items
+    # 1. Revenue
+    rev_curr = _val(is_statement, "revenue_from_operations", "revenue", "total_income", period=curr) or _get_growth_metric_val(rr, "revenue", which="current_value")
+    rev_prev = _val(is_statement, "revenue_from_operations", "revenue", "total_income", period=prev) or _get_growth_metric_val(rr, "revenue", which="previous_value")
+
+    # 2. Gross Profit
+    gp_curr = _val(is_statement, "gross_profit", "gross_income", period=curr) or _get_growth_metric_val(rr, "gross_profit", which="current_value")
+    if gp_curr is None:
+        try:
+            gp_calc = rr["financial_metrics"]["mathematical_accuracy"]["calculations"]["gross_profit"]["calculated_value"]
+            if gp_calc is not None:
+                gp_curr = float(gp_calc)
+        except (KeyError, TypeError, ValueError):
+            pass
+    gp_prev = _val(is_statement, "gross_profit", "gross_income", period=prev) or _get_growth_metric_val(rr, "gross_profit", which="previous_value")
+
+    # 3. Expenses / Operating Expenses
+    exp_curr = (
+        _val(is_statement, "total_expenses", "operating_expenses", "total_operating_expenses", period=curr)
+        or _get_growth_metric_val(rr, "operating_expenses", "total_expenses", which="current_value")
+    )
+    exp_prev = (
+        _val(is_statement, "total_expenses", "operating_expenses", "total_operating_expenses", period=prev)
+        or _get_growth_metric_val(rr, "operating_expenses", "total_expenses", which="previous_value")
+    )
+
+    # 4. Operating Profit
+    op_curr = _val(is_statement, "operating_profit", "operating_income", "ebit", period=curr) or _get_growth_metric_val(rr, "operating_profit", which="current_value")
+    if op_curr is None:
+        try:
+            op_calc = rr["financial_metrics"]["mathematical_accuracy"]["calculations"]["operating_income"]["calculated_value"]
+            if op_calc is not None:
+                op_curr = float(op_calc)
+        except (KeyError, TypeError, ValueError):
+            pass
+    op_prev = _val(is_statement, "operating_profit", "operating_income", "ebit", period=prev) or _get_growth_metric_val(rr, "operating_profit", which="previous_value")
+
+    # 5. Net Profit
+    np_curr = _val(is_statement, "profit_for_the_period", "net_profit", "profit_after_tax", "net_income", period=curr) or _get_growth_metric_val(rr, "net_profit", which="current_value")
+    if np_curr is None:
+        try:
+            np_calc = rr["financial_metrics"]["mathematical_accuracy"]["calculations"]["net_income"]["calculated_value"]
+            if np_calc is not None:
+                np_curr = float(np_calc)
+        except (KeyError, TypeError, ValueError):
+            pass
+    if np_curr is None:
+        raw_nm = _val(bs, "net_margin", "profit_for_the_period", period=curr)
+        if raw_nm is not None and rev_curr is not None:
+            if abs(raw_nm) <= 1.0:
+                np_curr = round(raw_nm * rev_curr, 2)
+            else:
+                np_curr = round((raw_nm / 100.0) * rev_curr, 2)
+    np_prev = _val(is_statement, "profit_for_the_period", "net_profit", "profit_after_tax", "net_income", period=prev) or _get_growth_metric_val(rr, "net_profit", which="previous_value")
+    if np_prev is None:
+        raw_nm_p = _val(bs, "net_margin", "profit_for_the_period", period=prev)
+        if raw_nm_p is not None and rev_prev is not None:
+            if abs(raw_nm_p) <= 1.0:
+                np_prev = round(raw_nm_p * rev_prev, 2)
+            else:
+                np_prev = round((raw_nm_p / 100.0) * rev_prev, 2)
+
+    # 6. Assets
+    ta_curr = _val(bs, "total_assets", "assets", period=curr) or _get_growth_metric_val(rr, "assets", which="current_value")
+    if ta_curr is None:
+        nca = _val(bs, "total_non_current_assets", "non_current_assets", period=curr)
+        ca = _val(bs, "total_current_assets", "current_assets", "other_non_current_assets", period=curr)
+        if nca is not None and ca is not None:
+            ta_curr = nca + ca
+    ta_prev = _val(bs, "total_assets", "assets", period=prev) or _get_growth_metric_val(rr, "assets", which="previous_value")
+    if ta_prev is None:
+        nca_p = _val(bs, "total_non_current_assets", "non_current_assets", period=prev)
+        ca_p = _val(bs, "total_current_assets", "current_assets", "other_non_current_assets", period=prev)
+        if nca_p is not None and ca_p is not None:
+            ta_prev = nca_p + ca_p
+
+    # 7. Liabilities
+    tl_curr = _val(bs, "total_liabilities", "liabilities", period=curr) or _get_growth_metric_val(rr, "liabilities", which="current_value")
+    if tl_curr is None:
+        ncl = _val(bs, "total_non_current_liabilities", "non_current_liabilities", "other_non_current_liabilities", period=curr)
+        cl = _val(bs, "total_current_liabilities", "current_liabilities", period=curr)
+        if ncl is not None and cl is not None:
+            tl_curr = ncl + cl
+    tl_prev = _val(bs, "total_liabilities", "liabilities", period=prev) or _get_growth_metric_val(rr, "liabilities", which="previous_value")
+    if tl_prev is None:
+        ncl_p = _val(bs, "total_non_current_liabilities", "non_current_liabilities", "other_non_current_liabilities", period=prev)
+        cl_p = _val(bs, "total_current_liabilities", "current_liabilities", period=prev)
+        if ncl_p is not None and cl_p is not None:
+            tl_prev = ncl_p + cl_p
+
+    # 8. Equity
+    eq_curr = _val(bs, "total_equity", "equity", "total_shareholders_funds", period=curr) or _get_growth_metric_val(rr, "equity", which="current_value")
+    if eq_curr is None:
+        sc = _val(bs, "equity_share_capital", "share_capital", period=curr)
+        oe = _val(bs, "other_equity", "reserves_and_surplus", period=curr)
+        if sc is not None and oe is not None:
+            eq_curr = sc + oe
+        elif sc is not None:
+            eq_curr = sc
+    eq_prev = _val(bs, "total_equity", "equity", "total_shareholders_funds", period=prev) or _get_growth_metric_val(rr, "equity", which="previous_value")
+    if eq_prev is None:
+        sc_p = _val(bs, "equity_share_capital", "share_capital", period=prev)
+        oe_p = _val(bs, "other_equity", "reserves_and_surplus", period=prev)
+        if sc_p is not None and oe_p is not None:
+            eq_prev = sc_p + oe_p
+        elif sc_p is not None:
+            eq_prev = sc_p
+
+    # 9. Cash
+    cash_curr = _val(bs, "cash_and_cash_equivalents", "cash", "cash_and_bank_balances", period=curr) or _get_growth_metric_val(rr, "cash", which="current_value")
+    cash_prev = _val(bs, "cash_and_cash_equivalents", "cash", "cash_and_bank_balances", period=prev) or _get_growth_metric_val(rr, "cash", which="previous_value")
+
+    # 10. Debt
+    debt_curr = _val(bs, "total_debt", period=curr) or _get_growth_metric_val(rr, "debt", which="current_value")
+    if debt_curr is None:
+        lt = _val(bs, "long_term_borrowings", "non_current_borrowings", period=curr)
+        st = _val(bs, "short_term_borrowings", "current_borrowings", period=curr)
+        if lt is not None and st is not None:
+            debt_curr = lt + st
+        elif lt is not None:
+            debt_curr = lt
+
+    debt_prev = _val(bs, "total_debt", period=prev) or _get_growth_metric_val(rr, "debt", which="previous_value")
+    if debt_prev is None:
+        lt_p = _val(bs, "long_term_borrowings", "non_current_borrowings", period=prev)
+        st_p = _val(bs, "short_term_borrowings", "current_borrowings", period=prev)
+        if lt_p is not None and st_p is not None:
+            debt_prev = lt_p + st_p
+        elif lt_p is not None:
+            debt_prev = lt_p
+
     # Build analysis result shape (Team 2 data)
     analysis_result = {
         "overall_score": rr.get("overall_score"),
@@ -251,54 +493,54 @@ def build_dashboard(
         # Financial metrics (Team 1 values + Team 2 growth rates)
         "financial_metrics": {
             "revenue": {
-                "current": _val(is_statement, "revenue_from_operations", curr),
-                "previous": _val(is_statement, "revenue_from_operations", prev),
+                "current": rev_curr,
+                "previous": rev_prev,
                 "growth_pct": _get_growth(rr, "revenue"),
             },
             "gross_profit": {
-                "current": _val(is_statement, "gross_profit", curr),
-                "previous": _val(is_statement, "gross_profit", prev),
+                "current": gp_curr,
+                "previous": gp_prev,
                 "growth_pct": _get_growth(rr, "gross_profit"),
             },
             "expenses": {
-                "current": _val(is_statement, "total_expenses", curr),
-                "previous": _val(is_statement, "total_expenses", prev),
-                "growth_pct": _get_growth(rr, "total_expenses"),
+                "current": exp_curr,
+                "previous": exp_prev,
+                "growth_pct": _get_growth(rr, "operating_expenses", "total_expenses", "expense"),
             },
             "operating_profit": {
-                "current": _val(is_statement, "operating_profit", curr),
-                "previous": _val(is_statement, "operating_profit", prev),
-                "growth_pct": _get_growth(rr, "operating_profit"),
+                "current": op_curr,
+                "previous": op_prev,
+                "growth_pct": _get_growth(rr, "operating_profit", "operating_income"),
             },
             "net_profit": {
-                "current": _val(is_statement, "profit_for_the_period", curr),
-                "previous": _val(is_statement, "profit_for_the_period", prev),
-                "growth_pct": _get_growth(rr, "net_profit"),
+                "current": np_curr,
+                "previous": np_prev,
+                "growth_pct": _get_growth(rr, "net_profit", "profit", "net_income"),
             },
             "assets": {
-                "current": _val(bs, "total_assets", curr),
-                "previous": _val(bs, "total_assets", prev),
-                "growth_pct": _get_growth(rr, "assets"),
+                "current": ta_curr,
+                "previous": ta_prev,
+                "growth_pct": _get_growth(rr, "assets") or _val(bs, "asset_growth", period=curr),
             },
             "liabilities": {
-                "current": _val(bs, "total_liabilities", curr),
-                "previous": _val(bs, "total_liabilities", prev),
+                "current": tl_curr,
+                "previous": tl_prev,
                 "growth_pct": _get_growth(rr, "liabilities"),
             },
             "equity": {
-                "current": _val(bs, "total_equity", curr),
-                "previous": _val(bs, "total_equity", prev),
+                "current": eq_curr,
+                "previous": eq_prev,
                 "growth_pct": _get_growth(rr, "equity"),
             },
             "cash": {
-                "current": _val(bs, "cash_and_cash_equivalents", curr),
-                "previous": _val(bs, "cash_and_cash_equivalents", prev),
-                "growth_pct": _get_growth(rr, "cash"),
+                "current": cash_curr,
+                "previous": cash_prev,
+                "growth_pct": _get_growth(rr, "cash") or _val(bs, "cash_growth", period=curr),
             },
             "debt": {
-                "current": _val(bs, "total_debt", curr) or _val(bs, "long_term_borrowings", curr),
-                "previous": _val(bs, "total_debt", prev) or _val(bs, "long_term_borrowings", prev),
-                "growth_pct": _get_growth(rr, "debt"),
+                "current": debt_curr,
+                "previous": debt_prev,
+                "growth_pct": _get_growth(rr, "debt") or _val(bs, "debt_growth", period=curr),
             },
         },
 
@@ -319,11 +561,11 @@ def build_dashboard(
             "related_disclosure": rr.get("category_scores", {}).get("RELATED_DISCLOSURE"),
         },
 
-        # Ratios (from Team 2)
-        "ratios": _ratios(rr),
+        # Ratios (from Team 2 + Team 1 fallback)
+        "ratios": _ratios(rr, fd, curr),
 
         # Analytics (from Team 2)
-        "growth_rates": _growth_rates(rr),
+        "growth_rates": _growth_rates(rr, fd, curr),
         "unusual_fluctuations": _unusual_fluctuations(rr),
         "unusual_gain": _unusual_gain(rr),
 

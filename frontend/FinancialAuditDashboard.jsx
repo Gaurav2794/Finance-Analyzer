@@ -625,8 +625,8 @@ export default function FinancialAuditDashboard() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
               {[
-                { name: "Current Ratio", val: ratios.current_ratio, icon: Scale, status: ratios.current_ratio >= 1.5 ? "Healthy" : "Needs Review", color: ratios.current_ratio >= 1.5 ? "#059669" : "#D97706", pct: Math.min(100, (ratios.current_ratio || 0) * 40) },
-                { name: "Debt to Equity", val: ratios.debt_to_equity, icon: Layers, status: ratios.debt_to_equity <= 2 ? "Healthy" : "Elevated", color: ratios.debt_to_equity <= 2 ? "#059669" : "#DC2626", pct: Math.min(100, (ratios.debt_to_equity || 0) * 35) },
+                { name: "Current Ratio", val: ratios.current_ratio != null ? Number(ratios.current_ratio).toFixed(2) : null, icon: Scale, status: ratios.current_ratio >= 1.5 ? "Healthy" : "Needs Review", color: ratios.current_ratio >= 1.5 ? "#059669" : "#D97706", pct: Math.min(100, (ratios.current_ratio || 0) * 40) },
+                { name: "Debt to Equity", val: ratios.debt_to_equity != null ? Number(ratios.debt_to_equity).toFixed(2) : null, icon: Layers, status: ratios.debt_to_equity <= 2 ? "Healthy" : "Elevated", color: ratios.debt_to_equity <= 2 ? "#059669" : "#DC2626", pct: Math.min(100, (ratios.debt_to_equity || 0) * 35) },
                 { name: "Net Margin", val: ratios.net_margin_pct != null ? `${Number(ratios.net_margin_pct).toFixed(2)}%` : null, icon: TrendingUp, status: "Profitability", color: "#059669", pct: Math.min(100, Math.max(10, (ratios.net_margin_pct || 0) * 2)) },
                 { name: "ROE", val: ratios.roe_pct != null ? `${Number(ratios.roe_pct).toFixed(2)}%` : null, icon: Award, status: "Efficiency", color: "#3B82F6", pct: Math.min(100, Math.max(10, (ratios.roe_pct || 0) * 2)) },
               ].map((r, i) => (
