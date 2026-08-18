@@ -484,26 +484,6 @@ export default function AskAIPanel({ finding, documentId, onClose }) {
                   ))}
                 </div>
               )}
-
-              {/* Groundedness Badge */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 14px",
-                  borderRadius: "8px",
-                  background: response.grounded ? "var(--color-primary-soft, #ECFDF5)" : "rgba(239, 68, 68, 0.08)",
-                  border: `1px solid ${response.grounded ? "rgba(16, 185, 129, 0.3)" : "rgba(239, 68, 68, 0.2)"}`,
-                }}
-              >
-                <ShieldCheck size={16} color={response.grounded ? "var(--color-primary, #059669)" : "#DC2626"} />
-                <span style={{ fontSize: "11px", color: response.grounded ? "var(--color-primary, #059669)" : "#DC2626", fontWeight: 600 }}>
-                  {response.grounded
-                    ? "Grounded in verified Team 1 + Team 2 review outputs"
-                    : "Information not fully available in source filing"}
-                </span>
-              </div>
             </div>
           )}
         </div>
