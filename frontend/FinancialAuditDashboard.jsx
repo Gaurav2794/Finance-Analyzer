@@ -610,7 +610,7 @@ export default function FinancialAuditDashboard() {
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--text-secondary)" }} dy={10} />
                     <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: "var(--text-secondary)" }} tickFormatter={v => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
                     <Tooltip contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "var(--shadow-card)", fontSize: "13px" }} formatter={v => `${currSymbol}${fmt(v)}`} />
-                    <Area type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#areaGrad)" />
+                    <Area type="monotone" dataKey="value" stroke="var(--color-primary)" strokeWidth={3} fillOpacity={1} fill="url(#areaGrad)" connectNulls={true} />
                   </AreaChart>
                 </ResponsiveContainer>
               )}

@@ -357,7 +357,16 @@ def build_dashboard(
                 gp_curr = float(gp_calc)
         except (KeyError, TypeError, ValueError):
             pass
+    if gp_curr is None and rev_curr is not None:
+        cogs_curr = _val(is_statement, "cost_of_materials_consumed", "cogs", "cost_of_goods_sold", period=curr)
+        if cogs_curr is not None:
+            gp_curr = rev_curr - cogs_curr
+
     gp_prev = _val(is_statement, "gross_profit", "gross_income", period=prev) or _get_growth_metric_val(rr, "gross_profit", which="previous_value")
+    if gp_prev is None and rev_prev is not None:
+        cogs_prev = _val(is_statement, "cost_of_materials_consumed", "cogs", "cost_of_goods_sold", period=prev)
+        if cogs_prev is not None:
+            gp_prev = rev_prev - cogs_prev
 
     # 3. Expenses / Operating Expenses
     exp_curr = (
@@ -378,7 +387,16 @@ def build_dashboard(
                 op_curr = float(op_calc)
         except (KeyError, TypeError, ValueError):
             pass
+    if op_curr is None and gp_curr is not None and exp_curr is not None:
+        op_curr = gp_curr - exp_curr
+
     op_prev = _val(is_statement, "operating_profit", "operating_income", "ebit", period=prev) or _get_growth_metric_val(rr, "operating_profit", which="previous_value")
+    if op_prev is None and gp_prev is not None and exp_prev is not None:
+        op_prev = gp_prev - exp_prev
+    if op_prev is None:
+        raw_om_p = _val(bs, "operating_margin", period=prev) or _val(is_statement, "operating_margin", period=prev)
+        if raw_om_p is not None and rev_prev is not None:
+            op_prev = round(raw_om_p * rev_prev if abs(raw_om_p) <= 1.0 else (raw_om_p / 100.0) * rev_prev, 2)
 
     # 5. Net Profit
     np_curr = _val(is_statement, "profit_for_the_period", "net_profit", "profit_after_tax", "net_income", period=curr) or _get_growth_metric_val(rr, "net_profit", which="current_value")
@@ -396,6 +414,7 @@ def build_dashboard(
                 np_curr = round(raw_nm * rev_curr, 2)
             else:
                 np_curr = round((raw_nm / 100.0) * rev_curr, 2)
+
     np_prev = _val(is_statement, "profit_for_the_period", "net_profit", "profit_after_tax", "net_income", period=prev) or _get_growth_metric_val(rr, "net_profit", which="previous_value")
     if np_prev is None:
         raw_nm_p = _val(bs, "net_margin", "profit_for_the_period", period=prev)
@@ -474,6 +493,11 @@ def build_dashboard(
         elif lt_p is not None:
             debt_prev = lt_p
 
+    def _calc_growth(c: Optional[float], p: Optional[float]) -> Optional[float]:
+        if c is not None and p is not None and p != 0:
+            return round(((c - p) / abs(p)) * 100.0, 2)
+        return None
+
     # Build analysis result shape (Team 2 data)
     analysis_result = {
         "overall_score": rr.get("overall_score"),
@@ -495,52 +519,52 @@ def build_dashboard(
             "revenue": {
                 "current": rev_curr,
                 "previous": rev_prev,
-                "growth_pct": _get_growth(rr, "revenue"),
+                "growth_pct": _get_growth(rr, "revenue") if _get_growth(rr, "revenue") is not None else _calc_growth(rev_curr, rev_prev),
             },
             "gross_profit": {
                 "current": gp_curr,
                 "previous": gp_prev,
-                "growth_pct": _get_growth(rr, "gross_profit"),
+                "growth_pct": _get_growth(rr, "gross_profit") if _get_growth(rr, "gross_profit") is not None else _calc_growth(gp_curr, gp_prev),
             },
             "expenses": {
                 "current": exp_curr,
                 "previous": exp_prev,
-                "growth_pct": _get_growth(rr, "operating_expenses", "total_expenses", "expense"),
+                "growth_pct": _get_growth(rr, "operating_expenses", "total_expenses", "expense") if _get_growth(rr, "operating_expenses", "total_expenses", "expense") is not None else _calc_growth(exp_curr, exp_prev),
             },
             "operating_profit": {
                 "current": op_curr,
                 "previous": op_prev,
-                "growth_pct": _get_growth(rr, "operating_profit", "operating_income"),
+                "growth_pct": _get_growth(rr, "operating_profit", "operating_income") if _get_growth(rr, "operating_profit", "operating_income") is not None else _calc_growth(op_curr, op_prev),
             },
             "net_profit": {
                 "current": np_curr,
                 "previous": np_prev,
-                "growth_pct": _get_growth(rr, "net_profit", "profit", "net_income"),
+                "growth_pct": _get_growth(rr, "net_profit", "profit", "net_income") if _get_growth(rr, "net_profit", "profit", "net_income") is not None else _calc_growth(np_curr, np_prev),
             },
             "assets": {
                 "current": ta_curr,
                 "previous": ta_prev,
-                "growth_pct": _get_growth(rr, "assets") or _val(bs, "asset_growth", period=curr),
+                "growth_pct": _get_growth(rr, "assets") or _val(bs, "asset_growth", period=curr) or _calc_growth(ta_curr, ta_prev),
             },
             "liabilities": {
                 "current": tl_curr,
                 "previous": tl_prev,
-                "growth_pct": _get_growth(rr, "liabilities"),
+                "growth_pct": _get_growth(rr, "liabilities") or _calc_growth(tl_curr, tl_prev),
             },
             "equity": {
                 "current": eq_curr,
                 "previous": eq_prev,
-                "growth_pct": _get_growth(rr, "equity"),
+                "growth_pct": _get_growth(rr, "equity") or _calc_growth(eq_curr, eq_prev),
             },
             "cash": {
                 "current": cash_curr,
                 "previous": cash_prev,
-                "growth_pct": _get_growth(rr, "cash") or _val(bs, "cash_growth", period=curr),
+                "growth_pct": _get_growth(rr, "cash") or _val(bs, "cash_growth", period=curr) or _calc_growth(cash_curr, cash_prev),
             },
             "debt": {
                 "current": debt_curr,
                 "previous": debt_prev,
-                "growth_pct": _get_growth(rr, "debt") or _val(bs, "debt_growth", period=curr),
+                "growth_pct": _get_growth(rr, "debt") or _val(bs, "debt_growth", period=curr) or _calc_growth(debt_curr, debt_prev),
             },
         },
 
