@@ -32,3 +32,25 @@ wheels/
 # OS
 .DS_Store
 Thumbs.db
+
+# Frontend & Node
+node_modules/
+**/node_modules/**
+frontend/node_modules/
+frontend/node_modules
+frontend/dist/
+dist/
+
+# Runtime Uploads & Generated Document Outputs
+uploads/
+outputs/DOC-*/
+outputs/AUDIT_RUN/
+outputs/TEST_RUN/
+screenshots/
+
+# Environment variables
+.env
+.env.*
+*.env
+
+

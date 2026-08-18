@@ -65,14 +65,28 @@ class ExcelParser:
                 "table_index": 0
             }
 
-            extracted_items = TableExtractor.parse_table_rows(
-                rows=rows,
-                section_name=statement_type,
-                source_info=source_info,
-                default_scale_multiplier=detected_multiplier
-            )
-
-            if statement_type in statements_result:
+            if statement_type == "notes":
+                # Extract disclosure notes from sheet rows
+                for r in rows:
+                    non_empty = [str(c).strip() for c in r if str(c).strip() and str(c).strip() != "nan"]
+                    if len(non_empty) >= 2:
+                        note_label = non_empty[0]
+                        topic = non_empty[1] if len(non_empty) > 1 else note_label
+                        text_body = " — ".join(non_empty[1:]) if len(non_empty) > 2 else non_empty[-1]
+                        if not any(h in note_label.lower() for h in ["particulars", "notes to financial", "evidence and related"]):
+                            statements_result["notes"].append({
+                                "note_number": note_label,
+                                "topic": f"{note_label}: {topic}",
+                                "text": text_body,
+                                "source": source_info
+                            })
+            elif statement_type in statements_result and isinstance(statements_result[statement_type], dict):
+                extracted_items = TableExtractor.parse_table_rows(
+                    rows=rows,
+                    section_name=statement_type,
+                    source_info=source_info,
+                    default_scale_multiplier=detected_multiplier
+                )
                 statements_result[statement_type].update(extracted_items)
 
         return {

@@ -56,6 +56,7 @@ from segment2_financial_review.checks.mathematical_accuracy import MathematicalA
 from segment2_financial_review.checks.cash_flow import CashFlowEngine
 from segment2_financial_review.checks.prior_year_tieout import PriorYearTieOutEngine
 from segment2_financial_review.checks.internal_consistency import InternalConsistencyEngine
+from segment2_financial_review.checks.language_quality import LanguageQualityEngine
 
 # ── Analytics Engines ────────────────────────────────────────────────────────
 from segment2_financial_review.analytics.growth import AnalyticalComparisonEngine
@@ -409,6 +410,17 @@ class Segment2Engine:
             self._ok("Related Party Disclosure",
                      f"consistency={rd_result.disclosure_consistency_pct}%, status={rd_result.status}")
 
+        # Step 11b: Language Quality / Spelling & Grammar
+        self._step("Language Quality (Spelling & Grammar)")
+        lq_result = self._safe_run(
+            "Language Quality",
+            LanguageQualityEngine.evaluate, data
+        )
+        if lq_result:
+            self._ok("Language Quality",
+                     f"passages={lq_result.reviewed_passages_count}, spelling_errors={lq_result.spelling_errors_count}, "
+                     f"grammar_issues={lq_result.grammar_issues_count}, status={lq_result.status}")
+
         log.info("━" * 60)
         log.info("  Generating Findings & Scoring …")
 
@@ -454,6 +466,20 @@ class Segment2Engine:
             "unusual_fluctuation":   _to_json_safe(uf_result),
             "unusual_gain":          _to_json_safe(ug_result),
             "related_disclosure":    _to_json_safe(rd_result),
+        }
+        output["language_quality"] = _to_json_safe(lq_result) if lq_result else {
+            "spelling_errors_count": 0,
+            "grammar_issues_count": 0,
+            "reviewed_passages_count": 0,
+            "score": 0.0,
+            "status": "NOT_AVAILABLE",
+            "details": [],
+            "issues": ["NOT_AVAILABLE: No narrative text available."],
+        }
+        output["checks"]["spelling_grammar"] = _to_json_safe(lq_result) if lq_result else {
+            "score": 0.0,
+            "status": "NOT_AVAILABLE",
+            "issues": [],
         }
 
         log.info("━" * 60)
