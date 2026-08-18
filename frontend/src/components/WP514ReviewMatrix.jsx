@@ -108,7 +108,7 @@ function getCategoryIcon(catId, catName) {
   return FileCheck2;
 }
 
-export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
+export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenEvidence }) {
   if (!wp514Data) {
     return (
       <div className="fd-card" style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
@@ -150,14 +150,29 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
     setExpandedCategories({});
   };
 
-  // Filter checks
+  const q = (searchQuery || "").trim().toLowerCase();
+
+  // Filter checks by category, status, and search query
   const filteredChecks = checks.filter((c) => {
     const matchCat = selectedCatId === "ALL" || c.category === selectedCatId;
     const matchStatus =
       statusFilter === "ALL" ||
       (statusFilter === "REVIEW" && (c.status === "REVIEW" || c.status === "WARNING")) ||
       c.status === statusFilter;
-    return matchCat && matchStatus;
+    if (!matchCat || !matchStatus) return false;
+    if (!q) return true;
+
+    return (
+      (c.check || "").toLowerCase().includes(q) ||
+      (c.id || "").toLowerCase().includes(q) ||
+      (c.category || "").toLowerCase().includes(q) ||
+      (c.status || "").toLowerCase().includes(q) ||
+      (c.evidence || "").toLowerCase().includes(q) ||
+      (c.actual_value || "").toLowerCase().includes(q) ||
+      (c.expected_value || "").toLowerCase().includes(q) ||
+      (c.threshold || "").toLowerCase().includes(q) ||
+      (c.difference || "").toLowerCase().includes(q)
+    );
   });
 
   return (
@@ -686,7 +701,7 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                 const reviewCount = catChecks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
                 const failedCount = catChecks.filter((c) => c.status === "FAILED").length;
                 const notAvailCount = catChecks.filter((c) => c.status === "NOT_AVAILABLE").length;
-                const isExpanded = Boolean(expandedCategories[cat.id]);
+                const isExpanded = q ? true : Boolean(expandedCategories[cat.id]);
                 const passRate = catChecks.length > 0 ? (passedCount / catChecks.length) * 100 : 0;
 
                 return (

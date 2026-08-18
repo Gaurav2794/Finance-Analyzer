@@ -392,6 +392,7 @@ export default function FinancialAuditDashboard() {
         </div>
         <WP514ReviewMatrix
           wp514Data={analysisResult.wp514}
+          searchQuery={searchQuery}
           onOpenEvidence={(findingId) => {
             const found = (analysisResult.findings || []).find(f => f.id === findingId);
             if (found) setSelectedFindingForEvidence(found);
@@ -415,11 +416,23 @@ export default function FinancialAuditDashboard() {
   const currentPeriod = extractionResult.period?.current || "";
   const previousPeriod = extractionResult.period?.previous || "";
 
-  const filteredFindings = (analysisResult.findings || []).filter(f =>
-    (f.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (f.category || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (f.description || "").toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const q = (searchQuery || "").trim().toLowerCase();
+  const filteredFindings = (analysisResult.findings || []).filter(f => {
+    if (!q) return true;
+    return (
+      (f.title || "").toLowerCase().includes(q) ||
+      (f.category || "").toLowerCase().includes(q) ||
+      (f.description || "").toLowerCase().includes(q) ||
+      (f.explanation || "").toLowerCase().includes(q) ||
+      (f.severity || "").toLowerCase().includes(q) ||
+      (f.id || "").toLowerCase().includes(q) ||
+      (f.finding_id || "").toLowerCase().includes(q) ||
+      (f.recommendation || "").toLowerCase().includes(q) ||
+      (f.impact || "").toLowerCase().includes(q) ||
+      (f.source?.note_ref || "").toLowerCase().includes(q) ||
+      (f.source?.raw_label || "").toLowerCase().includes(q)
+    );
+  });
 
   const activeMetricData = fm[chartMetric] || {};
   const isChartDataMissing = activeMetricData.current == null && activeMetricData.previous == null;
@@ -504,10 +517,25 @@ export default function FinancialAuditDashboard() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "var(--bg-card)", borderRadius: "24px", padding: "9px 18px", width: "240px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)" }}>
-              <Search size={16} color="var(--text-muted)" />
-              <input type="text" placeholder="Search findings..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                style={{ border: "none", outline: "none", fontSize: "13px", color: "var(--text-primary)", width: "100%", background: "transparent" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--bg-card)", borderRadius: "24px", padding: "8px 14px", width: "260px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)", border: searchQuery ? "1px solid var(--color-primary)" : "1px solid var(--border-light)", transition: "border 0.2s ease" }}>
+              <Search size={15} color={searchQuery ? "var(--color-primary)" : "var(--text-muted)"} />
+              <input
+                type="text"
+                placeholder="Search findings, checks, accounts..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                onKeyDown={e => { if (e.key === "Escape") setSearchQuery(""); }}
+                style={{ border: "none", outline: "none", fontSize: "13px", color: "var(--text-primary)", width: "100%", background: "transparent" }}
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery("")}
+                  style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px", color: "var(--text-muted)" }}
+                  title="Clear search"
+                >
+                  <X size={14} />
+                </button>
+              )}
             </div>
             <button
               onClick={() => setShowGlobalAI(true)}
@@ -679,6 +707,7 @@ export default function FinancialAuditDashboard() {
             </div>
             <WP514ReviewMatrix
               wp514Data={analysisResult.wp514}
+              searchQuery={searchQuery}
               onOpenEvidence={(findingId) => {
                 const found = (analysisResult.findings || []).find(f => f.id === findingId);
                 if (found) setSelectedFindingForEvidence(found);
