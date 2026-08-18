@@ -103,18 +103,26 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
 
   const [selectedCatId, setSelectedCatId] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [expandedCategories, setExpandedCategories] = useState(() => {
-    // Default open the first category
-    const initial = {};
-    if (categories.length > 0) initial[categories[0].id] = true;
-    return initial;
-  });
+  // Default all collapsed for clean, summarized-first executive view
+  const [expandedCategories, setExpandedCategories] = useState({});
 
   const toggleCategory = (catId) => {
     setExpandedCategories((prev) => ({
       ...prev,
       [catId]: !prev[catId],
     }));
+  };
+
+  const expandAllCategories = () => {
+    const all = {};
+    categories.forEach((c) => {
+      all[c.id] = true;
+    });
+    setExpandedCategories(all);
+  };
+
+  const collapseAllCategories = () => {
+    setExpandedCategories({});
   };
 
   // Filter checks
@@ -361,56 +369,89 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          4. SUMMARIZED REVIEW CHECKS SECTION
+          4. SUMMARIZED & ANIMATED AUDIT REVIEW CHECKS
           ──────────────────────────────────────────────────────────── */}
-      <div className="fd-card" style={{ padding: "20px" }}>
+      <div className="fd-card animate-fade-up" style={{ padding: "24px" }}>
+        {/* Header & Controls */}
         <div
           style={{
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "12px",
-            marginBottom: "16px",
-            paddingBottom: "12px",
+            gap: "16px",
+            marginBottom: "18px",
+            paddingBottom: "16px",
             borderBottom: "1px solid var(--border-subtle)",
           }}
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
                 Audit Review Checks Summary ({filteredChecks.length})
               </h3>
               <span
                 style={{
                   fontSize: "11px",
-                  fontWeight: 600,
+                  fontWeight: 700,
                   padding: "2px 8px",
                   borderRadius: "12px",
                   background: "var(--color-primary-soft)",
                   color: "var(--color-primary)",
+                  letterSpacing: "0.03em",
                 }}
               >
-                Summarized
+                Executive Summary
               </span>
             </div>
-            {selectedCatId !== "ALL" && (
-              <span style={{ fontSize: "12px", color: "var(--color-primary)", fontWeight: 600, display: "block", marginTop: "2px" }}>
-                Filtering: {categories.find((c) => c.id === selectedCatId)?.name || selectedCatId}
-              </span>
-            )}
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "4px 0 0" }}>
+              Categorized compliance checks across 10 WP-514 audit procedures. Click any category to drill down.
+            </p>
           </div>
 
+          {/* Quick Actions: Expand/Collapse All + Filter Badges */}
           <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
-            <span style={{ fontSize: "12px", color: "var(--text-muted)", display: "flex", alignItems: "center", gap: "4px" }}>
-              <Filter size={14} /> Filter:
-            </span>
+            <button
+              onClick={expandAllCategories}
+              style={{
+                padding: "5px 10px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 600,
+                background: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-subtle)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Expand All
+            </button>
+            <button
+              onClick={collapseAllCategories}
+              style={{
+                padding: "5px 10px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 600,
+                background: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-subtle)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Collapse All
+            </button>
+
+            <div style={{ height: "18px", width: "1px", background: "var(--border-subtle)", margin: "0 4px" }} />
+
             {["ALL", "REVIEW", "FAILED", "PASSED", "NOT_AVAILABLE"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 style={{
-                  padding: "4px 10px",
+                  padding: "5px 10px",
                   borderRadius: "6px",
                   fontSize: "11px",
                   fontWeight: statusFilter === st ? 700 : 500,
@@ -421,28 +462,123 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                   transition: "all 0.15s ease",
                 }}
               >
-                {st === "ALL" ? "All Status" : st === "REVIEW" ? "Review Required" : st === "NOT_AVAILABLE" ? "Not in Filing" : st}
+                {st === "ALL" ? "All Checks" : st === "REVIEW" ? "Review Required" : st === "NOT_AVAILABLE" ? "Not in Filing" : st}
               </button>
             ))}
-            {selectedCatId !== "ALL" && (
-              <button
-                onClick={() => setSelectedCatId("ALL")}
-                style={{
-                  padding: "4px 10px",
-                  borderRadius: "6px",
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  background: "transparent",
-                  color: "var(--color-primary)",
-                  border: "1px solid var(--color-primary)",
-                  cursor: "pointer",
-                }}
-              >
-                Reset Category
-              </button>
-            )}
           </div>
         </div>
+
+        {/* Executive Summary Meter / Segmented Progress Bar */}
+        {(() => {
+          const totalAll = checks.length || 1;
+          const passTotal = checks.filter((c) => c.status === "PASSED").length;
+          const revTotal = checks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
+          const failTotal = checks.filter((c) => c.status === "FAILED").length;
+          const naTotal = checks.filter((c) => c.status === "NOT_AVAILABLE").length;
+
+          const passPct = (passTotal / totalAll) * 100;
+          const revPct = (revTotal / totalAll) * 100;
+          const failPct = (failTotal / totalAll) * 100;
+          const naPct = (naTotal / totalAll) * 100;
+
+          return (
+            <div
+              style={{
+                background: "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)",
+                borderRadius: "10px",
+                padding: "14px 18px",
+                marginBottom: "20px",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  Overall Checks Distribution ({checks.length} Total Verification Items)
+                </span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: passTotal === totalAll ? "#059669" : "#D97706" }}>
+                  {passTotal} Passed ({passPct.toFixed(0)}%) • {revTotal + failTotal} Attention Items
+                </span>
+              </div>
+
+              {/* Segmented Progress Bar */}
+              <div
+                style={{
+                  display: "flex",
+                  height: "10px",
+                  borderRadius: "9999px",
+                  overflow: "hidden",
+                  background: "#E2E8F0",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
+                }}
+              >
+                {passPct > 0 && (
+                  <div
+                    style={{
+                      width: `${passPct}%`,
+                      background: "linear-gradient(90deg, #10B981, #059669)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Passed: ${passTotal}`}
+                  />
+                )}
+                {revPct > 0 && (
+                  <div
+                    style={{
+                      width: `${revPct}%`,
+                      background: "linear-gradient(90deg, #F59E0B, #D97706)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Review Required: ${revTotal}`}
+                  />
+                )}
+                {failPct > 0 && (
+                  <div
+                    style={{
+                      width: `${failPct}%`,
+                      background: "linear-gradient(90deg, #EF4444, #DC2626)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Failed: ${failTotal}`}
+                  />
+                )}
+                {naPct > 0 && (
+                  <div
+                    style={{
+                      width: `${naPct}%`,
+                      background: "#94A3B8",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Not in Filing: ${naTotal}`}
+                  />
+                )}
+              </div>
+
+              {/* Legend Badges */}
+              <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap", fontSize: "11px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#059669", fontWeight: 600 }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981" }} />
+                  {passTotal} Passed ({passPct.toFixed(0)}%)
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#D97706", fontWeight: 600 }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#F59E0B" }} />
+                  {revTotal} Review Required ({revPct.toFixed(0)}%)
+                </span>
+                {failTotal > 0 && (
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#DC2626", fontWeight: 600 }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444" }} />
+                    {failTotal} Failed ({failPct.toFixed(0)}%)
+                  </span>
+                )}
+                {naTotal > 0 && (
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B", fontWeight: 500 }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94A3B8" }} />
+                    {naTotal} Not in Filing ({naPct.toFixed(0)}%)
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
 
         {filteredChecks.length === 0 ? (
           <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
@@ -460,78 +596,127 @@ export default function WP514ReviewMatrix({ wp514Data, onOpenEvidence }) {
                 const reviewCount = catChecks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
                 const failedCount = catChecks.filter((c) => c.status === "FAILED").length;
                 const notAvailCount = catChecks.filter((c) => c.status === "NOT_AVAILABLE").length;
-                const isExpanded = expandedCategories[cat.id] ?? (reviewCount > 0 || failedCount > 0);
+                const isExpanded = Boolean(expandedCategories[cat.id]);
+                const passRate = catChecks.length > 0 ? (passedCount / catChecks.length) * 100 : 0;
 
                 return (
                   <div
                     key={cat.id}
                     style={{
-                      border: "1px solid var(--border-subtle)",
-                      borderRadius: "8px",
+                      border: isExpanded ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--border-subtle)",
+                      borderRadius: "10px",
                       overflow: "hidden",
                       background: "var(--bg-card)",
+                      boxShadow: isExpanded ? "0 4px 12px rgba(0, 0, 0, 0.04)" : "0 1px 3px rgba(0,0,0,0.02)",
+                      transition: "all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",
                     }}
                   >
-                    {/* Category Summary Header (Click to Expand / Collapse) */}
+                    {/* Category Summary Card Header (Click to Expand / Collapse) */}
                     <div
                       onClick={() => toggleCategory(cat.id)}
                       style={{
-                        padding: "12px 16px",
-                        background: isExpanded ? "rgba(16, 185, 129, 0.04)" : "var(--bg-secondary)",
+                        padding: "14px 18px",
+                        background: isExpanded
+                          ? "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, #FFFFFF 100%)"
+                          : "var(--bg-card)",
                         cursor: "pointer",
                         display: "flex",
                         justifyContent: "space-between",
                         alignItems: "center",
                         flexWrap: "wrap",
-                        gap: "10px",
+                        gap: "12px",
                         borderBottom: isExpanded ? "1px solid var(--border-subtle)" : "none",
+                        transition: "background 0.2s ease",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                        {isExpanded ? (
-                          <ChevronDown size={18} color="var(--color-primary)" />
-                        ) : (
-                          <ChevronRight size={18} color="var(--text-muted)" />
-                        )}
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "260px" }}>
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "6px",
+                            background: isExpanded ? "var(--color-primary-soft)" : "var(--bg-secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "transform 0.25s ease, background 0.2s ease",
+                            transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                          }}
+                        >
+                          <ChevronRight size={16} color={isExpanded ? "var(--color-primary)" : "var(--text-secondary)"} />
+                        </div>
                         <div>
-                          <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                            {cat.name}
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
+                              {cat.name}
+                            </span>
+                            {cat.score !== null && cat.score !== undefined && (
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 6px", borderRadius: "4px" }}>
+                                {cat.score.toFixed(0)}/100
+                              </span>
+                            )}
                           </div>
                           <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
-                            {catChecks.length} checks in this area • {cat.description || "Audit review verification"}
+                            {catChecks.length} checks • {cat.description || "Automated audit procedure"}
                           </div>
                         </div>
                       </div>
 
-                      <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap" }}>
+                      {/* Micro Progress Bar & Status Badges */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                        {/* Miniature Category Health Gauge */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", width: "100px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)", fontWeight: 600 }}>
+                            <span>Pass Rate</span>
+                            <span>{passRate.toFixed(0)}%</span>
+                          </div>
+                          <div style={{ height: "4px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
+                            <div
+                              style={{
+                                height: "100%",
+                                width: `${passRate}%`,
+                                background: passRate === 100 ? "#10B981" : passRate >= 60 ? "#F59E0B" : "#EF4444",
+                                transition: "width 0.3s ease",
+                              }}
+                            />
+                          </div>
+                        </div>
+
                         {/* Breakdown pills */}
-                        {passedCount > 0 && (
-                          <span style={{ fontSize: "11px", color: "#059669", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
-                            {passedCount} passed
-                          </span>
-                        )}
-                        {reviewCount > 0 && (
-                          <span style={{ fontSize: "11px", color: "#d97706", background: "rgba(245, 158, 11, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
-                            {reviewCount} review required
-                          </span>
-                        )}
-                        {failedCount > 0 && (
-                          <span style={{ fontSize: "11px", color: "#dc2626", background: "rgba(239, 68, 68, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
-                            {failedCount} failed
-                          </span>
-                        )}
-                        {notAvailCount > 0 && (
-                          <span style={{ fontSize: "11px", color: "#64748b", background: "rgba(100, 116, 139, 0.08)", padding: "2px 6px", borderRadius: "4px" }}>
-                            {notAvailCount} not in filing
-                          </span>
-                        )}
-                        <StatusBadge status={cat.status} />
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          {passedCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#059669", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
+                              {passedCount} passed
+                            </span>
+                          )}
+                          {reviewCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#d97706", background: "rgba(245, 158, 11, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                              {reviewCount} review
+                            </span>
+                          )}
+                          {failedCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#dc2626", background: "rgba(239, 68, 68, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                              {failedCount} failed
+                            </span>
+                          )}
+                          {notAvailCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#64748b", background: "rgba(100, 116, 139, 0.08)", padding: "2px 6px", borderRadius: "4px" }}>
+                              {notAvailCount} n/a
+                            </span>
+                          )}
+                          <StatusBadge status={cat.status} />
+                        </div>
                       </div>
                     </div>
 
                     {/* Detailed Checks Sub-table when expanded */}
                     {isExpanded && (
-                      <div style={{ overflowX: "auto" }}>
+                      <div
+                        style={{
+                          overflowX: "auto",
+                          animation: "fadeIn 0.2s ease-in-out",
+                        }}
+                      >
                         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
                           <thead>
                             <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
