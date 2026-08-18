@@ -1,6 +1,17 @@
-pandas>=2.0.0
-openpyxl>=3.1.0
-pdfplumber>=0.11.0
-pymupdf>=1.24.0
-pypdf>=4.0.0
-pydantic>=2.0.0
+﻿# ─────────────────────────────────────────────────────────────────────────────
+# Financial Statement Analyzer & Review Engine — Python Dependencies
+# Install with: pip install -r requirements.txt
+# Python >= 3.10 recommended
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Core Data Processing ──────────────────────────────────────────────────────
+pandas>=2.0.0          # DataFrame operations for table extraction & analysis
+openpyxl>=3.1.0        # Read/write .xlsx Excel workbooks (multi-sheet support)
+
+# ── PDF Parsing (Segment 1) ───────────────────────────────────────────────────
+pdfplumber>=0.11.0     # Primary PDF text & table extractor (best for digital PDFs)
+pymupdf>=1.24.0        # Fallback PDF renderer (PyMuPDF / fitz), OCR-ready
+pypdf>=4.0.0           # Lightweight PDF metadata & page reader
+
+# ── Data Validation ───────────────────────────────────────────────────────────
+pydantic>=2.0.0        # JSON schema contracts & runtime validation (V2 API)
