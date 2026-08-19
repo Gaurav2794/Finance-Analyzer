@@ -119,12 +119,17 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
   const currentPeriod = extractionResult?.period?.current || extractionResult?.periods?.[0]?.period_key || "Current Period";
   const previousPeriod = extractionResult?.period?.previous || (extractionResult?.periods?.length > 1 ? extractionResult.periods[1].period_key : "Prior Period");
 
-  // Top-line summary counts
-  const totalChecks = wp514.total_checks || 62;
-  const passedChecks = wp514.passed_checks || 22;
-  const reviewRequiredChecks = wp514.review_required || (wp514.attention_required || 4);
-  const failedChecks = wp514.failed_checks || (wp514.failed || 2);
-  const notInFilingChecks = wp514.not_in_filing || (totalChecks - passedChecks - reviewRequiredChecks - failedChecks);
+  // ── Single source of truth: all check counts come from wp514.overall ──
+  // wp514.overall is the canonical computed struct from wp514_service.py.
+  // Flat wp514.* fields do NOT exist — reading them gives undefined which
+  // caused mismatches between the executive summary and the appendix.
+  const wp514Overall = wp514.overall || {};
+  const totalChecks         = wp514Overall.total_checks   ?? (analysisResult?.wp514?.checks?.length ?? 0);
+  const passedChecks        = wp514Overall.passed         ?? 0;
+  const reviewRequiredChecks = wp514Overall.review        ?? 0;
+  const failedChecks        = wp514Overall.failed         ?? 0;
+  const notInFilingChecks   = wp514Overall.not_available  ?? (totalChecks - passedChecks - reviewRequiredChecks - failedChecks);
+  const overallScore        = wp514Overall.score          ?? analysisResult?.overall_score ?? 0;
 
   // Recommended review findings (Critical + High)
   const recommendedReview = findings.filter(
@@ -418,7 +423,7 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
               </span>
             </div>
           </div>
-          <ScoreSeal score={analysisResult?.overall_score} />
+          <ScoreSeal score={overallScore} />
         </div>
 
         {/* Top-Line Stat Cards Row */}
@@ -952,12 +957,23 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                 Appendix: Comprehensive WP-514 Verification Matrix
               </h2>
             </div>
-            <span style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
-              Full Audit Trail & Line-Item Check Breakdown
-            </span>
           </div>
 
-          <WP514ReviewMatrix wp514Data={analysisResult.wp514} />
+          {/* Compact reference line — full entity/period/framework details are on page 1 */}
+          <div style={{
+            fontSize: "11px",
+            color: "var(--text-secondary)",
+            background: "var(--bg-main)",
+            border: "1px solid var(--border-light)",
+            borderRadius: "6px",
+            padding: "7px 14px",
+            marginBottom: "16px",
+            fontStyle: "italic",
+          }}>
+            Appendix for <strong style={{ color: "var(--text-primary)", fontStyle: "normal" }}>WP-514 Financial Statement Review</strong> — see Executive Summary (page 1) for entity, period, framework, and compliance score details.
+          </div>
+
+          <WP514ReviewMatrix wp514Data={analysisResult.wp514} appendixMode={true} />
         </div>
       )}
     </div>

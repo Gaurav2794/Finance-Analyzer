@@ -109,7 +109,7 @@ function getCategoryIcon(catId, catName) {
   return FileCheck2;
 }
 
-export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenEvidence }) {
+export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenEvidence, appendixMode = false }) {
   if (!wp514Data) {
     return (
       <div className="fd-card" style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
@@ -182,7 +182,9 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* ────────────────────────────────────────────────────────────
           1. HEADER & DOCUMENT INFORMATION - HIGHLIGHTED HERO
+          (suppressed in appendixMode — already shown in executive summary)
           ──────────────────────────────────────────────────────────── */}
+      {!appendixMode && (
       <div
         className="fd-card animate-fade-up"
         style={{
@@ -298,10 +300,13 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
           </div>
         </div>
       </div>
+      )}
 
       {/* ────────────────────────────────────────────────────────────
           2. EXECUTIVE SUMMARY METRICS WITH VISUAL ICONS
+          (suppressed in appendixMode — already shown on page 1)
           ──────────────────────────────────────────────────────────── */}
+      {!appendixMode && (
       <div
         style={{
           display: "grid",
@@ -369,10 +374,13 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
           </div>
         </div>
       </div>
+      )}
 
       {/* ────────────────────────────────────────────────────────────
           3. CATEGORIES OVERVIEW GRID WITH SHOW MORE / LESS OPTION
+          (suppressed in appendixMode — category scores shown in Integrity Scorecard on page 2)
           ──────────────────────────────────────────────────────────── */}
+      {!appendixMode && (
       <div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
           <div>
@@ -548,9 +556,11 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
           )}
         </div>
       </div>
+      )}
 
       {/* ────────────────────────────────────────────────────────────
           4. SUMMARIZED & COMPACT AUDIT REVIEW CHECKS WITH VIEW MORE
+          (always shown, including in appendixMode — granular per-check detail)
           ──────────────────────────────────────────────────────────── */}
       <div className="fd-card animate-fade-up" style={{ padding: "18px 20px" }}>
         {/* Header & Controls */}

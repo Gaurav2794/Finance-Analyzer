@@ -458,7 +458,7 @@ def _findings_from_ratios(result: Any) -> Tuple[List[Finding], float]:
 
     score = getattr(result, "score", 0.0) or 100.0
     overall_status = str(getattr(result, "status", "PASSED")).upper()
-    computed = getattr(result, "total_ratios_computed", 0)
+    computed = getattr(result, "ratios_computed_count", 0)
     sev, action = classify("RATIOS", overall_status if overall_status in ("PASSED", "WARNING", "NOT_AVAILABLE") else "PASSED")
     findings.append(Finding(
         finding_id=_new_id("RT"),
