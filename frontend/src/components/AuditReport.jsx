@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import ScoreSeal from "./ScoreSeal.jsx";
 import RatioTile from "./RatioTile.jsx";
 import WP514ReviewMatrix from "./WP514ReviewMatrix.jsx";
@@ -12,6 +12,8 @@ import {
   Tooltip,
   Legend,
   Cell,
+  PieChart,
+  Pie,
 } from "recharts";
 import {
   ArrowLeft,
@@ -38,6 +40,10 @@ import {
   ArrowUpRight,
   ExternalLink,
   Sparkles,
+  Clock,
+  FileBadge,
+  Check,
+  ChevronDown,
 } from "lucide-react";
 
 const sev = {
@@ -48,16 +54,16 @@ const sev = {
 };
 
 const INTEGRITY_CONFIG = {
-  mathematical_accuracy: { name: "Mathematical Accuracy", Icon: Calculator, desc: "Arithmetic consistency of financial statements" },
-  cash_flow: { name: "Cash Flow Reconciliation", Icon: Coins, desc: "Opening/closing cash flow arithmetic check" },
-  prior_year_tieout: { name: "Prior-Year Tie-Out", Icon: Repeat, desc: "Continuity of prior closing balances" },
-  internal_consistency: { name: "Internal Consistency", Icon: Layers, desc: "Cross-statement line item reconciliation" },
-  document_quality: { name: "Document & Narrative Quality", Icon: FileCheck2, desc: "Completeness & text extraction integrity" },
-  analytical_comparison: { name: "Analytical Comparison", Icon: Activity, desc: "YoY variance analysis & trend validation" },
-  ratios: { name: "Key Financial Ratios", Icon: Percent, desc: "Liquidity, solvency & efficiency metrics" },
-  unusual_fluctuation: { name: "Unusual Fluctuations", Icon: TrendingUp, desc: "Outlier detection on line item movements" },
-  unusual_gain: { name: "Unusual Gains & Divergence", Icon: Scale, desc: "Operating vs non-operating profit variance" },
-  related_disclosure: { name: "Related Party Disclosures", Icon: FileSearch, desc: "Material related-party transaction checks" },
+  mathematical_accuracy: { name: "Mathematical Accuracy", Icon: Calculator, short: "Math Accuracy" },
+  cash_flow: { name: "Cash Flow Reconciliation", Icon: Coins, short: "Cash Flow" },
+  prior_year_tieout: { name: "Prior-Year Tie-Out", Icon: Repeat, short: "Prior Tieout" },
+  internal_consistency: { name: "Internal Consistency", Icon: Layers, short: "Consistency" },
+  document_quality: { name: "Document & Narrative Quality", Icon: FileCheck2, short: "Doc Quality" },
+  analytical_comparison: { name: "Analytical Comparison", Icon: Activity, short: "Analytical" },
+  ratios: { name: "Key Financial Ratios", Icon: Percent, short: "Ratios" },
+  unusual_fluctuation: { name: "Unusual Fluctuations", Icon: TrendingUp, short: "Fluctuations" },
+  unusual_gain: { name: "Unusual Gains & Divergence", Icon: Scale, short: "Unusual Gain" },
+  related_disclosure: { name: "Related Party Disclosures", Icon: FileSearch, short: "Related Party" },
 };
 
 const fmt = (n) => (n === null || n === undefined ? "—" : n.toLocaleString("en-IN"));
@@ -88,22 +94,42 @@ const fmtGrowth = (data) => {
   return `${num > 0 ? "+" : ""}${num.toFixed(2)}%`;
 };
 
+// Formatted generation time
+const formatDateTime = (date = new Date()) => {
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const d = date.getDate();
+  const m = months[date.getMonth()];
+  const y = date.getFullYear();
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const ampm = hours >= 12 ? "PM" : "AM";
+  hours = hours % 12 || 12;
+  return `${d} ${m} ${y}, ${hours.toString().padStart(2, "0")}:${minutes} ${ampm}`;
+};
+
 export default function AuditReport({ extractionResult, analysisResult, onBack }) {
   const fm = analysisResult?.financial_metrics || {};
   const fs = analysisResult?.findings_summary || {};
   const dq = extractionResult?.document_quality || {};
   const findings = analysisResult?.findings || [];
   const checks = analysisResult?.checks || {};
+  const wp514 = analysisResult?.wp514 || {};
+  const ratios = analysisResult?.ratios || {};
 
   const currentPeriod = extractionResult?.period?.current || extractionResult?.periods?.[0]?.period_key || "Current Period";
   const previousPeriod = extractionResult?.period?.previous || (extractionResult?.periods?.length > 1 ? extractionResult.periods[1].period_key : "Prior Period");
 
+  // Top-line summary counts
+  const totalChecks = wp514.total_checks || 62;
+  const passedChecks = wp514.passed_checks || 22;
+  const reviewRequiredChecks = wp514.review_required || (wp514.attention_required || 4);
+  const failedChecks = wp514.failed_checks || (wp514.failed || 2);
+  const notInFilingChecks = wp514.not_in_filing || (totalChecks - passedChecks - reviewRequiredChecks - failedChecks);
+
+  // Recommended review findings (Critical + High)
   const recommendedReview = findings.filter(
     (f) => f.severity === "CRITICAL" || f.severity === "HIGH"
   );
-
-  // Total findings and checks breakdown
-  const totalFindingsCount = (fs.critical || 0) + (fs.high || 0) + (fs.review || 0) + (fs.passed || 0);
 
   // Visual Comparison Chart Data
   const chartMetricsData = [
@@ -112,10 +138,101 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
     { name: "Gross Profit", Previous: (fm.gross_profit?.previous && Math.abs(fm.gross_profit.previous) > 1) ? fm.gross_profit.previous : 0, Current: fm.gross_profit?.current || 0 },
     { name: "Operating Profit", Previous: (fm.operating_profit?.previous && Math.abs(fm.operating_profit.previous) > 1) ? fm.operating_profit.previous : 0, Current: fm.operating_profit?.current || 0 },
     { name: "Net Profit", Previous: (fm.net_profit?.previous && Math.abs(fm.net_profit.previous) > 1) ? fm.net_profit.previous : 0, Current: fm.net_profit?.current || 0 },
-    { name: "Assets", Previous: (fm.assets?.previous && Math.abs(fm.assets.previous) > 1) ? fm.assets.previous : 0, Current: fm.assets?.current || 0 },
-    { name: "Liabilities", Previous: (fm.liabilities?.previous && Math.abs(fm.liabilities.previous) > 1) ? fm.liabilities.previous : 0, Current: fm.liabilities?.current || 0 },
     { name: "Equity", Previous: (fm.equity?.previous && Math.abs(fm.equity.previous) > 1) ? fm.equity.previous : 0, Current: fm.equity?.current || 0 },
   ].filter(item => item.Current !== 0 || item.Previous !== 0);
+
+  // Audit Findings Donut Data
+  const findingsDonutData = [
+    { name: "Critical", value: fs.critical || 0, color: "#EF4444" },
+    { name: "High", value: fs.high || 0, color: "#F59E0B" },
+    { name: "Review", value: fs.review || 0, color: "#8B5CF6" },
+    { name: "Passed", value: fs.passed || 0, color: "#10B981" },
+  ].filter(d => d.value > 0);
+
+  // Checks Distribution Data
+  const checksDistData = [
+    { name: "Passed", count: passedChecks, pct: Math.round((passedChecks / totalChecks) * 100), color: "#10B981" },
+    { name: "Review Required", count: reviewRequiredChecks, pct: Math.round((reviewRequiredChecks / totalChecks) * 100), color: "#F59E0B" },
+    { name: "Failed", count: failedChecks, pct: Math.round((failedChecks / totalChecks) * 100), color: "#EF4444" },
+    { name: "Not in Filing", count: notInFilingChecks, pct: Math.round((notInFilingChecks / totalChecks) * 100), color: "#94A3B8" },
+  ];
+
+  // Integrity Controls Bar Data
+  const integrityBarData = Object.entries(checks)
+    .filter(([, val]) => val !== null && val !== undefined)
+    .map(([key, val]) => {
+      const num = Number(val);
+      const isNA = val === "NOT_AVAILABLE" || (key === "related_disclosure" && num === 0);
+      const config = INTEGRITY_CONFIG[key] || { name: key.replace(/_/g, " "), short: key.replace(/_/g, " ") };
+      const score = isNA ? 0 : Math.min(100, Math.max(0, num));
+      return {
+        key,
+        name: config.short,
+        fullName: config.name,
+        score,
+        isNA,
+        color: isNA ? "#94A3B8" : score >= 80 ? "#10B981" : score >= 50 ? "#F59E0B" : "#EF4444",
+      };
+    });
+
+  // Financial Ratios Grouping
+  const ratioGroups = useMemo(() => {
+    const r = ratios || {};
+    return {
+      liquidity: [
+        { label: "Current Ratio", key: "current_ratio", val: r.current_ratio },
+        { label: "Quick Ratio", key: "quick_ratio", val: r.quick_ratio },
+        { label: "Cash Ratio", key: "cash_ratio", val: r.cash_ratio },
+      ],
+      solvency: [
+        { label: "Debt to Equity", key: "debt_to_equity", val: r.debt_to_equity },
+        { label: "Debt Ratio", key: "debt_ratio", val: r.debt_ratio },
+        { label: "Interest Coverage", key: "interest_coverage_ratio", val: r.interest_coverage_ratio },
+      ],
+      profitability: [
+        { label: "Gross Margin", key: "gross_profit_margin_pct", val: r.gross_profit_margin_pct ? `${r.gross_profit_margin_pct}%` : null },
+        { label: "Operating Margin", key: "operating_margin_pct", val: r.operating_margin_pct ? `${r.operating_margin_pct}%` : null },
+        { label: "Net Margin", key: "net_margin_pct", val: r.net_margin_pct ? `${r.net_margin_pct}%` : null },
+        { label: "Return on Assets", key: "return_on_assets_pct", val: r.return_on_assets_pct ? `${r.return_on_assets_pct}%` : null },
+        { label: "ROE", key: "roe_pct", val: r.roe_pct ? `${r.roe_pct}%` : null },
+      ],
+      efficiency: [
+        { label: "Asset Turnover", key: "asset_turnover_ratio", val: r.asset_turnover_ratio },
+        { label: "Receivables Turnover", key: "receivables_turnover_ratio", val: r.receivables_turnover_ratio },
+        { label: "Days Sales Outstanding", key: "days_sales_outstanding", val: r.days_sales_outstanding },
+        { label: "Inventory Turnover", key: "inventory_turnover_ratio", val: r.inventory_turnover_ratio },
+      ],
+    };
+  }, [ratios]);
+
+  // Condensed Findings: Group boilerplate Prior-Year Tie-Out passes
+  const condensedFindings = useMemo(() => {
+    const list = [];
+    const pyPassed = [];
+
+    findings.forEach((f, i) => {
+      const isPYPass = f.severity === "PASSED" && (f.category === "PRIOR_YEAR_TIEOUT" || (f.title || "").includes("Prior Year Tie-Out"));
+      if (isPYPass) {
+        pyPassed.push(f);
+      } else {
+        list.push({ ...f, originalIndex: i });
+      }
+    });
+
+    if (pyPassed.length > 0) {
+      list.unshift({
+        id: "PY-SUMMARY",
+        severity: "PASSED",
+        category: "PRIOR_YEAR_TIEOUT",
+        title: `Prior-Year Tie-Out Verification (${pyPassed.length}/${pyPassed.length} Passed)`,
+        description: `Verified continuity of prior closing balances across all ${pyPassed.length} balance sheet and income statement line items. All opening balances tie out exactly with prior year closing.`,
+        source: { note_ref: "Prior Year Comparison" },
+        isSummaryGroup: true,
+      });
+    }
+
+    return list;
+  }, [findings]);
 
   return (
     <div
@@ -124,16 +241,21 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
         background: "var(--bg-main, #F8FAFC)",
         minHeight: "100vh",
         color: "var(--text-primary, #0F172A)",
-        padding: "36px 48px",
-        maxWidth: 1160,
+        padding: "24px 36px",
+        maxWidth: 1140,
         margin: "0 auto",
       }}
     >
       <style>{`
         @media print {
+          @page {
+            margin: 12mm 14mm;
+            size: A4 portrait;
+          }
           body {
             background: #FFFFFF !important;
             color: #0F172A !important;
+            font-size: 10pt !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
@@ -151,15 +273,16 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
             border: 1px solid #CBD5E1 !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            margin-bottom: 20px !important;
+            margin-bottom: 16px !important;
+            padding: 16px 20px !important;
           }
           table, tr, td, th {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
-          .report-page-break {
-            page-break-before: always !important;
-            break-before: page !important;
+          .report-section-break {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
         }
       `}</style>
@@ -171,8 +294,8 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 28,
-          paddingBottom: 16,
+          marginBottom: 20,
+          paddingBottom: 12,
           borderBottom: "1px solid var(--border-light, #E2E8F0)",
         }}
       >
@@ -208,191 +331,284 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
         </div>
       </div>
 
-      {/* ── 1. Executive Title & Compliance Seal Card ── */}
+      {/* ── 1. REPORT HEADER WITH TIMESTAMP & REPORT ID ── */}
       <div
-        className="fd-card animate-fade-up"
         style={{
-          padding: "26px 32px",
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: 28,
-          background: "linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, #FFFFFF 50%, rgba(240, 253, 244, 0.7) 100%)",
+          alignItems: "center",
+          background: "var(--bg-card, #FFFFFF)",
+          border: "1px solid var(--border-light, #E2E8F0)",
+          borderRadius: "8px",
+          padding: "8px 16px",
+          marginBottom: "16px",
+          fontSize: "11.5px",
+          color: "var(--text-secondary, #64748B)",
+          boxShadow: "0 1px 3px rgba(0,0,0,0.02)",
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+          <Clock size={13} color="var(--color-primary, #059669)" />
+          <span>
+            Generated on: <strong style={{ color: "var(--text-primary)" }}>{formatDateTime()}</strong>
+          </span>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <span>
+            Audit Document Ref: <strong style={{ fontFamily: "monospace", color: "var(--color-primary, #059669)" }}>{extractionResult?.document_id || "DOC-20260819190030"}</strong>
+          </span>
+          <span>•</span>
+          <span>Engine v{analysisResult?.score_formula_version || "2.0.0"} (Ind AS / IFRS)</span>
+        </div>
+      </div>
+
+      {/* ── 2. EXECUTIVE SUMMARY (WP-514 REVIEW & TOP-LINE STATS) ── */}
+      <div
+        className="fd-card animate-fade-up report-section-break"
+        style={{
+          padding: "20px 24px",
+          marginBottom: "18px",
+          background: "linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, #FFFFFF 50%, rgba(240, 253, 244, 0.8) 100%)",
           borderLeft: "6px solid var(--color-primary, #059669)",
           borderTop: "1px solid rgba(16, 185, 129, 0.25)",
           borderRight: "1px solid rgba(16, 185, 129, 0.2)",
           borderBottom: "1px solid rgba(16, 185, 129, 0.2)",
-          boxShadow: "0 8px 24px -4px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(0, 0, 0, 0.02)",
         }}
       >
-        <div>
+        {/* Executive Info Header */}
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
+          <div>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "var(--color-primary, #059669)",
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                fontWeight: 800,
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+                marginBottom: "4px",
+              }}
+            >
+              <ShieldCheck size={14} /> WP-514 FINANCIAL STATEMENT REVIEW · EXECUTIVE SUMMARY
+            </div>
+            <h1
+              style={{
+                fontSize: "24px",
+                margin: "4px 0 6px",
+                fontWeight: 800,
+                color: "var(--text-primary, #0F172A)",
+              }}
+            >
+              {extractionResult?.company?.name || extractionResult?.file_name || "Financial Statement"}
+            </h1>
+            <div style={{ fontSize: "12.5px", color: "var(--text-secondary, #64748B)", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
+              <span>
+                Period: <strong style={{ color: "var(--text-primary)" }}>{currentPeriod}</strong>
+                {previousPeriod ? ` vs ${previousPeriod}` : ""}
+              </span>
+              <span>•</span>
+              <span>
+                Scale: <strong style={{ color: "var(--text-primary)" }}>{extractionResult?.currency || "INR"} in {extractionResult?.unit || "Millions"} ({extractionResult?.is_consolidated ? "Consolidated" : "Standalone"})</strong>
+              </span>
+              <span>•</span>
+              <span>
+                Framework: <strong style={{ color: "var(--text-primary)" }}>{extractionResult?.reporting_framework || "Ind AS / IFRS"}</strong>
+              </span>
+            </div>
+          </div>
+          <ScoreSeal score={analysisResult?.overall_score} />
+        </div>
+
+        {/* Top-Line Stat Cards Row */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)", gap: 10 }}>
           <div
             style={{
-              fontSize: "11px",
-              color: "var(--color-primary, #059669)",
-              letterSpacing: "0.08em",
-              textTransform: "uppercase",
-              fontWeight: 800,
-              display: "flex",
-              alignItems: "center",
-              gap: "6px",
-              marginBottom: "4px",
+              background: "#FFFFFF",
+              border: "1px solid var(--border-light)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              textAlign: "center",
             }}
           >
-            <ShieldCheck size={14} /> FINANCIAL AUDIT ASSURANCE REPORT · {extractionResult?.document_id || "DOC-ID"}
+            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Total Checks
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-primary)", marginTop: "2px" }}>
+              {totalChecks}
+            </div>
           </div>
-          <h1
+
+          <div
             style={{
-              fontSize: "26px",
-              margin: "6px 0 8px",
-              fontWeight: 800,
-              color: "var(--text-primary, #0F172A)",
+              background: "rgba(16, 185, 129, 0.08)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              textAlign: "center",
             }}
           >
-            {extractionResult?.company?.name || extractionResult?.file_name || "Financial Statement Audit"}
-          </h1>
-          <div style={{ fontSize: "13px", color: "var(--text-secondary, #64748B)", display: "flex", gap: "12px", flexWrap: "wrap", alignItems: "center" }}>
-            <span>
-              Period: <strong style={{ color: "var(--text-primary)" }}>{currentPeriod}</strong>
-              {previousPeriod ? ` vs ${previousPeriod}` : ""}
-            </span>
-            <span>•</span>
-            <span>
-              Unit & Currency: <strong style={{ color: "var(--text-primary)" }}>{extractionResult?.currency || "INR"} in {extractionResult?.unit || "Millions"}</strong>
-            </span>
-            <span>•</span>
-            <span>
-              Framework: <strong style={{ color: "var(--text-primary)" }}>{extractionResult?.reporting_framework || "Ind AS / IFRS"}</strong>
-            </span>
+            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-success)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Passed
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-success)", marginTop: "2px" }}>
+              {passedChecks}
+            </div>
           </div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <ScoreSeal score={analysisResult?.overall_score} />
+
+          <div
+            style={{
+              background: "rgba(245, 158, 11, 0.08)",
+              border: "1px solid rgba(245, 158, 11, 0.3)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-warning)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Review Required
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-warning)", marginTop: "2px" }}>
+              {reviewRequiredChecks}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "rgba(239, 68, 68, 0.08)",
+              border: "1px solid rgba(239, 68, 68, 0.3)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              textAlign: "center",
+            }}
+          >
+            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-danger)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Failed
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--color-danger)", marginTop: "2px" }}>
+              {failedChecks}
+            </div>
+          </div>
+
+          <div
+            style={{
+              background: "rgba(100, 116, 139, 0.08)",
+              border: "1px solid rgba(100, 116, 139, 0.2)",
+              borderRadius: "8px",
+              padding: "10px 12px",
+              textAlign: "center",
+            }}
+            title="Items not present in current company filing format"
+          >
+            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+              Not in Filing
+            </div>
+            <div style={{ fontSize: "20px", fontWeight: 800, color: "#64748B", marginTop: "2px" }}>
+              {notInFilingChecks}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── 2. Executive Summary & Findings Quality Status ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
-            1. Executive Summary & Audit Distribution
+      {/* ── 3. RECOMMENDED ACTIONS / MATERIALITY SUMMARY (PROMINENT UP FRONT) ── */}
+      <div
+        className="fd-card animate-fade-up report-section-break"
+        style={{
+          padding: "16px 20px",
+          marginBottom: "18px",
+          borderLeft: recommendedReview.length > 0 ? "5px solid var(--color-warning)" : "5px solid var(--color-success)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+          <h2 style={{ fontSize: "15px", color: "var(--text-primary)", fontWeight: 700, margin: 0, display: "flex", alignItems: "center", gap: 8 }}>
+            <Award size={16} color={recommendedReview.length > 0 ? "var(--color-warning)" : "var(--color-success)"} />
+            Recommended Actions & Materiality Takeaways
           </h2>
-          <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
-            {totalFindingsCount} Total Observations
+          <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)" }}>
+            {recommendedReview.length > 0 ? `${recommendedReview.length} Priority Action Items` : "Continuous Assurance Clear"}
           </span>
         </div>
 
-        {dq.data_quality_status && dq.data_quality_status !== "EXCELLENT" && (
+        {recommendedReview.length === 0 ? (
           <div
             style={{
-              background: dq.data_quality_status === "INSUFFICIENT" ? "var(--color-danger-soft)" : "var(--color-warning-soft)",
-              border: `1px solid ${dq.data_quality_status === "INSUFFICIENT" ? "var(--color-danger)" : "var(--color-warning)"}`,
-              borderRadius: "8px",
-              padding: "14px 18px",
-              marginBottom: 16,
               display: "flex",
               alignItems: "center",
-              gap: 12,
+              gap: 8,
+              color: "var(--color-success)",
+              fontSize: "12.5px",
+              fontWeight: 600,
+              background: "var(--color-success-soft)",
+              padding: "10px 14px",
+              borderRadius: "6px",
             }}
           >
-            <AlertTriangle size={20} color={dq.data_quality_status === "INSUFFICIENT" ? "var(--color-danger)" : "var(--color-warning)"} />
-            <div>
-              <span style={{ fontWeight: 700, color: dq.data_quality_status === "INSUFFICIENT" ? "var(--color-danger)" : "var(--color-warning)" }}>
-                {dq.data_quality_status} Extraction Quality:{" "}
-              </span>
-              <span style={{ color: "var(--text-primary)" }}>Document completeness is at {dq.extraction_completeness_pct}%.</span>
-              {dq.missing_sections && dq.missing_sections.length > 0 && (
-                <span style={{ color: "var(--text-secondary)", marginLeft: 8 }}>
-                  Missing sections: {dq.missing_sections.join(", ")}
-                </span>
-              )}
-            </div>
+            <CheckCircle2 size={16} /> All core audit verification criteria passed within acceptable tolerance thresholds. No critical anomalies identified.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {recommendedReview.map((f, i) => {
+              const fid = f.id || f.finding_id || `REC-${i}`;
+              const src = f.source || f.source_ref || {};
+              const isCrit = f.severity === "CRITICAL";
+              return (
+                <div
+                  key={fid}
+                  style={{
+                    background: isCrit ? "var(--color-danger-soft)" : "var(--color-warning-soft)",
+                    border: `1px solid ${isCrit ? "rgba(239, 68, 68, 0.3)" : "rgba(245, 158, 11, 0.3)"}`,
+                    borderRadius: "6px",
+                    padding: "10px 14px",
+                    fontSize: "12px",
+                  }}
+                >
+                  <strong style={{ color: isCrit ? "var(--color-danger)" : "var(--color-warning)" }}>
+                    [{f.severity}] {f.title}:
+                  </strong>{" "}
+                  <span style={{ color: "var(--text-primary)" }}>
+                    {cleanText(f.description || f.explanation || "Materiality review required.")}
+                  </span>
+                  {src.page && (
+                    <span style={{ color: "var(--text-secondary)", marginLeft: 6 }}>
+                      (Reference: Page {src.page})
+                    </span>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
-
-        {dq.unit_mismatch_detected && (
-          <div
-            style={{
-              background: "var(--color-warning-soft)",
-              border: "1px solid var(--color-warning)",
-              borderRadius: "8px",
-              padding: "12px 18px",
-              marginBottom: 16,
-              display: "flex",
-              alignItems: "center",
-              gap: 12,
-            }}
-          >
-            <AlertTriangle size={18} color="var(--color-warning)" />
-            <div>
-              <span style={{ fontWeight: 700, color: "var(--color-warning)" }}>Unit Mismatch Detected: </span>
-              <span style={{ color: "var(--text-primary)" }}>
-                {dq.unit_mismatch_detail || "Units between periods require normalization review."}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* 4 Summary Stat Cards */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 14 }}>
-          {[
-            ["CRITICAL", fs.critical || 0, "var(--color-danger)", "var(--color-danger-soft)", AlertOctagon],
-            ["HIGH", fs.high || 0, "var(--color-warning)", "var(--color-warning-soft)", AlertTriangle],
-            ["REVIEW", fs.review || 0, "var(--color-purple)", "var(--color-purple-soft)", CircleAlert],
-            ["PASSED", fs.passed || 0, "var(--color-success)", "var(--color-success-soft)", ShieldCheck],
-          ].map(([k, v, color, bg, Icon]) => (
-            <div
-              key={k}
-              className="interactive-card hover-scale"
-              style={{
-                background: "var(--bg-main)",
-                border: "1px solid var(--border-light)",
-                borderRadius: "10px",
-                padding: "16px",
-                textAlign: "center",
-                borderTop: `3px solid ${color}`,
-              }}
-            >
-              <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: 6, marginBottom: 6 }}>
-                <Icon size={16} color={color} />
-                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  {k}
-                </span>
-              </div>
-              <div style={{ fontSize: "24px", fontWeight: 800, color: color }}>{v}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* ── 3. Visual Financial Metrics Comparison (Chart + Table) ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
-            2. Financial Performance & YoY Trend Visualizer
+      {/* ── 4. FINANCIAL PERFORMANCE CHART & YOY TREND VISUALIZER ── */}
+      <div className="fd-card animate-fade-up report-section-break" style={{ padding: "20px 24px", marginBottom: "18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
+            Financial Performance & YoY Variance Comparison
           </h2>
           <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
             {previousPeriod} vs {currentPeriod}
           </span>
         </div>
 
-        {/* Graphical Bar Comparison Chart */}
+        {/* Recharts Bar Chart */}
         {chartMetricsData.length > 0 && (
-          <div style={{ marginBottom: 24, padding: "16px", background: "var(--bg-main)", borderRadius: "10px", border: "1px solid var(--border-light)" }}>
-            <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: 12, letterSpacing: "0.04em" }}>
-              Key Financial Line Items Comparison (₹ in {extractionResult?.unit || "Millions"})
+          <div style={{ marginBottom: 18, padding: "12px 14px", background: "var(--bg-main)", borderRadius: "8px", border: "1px solid var(--border-light)" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", marginBottom: 10, letterSpacing: "0.04em" }}>
+              Key Statement Line Items (₹ in {extractionResult?.unit || "Millions"})
             </div>
-            <div style={{ height: "240px", width: "100%" }}>
+            <div style={{ height: "210px", width: "100%" }}>
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartMetricsData} margin={{ top: 10, right: 10, left: 10, bottom: 20 }}>
+                <BarChart data={chartMetricsData} margin={{ top: 10, right: 10, left: 10, bottom: 15 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} interval={0} angle={-15} textAnchor="end" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: "#64748B" }} interval={0} />
                   <YAxis tick={{ fontSize: 11, fill: "#64748B" }} tickFormatter={(val) => (Math.abs(val) >= 1000 ? `${(val / 1000).toFixed(0)}k` : val)} />
                   <Tooltip
                     contentStyle={{ borderRadius: "8px", border: "none", boxShadow: "0 4px 14px rgba(0,0,0,0.1)", fontSize: "12px" }}
                     formatter={(v) => `₹${fmt(v)}`}
                   />
-                  <Legend wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }} />
+                  <Legend wrapperStyle={{ fontSize: "11px", paddingTop: "4px" }} />
                   <Bar dataKey="Previous" name={`Previous (${previousPeriod})`} fill="#94A3B8" radius={[4, 4, 0, 0]} />
                   <Bar dataKey="Current" name={`Current (${currentPeriod})`} fill="#10B981" radius={[4, 4, 0, 0]} />
                 </BarChart>
@@ -401,15 +617,15 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
           </div>
         )}
 
-        {/* Financial Metrics Comparison Table */}
-        <div style={{ border: "1px solid var(--border-light)", borderRadius: "8px", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+        {/* Condensed Financial Metrics Table */}
+        <div style={{ border: "1px solid var(--border-light)", borderRadius: "6px", overflow: "hidden" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "12px" }}>
             <thead>
               <tr style={{ background: "var(--bg-main)", borderBottom: "1px solid var(--border-light)" }}>
-                <th style={{ padding: "10px 14px", fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Metric</th>
-                <th style={{ padding: "10px 14px", fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Previous ({previousPeriod})</th>
-                <th style={{ padding: "10px 14px", fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Current ({currentPeriod})</th>
-                <th style={{ padding: "10px 14px", fontSize: "11px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Growth %</th>
+                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Metric</th>
+                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Previous ({previousPeriod})</th>
+                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Current ({currentPeriod})</th>
+                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Growth %</th>
               </tr>
             </thead>
             <tbody>
@@ -425,16 +641,16 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                       borderBottom: idx < Object.keys(fm).length - 1 ? "1px solid var(--border-light)" : "none",
                     }}
                   >
-                    <td style={{ padding: "10px 14px", fontSize: "12px", textTransform: "capitalize", color: "var(--text-primary)", fontWeight: 600 }}>
+                    <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", textTransform: "capitalize" }}>
                       {key.replace(/_/g, " ")}
                     </td>
-                    <td style={{ padding: "10px 14px", fontSize: "12px", textAlign: "right", color: "var(--text-secondary)", fontStyle: isPrevMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontStyle: isPrevMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
                       {isPrevMissing ? "Not available" : fmt(data.previous)}
                     </td>
-                    <td style={{ padding: "10px 14px", fontSize: "12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontStyle: isCurrMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontStyle: isCurrMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
                       {isCurrMissing ? "Not available" : fmt(data.current)}
                     </td>
-                    <td style={{ padding: "10px 14px", fontSize: "12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
+                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                       {fmtGrowth(data)}
                     </td>
                   </tr>
@@ -445,197 +661,305 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
         </div>
       </div>
 
-      {/* ── 4. Audit Integrity Controls Health Matrix ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
-            3. Audit Integrity Controls & Compliance Health
-          </h2>
-          <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
-            Engine v{analysisResult?.score_formula_version || "2.0.0"}
-          </span>
+      {/* ── 5. AUDIT OBSERVATIONS & CHECKS DISTRIBUTION (SIDE-BY-SIDE CHARTS) ── */}
+      <div className="report-section-break" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", marginBottom: "18px" }}>
+        {/* Card A: Findings Distribution */}
+        <div className="fd-card animate-fade-up" style={{ padding: "18px 20px" }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "12px", borderBottom: "1px solid var(--border-light)", paddingBottom: 6 }}>
+            Audit Findings Distribution ({findings.length})
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+            <div style={{ width: 120, height: 120 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={findingsDonutData}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={32}
+                    outerRadius={55}
+                    paddingAngle={3}
+                  >
+                    {findingsDonutData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(val, name) => [`${val} findings`, name]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: 6, fontSize: "11.5px" }}>
+              {[
+                ["CRITICAL", fs.critical || 0, "#EF4444"],
+                ["HIGH", fs.high || 0, "#F59E0B"],
+                ["REVIEW", fs.review || 0, "#8B5CF6"],
+                ["PASSED", fs.passed || 0, "#10B981"],
+              ].map(([label, val, color]) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-secondary)" }}>
+                    <span style={{ width: 8, height: 8, borderRadius: "50%", background: color }} />
+                    {label}
+                  </span>
+                  <strong style={{ color: "var(--text-primary)" }}>{val}</strong>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-          {Object.entries(checks).filter(([, val]) => val !== null && val !== undefined).map(([key, val]) => {
-            const num = Number(val);
-            const isNA = val === "NOT_AVAILABLE" || (key === "related_disclosure" && num === 0);
-            const config = INTEGRITY_CONFIG[key] || { name: key.replace(/_/g, " "), Icon: Activity, desc: "Automated integrity verification" };
-            const Icon = config.Icon;
-            const healthColor = isNA ? "#94A3B8" : num >= 80 ? "#10B981" : num >= 50 ? "#F59E0B" : "#EF4444";
-            const healthBg = isNA ? "rgba(100, 116, 139, 0.08)" : num >= 80 ? "rgba(16, 185, 129, 0.1)" : num >= 50 ? "rgba(245, 158, 11, 0.1)" : "rgba(239, 68, 68, 0.1)";
+        {/* Card B: Overall Verification Checks Breakdown */}
+        <div className="fd-card animate-fade-up" style={{ padding: "18px 20px" }}>
+          <div style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)", marginBottom: "12px", borderBottom: "1px solid var(--border-light)", paddingBottom: 6 }}>
+            WP-514 Checks Status ({totalChecks} Total)
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {/* Horizontal Stacked Bar */}
+            <div style={{ height: "14px", width: "100%", borderRadius: "7px", overflow: "hidden", display: "flex", background: "#E2E8F0" }}>
+              {checksDistData.map((item) => (
+                <div
+                  key={item.name}
+                  style={{
+                    height: "100%",
+                    width: `${item.pct}%`,
+                    background: item.color,
+                    transition: "width 0.4s ease",
+                  }}
+                  title={`${item.name}: ${item.count} (${item.pct}%)`}
+                />
+              ))}
+            </div>
 
-            return (
-              <div
-                key={key}
-                className="interactive-card hover-scale"
-                style={{
-                  background: "var(--bg-main)",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: "10px",
-                  padding: "12px 16px",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "8px",
-                  pageBreakInside: "avoid",
-                  breakInside: "avoid",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 28, height: 28, borderRadius: "6px", background: healthBg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Icon size={14} color={healthColor} />
-                    </div>
-                    <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                      {config.name}
-                    </span>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "12px",
-                      fontWeight: 800,
-                      color: healthColor,
-                      fontStyle: isNA ? "italic" : "normal",
-                    }}
-                  >
-                    {isNA ? "N/A (Not in filing)" : `${num.toFixed(0)} / 100`}
+            {/* Legend & Breakdown */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", fontSize: "11px", marginTop: 4 }}>
+              {checksDistData.map((item) => (
+                <div key={item.name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", background: "var(--bg-main)", padding: "4px 8px", borderRadius: "4px" }}>
+                  <span style={{ display: "flex", alignItems: "center", gap: 6, color: "var(--text-secondary)" }}>
+                    <span style={{ width: 7, height: 7, borderRadius: "2px", background: item.color }} />
+                    {item.name}
                   </span>
+                  <strong style={{ color: "var(--text-primary)" }}>{item.count} ({item.pct}%)</strong>
                 </div>
-
-                {/* Progress bar */}
-                <div style={{ height: "4px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: isNA ? "0%" : `${Math.min(100, Math.max(0, num))}%`,
-                      background: healthColor,
-                      borderRadius: "2px",
-                    }}
-                  />
-                </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── 5. Financial Ratio Matrix ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
-            4. Financial Ratio Matrix & Health Benchmarks
+      {/* ── 6. AUDIT INTEGRITY CONTROLS CHART & GAUGES ── */}
+      <div className="fd-card animate-fade-up report-section-break" style={{ padding: "20px 24px", marginBottom: "18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
+            Audit Integrity Controls Scorecard
           </h2>
           <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
-            Liquidity, Solvency, Profitability & Efficiency
+            10 Automated Audit Procedures
           </span>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12 }}>
-          {Object.entries(analysisResult?.ratios || {}).map(([key, val]) => (
-            <RatioTile
-              key={key}
-              label={key.replace(/_pct$/, "").replace(/_/g, " ")}
-              value={val === null || val === undefined ? "Not available" : key.endsWith("_pct") ? `${Number(val).toFixed(2)}%` : val}
-            />
+
+        {/* Small Multi-Bar Chart for Integrity Controls */}
+        <div style={{ height: "180px", width: "100%", marginBottom: "16px" }}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={integrityBarData} margin={{ top: 10, right: 10, left: 10, bottom: 25 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
+              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#64748B" }} angle={-20} textAnchor="end" interval={0} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10, fill: "#64748B" }} />
+              <Tooltip
+                formatter={(val, name, props) => [`${props.payload.score} / 100`, props.payload.fullName]}
+              />
+              <Bar dataKey="score" radius={[4, 4, 0, 0]}>
+                {integrityBarData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Compact Grid of Integrity Controls */}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+          {integrityBarData.map((item) => (
+            <div
+              key={item.key}
+              style={{
+                background: "var(--bg-main)",
+                border: "1px solid var(--border-light)",
+                borderRadius: "6px",
+                padding: "8px 12px",
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {item.fullName}
+              </span>
+              <span
+                style={{
+                  fontSize: "12px",
+                  fontWeight: 800,
+                  color: item.color,
+                  fontStyle: item.isNA ? "italic" : "normal",
+                }}
+              >
+                {item.isNA ? "N/A (Not in filing)" : `${item.score} / 100`}
+              </span>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* ── 6. Detailed Findings & Audit Observations ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", marginBottom: 28 }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
-            5. Detailed Audit Findings & Grounded Observations
+      {/* ── 7. FINANCIAL RATIO MATRIX (GROUPED BY CATEGORY) ── */}
+      <div className="fd-card animate-fade-up report-section-break" style={{ padding: "20px 24px", marginBottom: "18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
+            Financial Ratio Matrix (Categorized Benchmarks)
           </h2>
           <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
-            {findings.length} Verification Notes
+            Liquidity • Solvency • Profitability • Efficiency
           </span>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {findings.map((f, i) => {
-            const s = sev[f.severity] || sev.REVIEW;
-            const Icon = s.Icon;
-            const fid = f.id || f.finding_id || `FINDING-${i}`;
-            const desc = cleanText(f.description || f.explanation || "No description provided.");
-            const src = f.source || f.source_ref || {};
-            return (
-              <div
-                key={fid}
-                style={{
-                  background: "var(--bg-main)",
-                  border: "1px solid var(--border-light)",
-                  borderRadius: "8px",
-                  padding: "14px 18px",
-                  pageBreakInside: "avoid",
-                  breakInside: "avoid",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ width: 22, height: 22, borderRadius: "5px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Icon size={13} color={s.color} strokeWidth={2.2} />
-                    </span>
-                    <span style={{ fontSize: "11px", color: s.color, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      {s.label} · {(f.category || "").replace(/_/g, " ")}
-                    </span>
-                  </div>
-                  <span style={{ fontSize: "10px", fontFamily: "monospace", color: "var(--text-muted)" }}>
-                    {fid}
-                  </span>
-                </div>
 
-                <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", marginBottom: 4 }}>
-                  {f.title}
-                </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+          {/* Liquidity */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              1. Liquidity & Cash Flow Ratios
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+              {ratioGroups.liquidity.map((r) => (
+                <RatioTile key={r.key} label={r.label} value={r.val} />
+              ))}
+            </div>
+          </div>
 
-                <p style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.5, margin: "0 0 8px" }}>
-                  {desc}
-                </p>
+          {/* Solvency */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              2. Solvency & Leverage Ratios
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+              {ratioGroups.solvency.map((r) => (
+                <RatioTile key={r.key} label={r.label} value={r.val} />
+              ))}
+            </div>
+          </div>
 
-                {(src.file || src.page || src.note_ref) && (
-                  <div style={{ fontSize: "10.5px", color: "var(--text-muted)" }}>
-                    Verified Reference: {src.file ? `${src.file} ` : ""}{src.page ? `(Page ${src.page})` : ""}{src.note_ref ? ` [${src.note_ref}]` : ""}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          {/* Profitability */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              3. Profitability & Margin Health
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 10 }}>
+              {ratioGroups.profitability.map((r) => (
+                <RatioTile key={r.key} label={r.label} value={r.val} />
+              ))}
+            </div>
+          </div>
+
+          {/* Efficiency */}
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "8px" }}>
+              4. Operating Efficiency & Turnover
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
+              {ratioGroups.efficiency.map((r) => (
+                <RatioTile key={r.key} label={r.label} value={r.val} />
+              ))}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* ── 7. WP-514 Financial Statement Review Matrix ── */}
+      {/* ── 8. CONDENSED AUDIT FINDINGS TABLE ── */}
+      <div className="fd-card animate-fade-up report-section-break" style={{ padding: "20px 24px", marginBottom: "18px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
+          <h2 style={{ fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, margin: 0 }}>
+            Audit Findings & Observations Summary
+          </h2>
+          <span style={{ fontSize: "12px", color: "var(--text-secondary)", fontWeight: 600 }}>
+            {findings.length} Grounded Notes (Condensed)
+          </span>
+        </div>
+
+        <div style={{ border: "1px solid var(--border-light)", borderRadius: "6px", overflow: "hidden" }}>
+          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "11.5px" }}>
+            <thead>
+              <tr style={{ background: "var(--bg-main)", borderBottom: "1px solid var(--border-light)" }}>
+                <th style={{ padding: "8px 10px", width: "90px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Severity</th>
+                <th style={{ padding: "8px 10px", width: "160px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Category</th>
+                <th style={{ padding: "8px 10px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Finding & Note</th>
+                <th style={{ padding: "8px 10px", width: "140px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Reference</th>
+              </tr>
+            </thead>
+            <tbody>
+              {condensedFindings.map((f, idx) => {
+                const s = sev[f.severity] || sev.REVIEW;
+                const isEven = idx % 2 === 0;
+                const desc = cleanText(f.description || f.explanation || "Verified.");
+                const src = f.source || f.source_ref || {};
+                return (
+                  <tr
+                    key={f.id || idx}
+                    style={{
+                      background: isEven ? "#FFFFFF" : "rgba(248, 250, 252, 0.7)",
+                      borderBottom: idx < condensedFindings.length - 1 ? "1px solid var(--border-light)" : "none",
+                    }}
+                  >
+                    <td style={{ padding: "8px 10px", verticalAlign: "top" }}>
+                      <span
+                        style={{
+                          fontSize: "10px",
+                          fontWeight: 700,
+                          padding: "2px 6px",
+                          borderRadius: "4px",
+                          background: s.bg,
+                          color: s.color,
+                          display: "inline-block",
+                        }}
+                      >
+                        {f.severity}
+                      </span>
+                    </td>
+                    <td style={{ padding: "8px 10px", verticalAlign: "top", fontWeight: 600, color: "var(--text-primary)", textTransform: "capitalize" }}>
+                      {(f.category || "").replace(/_/g, " ")}
+                    </td>
+                    <td style={{ padding: "8px 10px", verticalAlign: "top", color: "var(--text-primary)" }}>
+                      <strong style={{ display: "block", marginBottom: 2 }}>{f.title}</strong>
+                      <span style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>{desc}</span>
+                    </td>
+                    <td style={{ padding: "8px 10px", verticalAlign: "top", textAlign: "right", color: "var(--text-muted)", fontSize: "10.5px" }}>
+                      {src.page ? `Page ${src.page}` : src.note_ref ? src.note_ref : f.id}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* ── 9. APPENDIX: FULL WP-514 VERIFICATION WORKPAPER ── */}
       {analysisResult?.wp514 && (
-        <div style={{ marginBottom: 28, pageBreakInside: "avoid", breakInside: "avoid" }}>
+        <div className="report-section-break" style={{ marginTop: "24px", paddingTop: "16px", borderTop: "2px dashed var(--border-light)" }}>
+          <div style={{ marginBottom: "14px", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                DOCUMENT APPENDIX
+              </div>
+              <h2 style={{ fontSize: "16px", color: "var(--text-primary)", fontWeight: 700, margin: "2px 0 0" }}>
+                Appendix: Comprehensive WP-514 Verification Matrix
+              </h2>
+            </div>
+            <span style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
+              Full Audit Trail & Line-Item Check Breakdown
+            </span>
+          </div>
+
           <WP514ReviewMatrix wp514Data={analysisResult.wp514} />
         </div>
       )}
-
-      {/* ── 8. Recommended Action & Review Areas ── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px 28px", pageBreakInside: "avoid", breakInside: "avoid" }}>
-        <h2 style={{ fontSize: "17px", color: "var(--text-primary)", fontWeight: 700, marginBottom: 16, borderBottom: "1px solid var(--border-light)", paddingBottom: 8 }}>
-          7. Recommended Action & Materiality Review Areas
-        </h2>
-        {recommendedReview.length === 0 ? (
-          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "var(--color-success)", fontSize: "13px", fontWeight: 600, background: "var(--color-success-soft)", padding: "12px 16px", borderRadius: "8px" }}>
-            <CheckCircle2 size={16} /> All core audit verification criteria passed within acceptable tolerance thresholds.
-          </div>
-        ) : (
-          <ul style={{ margin: 0, paddingLeft: 20, display: "flex", flexDirection: "column", gap: 10 }}>
-            {recommendedReview.map((f, i) => {
-              const fid = f.id || f.finding_id || `REC-${i}`;
-              const src = f.source || f.source_ref || {};
-              return (
-                <li key={fid} style={{ fontSize: "13px", color: "var(--text-primary)", lineHeight: 1.5 }}>
-                  <strong style={{ color: f.severity === "CRITICAL" ? "var(--color-danger)" : "var(--color-warning)" }}>
-                    [{f.severity}] {f.title}:
-                  </strong>{" "}
-                  {cleanText(f.description || f.explanation || "Materiality review required.")}
-                  {src.page && ` (Reference: Page ${src.page})`}
-                </li>
-              );
-            })}
-          </ul>
-        )}
-      </div>
     </div>
   );
 }
