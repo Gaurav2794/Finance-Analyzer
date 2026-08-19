@@ -903,10 +903,10 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                       <StatusBadge status={chk.status} />
                                     </td>
                                     <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.expected_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                      {chk.expected_value || <span style={{ color: "var(--text-muted)" }}>—</span>}
                                     </td>
                                     <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.actual_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                      {chk.actual_value || <span style={{ color: "var(--text-muted)" }}>—</span>}
                                     </td>
                                     <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
                                       {chk.difference || chk.difference_percent || <span style={{ color: "var(--text-muted)" }}>—</span>}
@@ -935,12 +935,10 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                           <ExternalLink size={11} />
                                           {chk.finding_id}
                                         </button>
-                                      ) : chk.source ? (
-                                        <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>
-                                          {chk.source.page != null ? `p.${chk.source.page}` : (chk.source.sheet ? `Sheet: ${chk.source.sheet}` : (chk.source.file || "—"))}
-                                        </span>
                                       ) : (
-                                        <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>—</span>
+                                        <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600 }}>
+                                          Verified
+                                        </span>
                                       )}
                                     </td>
                                   </tr>

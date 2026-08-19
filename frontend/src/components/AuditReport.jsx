@@ -669,11 +669,11 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                     <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", textTransform: "capitalize" }}>
                       {key.replace(/_/g, " ")}
                     </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontStyle: isPrevMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
-                      {isPrevMissing ? "Not available" : fmt(data.previous)}
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                      {isPrevMissing ? "—" : fmt(data.previous)}
                     </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontStyle: isCurrMissing ? "italic" : "normal", fontVariantNumeric: "tabular-nums" }}>
-                      {isCurrMissing ? "Not available" : fmt(data.current)}
+                    <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontVariantNumeric: "tabular-nums" }}>
+                      {isCurrMissing ? "—" : fmt(data.current)}
                     </td>
                     <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                       {fmtGrowth(data)}
