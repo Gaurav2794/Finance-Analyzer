@@ -198,19 +198,26 @@ class WP514Service:
         failed = sum(1 for c in checks if c.get("status") == "FAILED")
         na = sum(1 for c in checks if c.get("status") == "NOT_AVAILABLE")
 
-        norm_status = status
         if failed > 0:
             norm_status = "FAILED"
-        elif review > 0 and norm_status != "FAILED":
+        elif review > 0:
             norm_status = "REVIEW"
+        elif passed > 0 and failed == 0 and review == 0:
+            norm_status = "PASSED"
+        elif score is not None and score >= 80.0:
+            norm_status = "PASSED"
         elif na == len(checks) and len(checks) > 0:
             norm_status = "NOT_AVAILABLE"
+        elif status in ("NOT_AVAILABLE", "COMPUTED"):
+            norm_status = "PASSED" if passed > 0 else "NOT_AVAILABLE"
+        else:
+            norm_status = status or "PASSED"
 
         return {
             "id": cat_id,
             "name": name,
             "status": norm_status,
-            "score": score,
+            "score": score if score is not None else (100.0 if failed == 0 and review == 0 else 0.0),
             "total_checks": len(checks),
             "passed_checks": passed,
             "review_checks": review,

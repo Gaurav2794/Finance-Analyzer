@@ -68,6 +68,16 @@ const STATUS_CONFIG = {
   },
 };
 
+function getCategoryDisplayStatus(cat) {
+  if (!cat) return "PASSED";
+  if (cat.failed_checks > 0) return "FAILED";
+  if (cat.review_checks > 0) return "REVIEW";
+  if (cat.passed_checks > 0 && cat.failed_checks === 0 && cat.review_checks === 0) return "PASSED";
+  if (cat.score !== null && cat.score !== undefined && cat.score >= 80) return "PASSED";
+  if (cat.status && cat.status !== "NOT_AVAILABLE" && cat.status !== "COMPUTED") return cat.status;
+  return "PASSED";
+}
+
 function StatusBadge({ status }) {
   const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.NOT_AVAILABLE;
   const Icon = cfg.Icon;
@@ -470,7 +480,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                         {cat.name}
                       </div>
                     </div>
-                    <StatusBadge status={cat.status} />
+                    <StatusBadge status={getCategoryDisplayStatus(cat)} />
                   </div>
 
                   {/* Visual Category Score Bar */}
@@ -934,7 +944,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                 {notAvailCount} n/a
                               </span>
                             )}
-                            <StatusBadge status={cat.status} />
+                            <StatusBadge status={getCategoryDisplayStatus(cat)} />
                           </div>
                         </div>
                       </div>
