@@ -50,6 +50,13 @@ import {
   FileCheck2,
   ArrowLeft,
   Scale,
+  Calculator,
+  Repeat,
+  Percent,
+  FileSearch,
+  ChevronDown,
+  ChevronRight,
+  Filter,
 } from "lucide-react";
 
 /* ============================================================
@@ -61,6 +68,19 @@ const sev = {
   HIGH:     { color: "var(--color-warning)", bg: "var(--color-warning-soft)", label: "High", Icon: AlertTriangle },
   REVIEW:   { color: "var(--color-purple)", bg: "var(--color-purple-soft)", label: "Review", Icon: CircleAlert },
   PASSED:   { color: "var(--color-success)", bg: "var(--color-success-soft)", label: "Passed", Icon: ShieldCheck },
+};
+
+const INTEGRITY_CONFIG = {
+  mathematical_accuracy: { name: "Mathematical Accuracy", Icon: Calculator },
+  cash_flow: { name: "Cash Flow Reconciliation", Icon: Coins },
+  prior_year_tieout: { name: "Prior Year Tie-out", Icon: Repeat },
+  internal_consistency: { name: "Internal Consistency", Icon: Layers },
+  document_quality: { name: "Document Quality", Icon: FileCheck2 },
+  analytical_comparison: { name: "Analytical Comparison", Icon: Activity },
+  ratios: { name: "Key Financial Ratios", Icon: Percent },
+  unusual_fluctuation: { name: "Unusual Fluctuation", Icon: TrendingUp },
+  unusual_gain: { name: "Unusual Gain / Divergence", Icon: Scale },
+  related_disclosure: { name: "Related Party Disclosure", Icon: FileSearch },
 };
 
 const fmt = (n) => (n === null || n === undefined ? "—" : n.toLocaleString("en-IN"));
@@ -109,29 +129,71 @@ function FinDashFindingItem({ f, documentId }) {
   const Icon = s.Icon;
 
   return (
-    <div style={{ borderBottom: "1px solid var(--border-light)", padding: "16px 0" }}>
-      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: "16px", cursor: "pointer" }}>
-        <div style={{ width: "44px", height: "44px", borderRadius: "12px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Icon size={22} color={s.color} strokeWidth={2} />
+    <div className="finding-item-card animate-fade-in" style={{ borderColor: open ? "rgba(59, 130, 246, 0.4)" : "var(--border-light)" }}>
+      <div onClick={() => setOpen(!open)} style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer" }}>
+        <div style={{ width: "36px", height: "36px", borderRadius: "10px", background: s.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Icon size={18} color={s.color} strokeWidth={2.2} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: "14px", fontWeight: 600, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{f.title}</div>
-          <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "3px" }}>{(f.category || "").replace(/_/g, " ")}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {f.title}
+            </span>
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "6px", marginTop: "2px" }}>
+            <span style={{ fontSize: "11px", color: "var(--text-muted)", fontWeight: 500 }}>
+              {(f.category || "").replace(/_/g, " ")}
+            </span>
+            {f.id && (
+              <span style={{ fontSize: "10px", color: "var(--text-muted)", background: "var(--bg-main)", padding: "1px 5px", borderRadius: "4px", fontFamily: "monospace" }}>
+                {f.id}
+              </span>
+            )}
+          </div>
         </div>
-        <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontSize: "14px", fontWeight: 600, color: s.color }}>{s.label}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", flexShrink: 0 }}>
+          <span style={{
+            fontSize: "11px",
+            fontWeight: 700,
+            color: s.color,
+            background: s.bg,
+            padding: "3px 8px",
+            borderRadius: "6px",
+            border: `1px solid ${s.color}25`,
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "4px"
+          }}>
+            <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: s.color }} />
+            {s.label}
+          </span>
+          <div style={{
+            width: "22px",
+            height: "22px",
+            borderRadius: "50%",
+            background: open ? "var(--color-primary-soft)" : "transparent",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            transition: "transform 0.2s ease",
+            transform: open ? "rotate(90deg)" : "rotate(0deg)"
+          }}>
+            <ChevronRight size={14} color={open ? "var(--color-primary)" : "var(--text-muted)"} />
+          </div>
         </div>
       </div>
 
       {open && (
-        <div style={{ padding: "16px 0 4px 60px" }}>
-          <p style={{ fontSize: "13px", color: "var(--text-secondary)", lineHeight: 1.65, margin: "0 0 14px" }}>{f.description}</p>
-          <div style={{ display: "flex", gap: "10px" }}>
-            <button onClick={() => setShowEvidence(true)} className="fd-btn fd-btn-outline" style={{ fontSize: "12px", padding: "6px 12px" }}>
-              <FileText size={14} color="var(--color-primary)" /> Evidence
+        <div className="animate-slide-down" style={{ marginTop: "12px", paddingTop: "12px", borderTop: "1px solid var(--border-light)" }}>
+          <p style={{ fontSize: "12px", color: "var(--text-secondary)", lineHeight: 1.6, margin: "0 0 12px" }}>
+            {f.description || f.explanation || "Verification check recorded in workpaper."}
+          </p>
+          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+            <button onClick={(e) => { e.stopPropagation(); setShowEvidence(true); }} className="fd-btn fd-btn-outline" style={{ fontSize: "11px", padding: "5px 10px", borderRadius: "6px" }}>
+              <FileText size={13} color="var(--color-primary)" /> View Evidence
             </button>
-            <button onClick={() => setShowAskAI(true)} className="fd-btn" style={{ fontSize: "12px", padding: "6px 12px", background: "var(--color-warning-soft)", color: "var(--color-warning)" }}>
-              <Sparkles size={14} /> Ask AI
+            <button onClick={(e) => { e.stopPropagation(); setShowAskAI(true); }} className="fd-btn" style={{ fontSize: "11px", padding: "5px 10px", borderRadius: "6px", background: "var(--color-warning-soft)", color: "var(--color-warning)", border: "1px solid rgba(245, 158, 11, 0.2)" }}>
+              <Sparkles size={13} /> Ask AI
             </button>
           </div>
         </div>
@@ -324,6 +386,7 @@ export default function FinancialAuditDashboard() {
   const [route, setRoute] = useState(window.location.hash || "");
   const [searchQuery, setSearchQuery] = useState("");
   const [chartMetric, setChartMetric] = useState("revenue");
+  const [findingFilter, setFindingFilter] = useState("ALL");
   const [showGlobalAI, setShowGlobalAI] = useState(false);
   const [selectedFindingForEvidence, setSelectedFindingForEvidence] = useState(null);
 
@@ -418,6 +481,12 @@ export default function FinancialAuditDashboard() {
 
   const q = (searchQuery || "").trim().toLowerCase();
   const filteredFindings = (analysisResult.findings || []).filter(f => {
+    const matchFilter =
+      findingFilter === "ALL" ||
+      (findingFilter === "CRITICAL" && (f.severity === "CRITICAL" || f.severity === "HIGH")) ||
+      f.severity === findingFilter;
+    if (!matchFilter) return false;
+
     if (!q) return true;
     return (
       (f.title || "").toLowerCase().includes(q) ||
@@ -718,53 +787,147 @@ export default function FinancialAuditDashboard() {
 
         {/* BOTTOM ROW */}
         <section className="fd-bottom-grid">
-          {/* DONUT */}
-          <div className="fd-card animate-fade-up" style={{ padding: "24px", animationDelay: "0.7s" }}>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 16px" }}>Findings Breakdown</h2>
-            <div style={{ position: "relative", height: "170px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie data={donutData} innerRadius={55} outerRadius={75} paddingAngle={3} dataKey="value" stroke="none">
-                    {donutData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-              <div style={{ position: "absolute", textAlign: "center" }}>
-                <div style={{ fontSize: "11px", color: "var(--text-secondary)" }}>Total</div>
-                <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-primary)" }}>{totalFindings}</div>
+          {/* DONUT / FINDINGS BREAKDOWN */}
+          <div className="fd-card animate-fade-up hover-scale" style={{ padding: "24px", animationDelay: "0.7s", display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+                <h2 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Findings Breakdown</h2>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "2px 8px", borderRadius: "10px" }}>
+                  {totalFindings} Total
+                </span>
+              </div>
+              <div style={{ position: "relative", height: "160px", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div style={{ background: "rgba(15, 23, 42, 0.9)", backdropFilter: "blur(8px)", color: "#FFFFFF", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.15)" }}>
+                              <div style={{ fontWeight: 700, color: data.color }}>{data.name}</div>
+                              <div>{data.value} findings ({totalFindings ? Math.round((data.value / totalFindings) * 100) : 0}%)</div>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Pie
+                      data={donutData}
+                      innerRadius={50}
+                      outerRadius={72}
+                      paddingAngle={4}
+                      cornerRadius={6}
+                      dataKey="value"
+                      stroke="none"
+                      animationDuration={900}
+                      animationEasing="ease-out"
+                    >
+                      {donutData.map((entry, i) => (
+                        <Cell key={i} fill={entry.color} style={{ outline: "none", cursor: "pointer" }} />
+                      ))}
+                    </Pie>
+                  </PieChart>
+                </ResponsiveContainer>
+                <div style={{ position: "absolute", textAlign: "center", pointerEvents: "none" }}>
+                  <div style={{ fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-muted)", fontWeight: 600 }}>Total</div>
+                  <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", lineHeight: 1.1 }}>{totalFindings}</div>
+                </div>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginTop: "14px" }}>
-              {donutData.map(d => (
-                <div key={d.name} style={{ display: "flex", alignItems: "center", fontSize: "12px" }}>
-                  <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: d.color, marginRight: "8px" }} />
-                  <span style={{ color: "var(--text-secondary)", flex: 1 }}>{d.name}</span>
-                  <span style={{ fontWeight: 600, color: "var(--text-primary)", marginRight: "10px" }}>{d.value}</span>
-                  <span style={{ color: "var(--text-muted)", fontSize: "11px" }}>({totalFindings ? Math.round(d.value / totalFindings * 100) : 0}%)</span>
-                </div>
-              ))}
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", marginTop: "14px" }}>
+              {donutData.map(d => {
+                const isSelected = findingFilter === d.name.toUpperCase();
+                const itemPct = totalFindings ? Math.round((d.value / totalFindings) * 100) : 0;
+                return (
+                  <div
+                    key={d.name}
+                    onClick={() => setFindingFilter(isSelected ? "ALL" : d.name.toUpperCase())}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      fontSize: "12px",
+                      padding: "6px 10px",
+                      borderRadius: "8px",
+                      background: isSelected ? `${d.color}15` : "var(--bg-main)",
+                      border: `1px solid ${isSelected ? d.color : "transparent"}`,
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    <div style={{ width: "8px", height: "8px", borderRadius: "50%", background: d.color, marginRight: "8px", boxShadow: `0 0 6px ${d.color}60` }} />
+                    <span style={{ color: "var(--text-primary)", fontWeight: 600, flex: 1 }}>{d.name}</span>
+                    <span style={{ fontWeight: 700, color: "var(--text-primary)", marginRight: "8px" }}>{d.value}</span>
+                    <span style={{ color: "var(--text-muted)", fontSize: "11px", minWidth: "32px", textAlign: "right" }}>{itemPct}%</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 
-          {/* INTEGRITY CHECKS */}
-          <div className="fd-card animate-fade-up" style={{ padding: "24px", animationDelay: "0.8s" }}>
-            <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 20px" }}>Audit Integrity</h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+          {/* AUDIT INTEGRITY */}
+          <div className="fd-card animate-fade-up hover-scale" style={{ padding: "24px", animationDelay: "0.8s", display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <ShieldCheck size={18} color="var(--color-primary)" />
+                <h2 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Audit Integrity</h2>
+              </div>
+              <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--color-success)", background: "var(--color-success-soft)", padding: "2px 8px", borderRadius: "10px", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "var(--color-success)" }} />
+                10 Controls
+              </span>
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", maxHeight: "330px", paddingRight: "4px", display: "flex", flexDirection: "column", gap: "4px" }}>
               {Object.entries(analysisResult.checks || {}).filter(([, v]) => v != null).map(([key, val]) => {
                 const score = Number(val);
                 const isNA = val === "NOT_AVAILABLE" || (key === "related_disclosure" && score === 0);
-                const color = isNA ? "var(--text-muted)" : score >= 80 ? "var(--color-primary)" : score >= 60 ? "var(--color-warning)" : "var(--color-danger)";
+                const cfg = INTEGRITY_CONFIG[key] || { name: key.replace(/_/g, " "), Icon: Activity };
+                const Icon = cfg.Icon;
+                
+                const gradColor = isNA
+                  ? "#94A3B8"
+                  : score >= 80
+                  ? "linear-gradient(90deg, #10B981, #059669)"
+                  : score >= 60
+                  ? "linear-gradient(90deg, #F59E0B, #D97706)"
+                  : "linear-gradient(90deg, #EF4444, #DC2626)";
+                
+                const badgeColor = isNA
+                  ? "var(--text-muted)"
+                  : score >= 80
+                  ? "var(--color-success)"
+                  : score >= 60
+                  ? "var(--color-warning)"
+                  : "var(--color-danger)";
+
                 return (
-                  <div key={key}>
-                    <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", marginBottom: "7px" }}>
-                      <span style={{ textTransform: "capitalize", color: isNA ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: 600 }}>{key.replace(/_/g, " ")}</span>
-                      <span style={{ color: isNA ? "var(--text-muted)" : "var(--text-secondary)", fontWeight: isNA ? 600 : 400, fontStyle: isNA ? "italic" : "normal" }}>
-                        {isNA ? "N/A (Not in filing)" : `${score.toFixed(0)}%`}
+                  <div key={key} className="integrity-item-row">
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <div style={{ width: "20px", height: "20px", borderRadius: "4px", background: "var(--bg-main)", display: "flex", alignItems: "center", justifyContent: "center", color: isNA ? "var(--text-muted)" : "var(--color-primary)", flexShrink: 0 }}>
+                          <Icon size={12} />
+                        </div>
+                        <span style={{ color: isNA ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: 600 }}>
+                          {cfg.name}
+                        </span>
+                      </div>
+                      <span style={{ color: badgeColor, fontWeight: 700, fontSize: "11px" }}>
+                        {isNA ? "N/A" : `${score.toFixed(0)}%`}
                       </span>
                     </div>
-                    <div style={{ height: "7px", background: "var(--bg-main)", borderRadius: "4px", overflow: "hidden" }}>
+
+                    <div style={{ height: "6px", background: "var(--bg-main)", borderRadius: "999px", overflow: "hidden" }}>
                       {!isNA && (
-                        <div style={{ width: `${Math.min(100, score)}%`, height: "100%", background: color, borderRadius: "4px" }} />
+                        <div
+                          className="animated-progress-fill"
+                          style={{
+                            width: `${Math.min(100, score)}%`,
+                            background: gradColor,
+                          }}
+                        />
                       )}
                     </div>
                   </div>
@@ -775,14 +938,49 @@ export default function FinancialAuditDashboard() {
 
           {/* FINDINGS LIST */}
           <div className="fd-card animate-fade-up" style={{ padding: "24px", display: "flex", flexDirection: "column", animationDelay: "0.9s" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
-              <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Recent Findings</h2>
-              <button onClick={() => { window.location.hash = "#report"; }} style={{ fontSize: "12px", color: "var(--color-primary)", background: "none", border: "none", fontWeight: 600, cursor: "pointer" }}>View All</button>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                <h2 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>Recent Findings</h2>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-muted)", background: "var(--bg-main)", padding: "1px 6px", borderRadius: "6px" }}>
+                  {filteredFindings.length}
+                </span>
+              </div>
+              <button onClick={() => { window.location.hash = "#report"; }} style={{ fontSize: "12px", color: "var(--color-primary)", background: "none", border: "none", fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                View All <ArrowUpRight size={13} />
+              </button>
             </div>
-            <div style={{ flex: 1, overflowY: "auto", maxHeight: "340px", paddingRight: "4px" }}>
+
+            {/* Quick Severity Filter Pills */}
+            <div style={{ display: "flex", gap: "6px", marginBottom: "14px", flexWrap: "wrap" }}>
+              {["ALL", "CRITICAL", "REVIEW", "PASSED"].map((flt) => {
+                const count = flt === "ALL"
+                  ? (analysisResult.findings || []).length
+                  : flt === "CRITICAL"
+                  ? (analysisResult.findings || []).filter(f => f.severity === "CRITICAL" || f.severity === "HIGH").length
+                  : (analysisResult.findings || []).filter(f => f.severity === flt).length;
+                return (
+                  <button
+                    key={flt}
+                    onClick={() => setFindingFilter(flt)}
+                    className={`filter-tab-pill ${findingFilter === flt ? "active" : ""}`}
+                  >
+                    {flt === "ALL" ? "All" : flt.charAt(0) + flt.slice(1).toLowerCase()}
+                    <span style={{ opacity: 0.75, fontSize: "10px" }}>({count})</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div style={{ flex: 1, overflowY: "auto", maxHeight: "310px", paddingRight: "4px" }}>
               {filteredFindings.length === 0 ? (
-                <div style={{ padding: "32px 0", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
-                  {searchQuery ? "No findings match your search." : "No findings available."}
+                <div style={{ padding: "40px 0", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+                  <ShieldCheck size={32} style={{ margin: "0 auto 10px", opacity: 0.4 }} />
+                  <div>{searchQuery ? "No findings match your search." : "No findings match active filter."}</div>
+                  {findingFilter !== "ALL" && (
+                    <button onClick={() => setFindingFilter("ALL")} style={{ marginTop: "8px", background: "none", border: "none", color: "var(--color-primary)", fontSize: "12px", fontWeight: 600, cursor: "pointer" }}>
+                      Reset filter
+                    </button>
+                  )}
                 </div>
               ) : (
                 filteredFindings.map(f => (
