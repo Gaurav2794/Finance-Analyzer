@@ -643,47 +643,61 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
         )}
 
         {/* Condensed Financial Metrics Table */}
-        <div style={{ border: "1px solid var(--border-light)", borderRadius: "6px", overflow: "hidden" }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "12px" }}>
-            <thead>
-              <tr style={{ background: "var(--bg-main)", borderBottom: "1px solid var(--border-light)" }}>
-                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Metric</th>
-                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Previous ({previousPeriod})</th>
-                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Current ({currentPeriod})</th>
-                <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Growth %</th>
-              </tr>
-            </thead>
-            <tbody>
-              {Object.entries(fm).map(([key, data], idx) => {
-                const isPrevMissing = data.previous === null || data.previous === undefined;
-                const isCurrMissing = data.current === null || data.current === undefined;
-                const isEven = idx % 2 === 0;
-                return (
-                  <tr
-                    key={key}
-                    style={{
-                      background: isEven ? "#FFFFFF" : "rgba(248, 250, 252, 0.7)",
-                      borderBottom: idx < Object.keys(fm).length - 1 ? "1px solid var(--border-light)" : "none",
-                    }}
-                  >
-                    <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", textTransform: "capitalize" }}>
-                      {key.replace(/_/g, " ")}
-                    </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                      {isPrevMissing ? "" : fmt(data.previous)}
-                    </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontVariantNumeric: "tabular-nums" }}>
-                      {isCurrMissing ? "" : fmt(data.current)}
-                    </td>
-                    <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
-                      {fmtGrowth(data)}
-                    </td>
+        {(() => {
+          const hasPrev = Object.values(fm).some((d) => d.previous !== null && d.previous !== undefined && String(d.previous).trim() !== "");
+          const hasCurr = Object.values(fm).some((d) => d.current !== null && d.current !== undefined && String(d.current).trim() !== "");
+          const hasGrowth = Object.values(fm).some((d) => d.growth_pct !== null && d.growth_pct !== undefined && String(d.growth_pct).trim() !== "");
+
+          return (
+            <div style={{ border: "1px solid var(--border-light)", borderRadius: "6px", overflow: "hidden" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left", fontSize: "12px" }}>
+                <thead>
+                  <tr style={{ background: "var(--bg-main)", borderBottom: "1px solid var(--border-light)" }}>
+                    <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>Metric</th>
+                    {hasPrev && <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Previous ({previousPeriod})</th>}
+                    {hasCurr && <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Current ({currentPeriod})</th>}
+                    {hasGrowth && <th style={{ padding: "8px 12px", fontSize: "10.5px", color: "var(--text-secondary)", textTransform: "uppercase", letterSpacing: "0.05em", textAlign: "right", fontWeight: 700 }}>Growth %</th>}
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {Object.entries(fm).map(([key, data], idx) => {
+                    const isPrevMissing = data.previous === null || data.previous === undefined;
+                    const isCurrMissing = data.current === null || data.current === undefined;
+                    const isEven = idx % 2 === 0;
+                    return (
+                      <tr
+                        key={key}
+                        style={{
+                          background: isEven ? "#FFFFFF" : "rgba(248, 250, 252, 0.7)",
+                          borderBottom: idx < Object.keys(fm).length - 1 ? "1px solid var(--border-light)" : "none",
+                        }}
+                      >
+                        <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", textTransform: "capitalize" }}>
+                          {key.replace(/_/g, " ")}
+                        </td>
+                        {hasPrev && (
+                          <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                            {isPrevMissing ? "" : fmt(data.previous)}
+                          </td>
+                        )}
+                        {hasCurr && (
+                          <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontVariantNumeric: "tabular-nums" }}>
+                            {isCurrMissing ? "" : fmt(data.current)}
+                          </td>
+                        )}
+                        {hasGrowth && (
+                          <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
+                            {fmtGrowth(data)}
+                          </td>
+                        )}
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          );
+        })()}
       </div>
 
       {/* ── 5. AUDIT OBSERVATIONS & CHECKS DISTRIBUTION (SIDE-BY-SIDE CHARTS) ── */}
@@ -924,6 +938,7 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                 const isEven = idx % 2 === 0;
                 const desc = cleanText(f.description || f.explanation || "Verified.");
                 const src = f.source || f.source_ref || {};
+                const refLabel = src.note_ref || f.id || (src.page ? `Note Ref (p.${src.page})` : "Verified");
                 return (
                   <tr
                     key={f.id || idx}
@@ -955,7 +970,7 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                       <span style={{ color: "var(--text-secondary)", lineHeight: 1.4 }}>{desc}</span>
                     </td>
                     <td style={{ padding: "8px 10px", verticalAlign: "top", textAlign: "right", color: "var(--text-muted)", fontSize: "10.5px" }}>
-                      {src.page ? `Page ${src.page}` : src.note_ref ? src.note_ref : f.id}
+                      {refLabel}
                     </td>
                   </tr>
                 );
