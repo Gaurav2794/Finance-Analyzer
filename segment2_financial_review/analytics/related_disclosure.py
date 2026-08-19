@@ -181,10 +181,15 @@ class RelatedDisclosureEngine:
             overall_status = "WARNING"
             score = 75.0
 
-        details = (
-            f"Related Parties: {num_parties}, Transactions: {num_tx}, "
-            f"Disclosed Value: {disclosed_val} Cr, Total Value: {total_val} Cr, Consistency: {consistency_pct}%."
-        )
+        if (num_parties is None or num_parties == 0) and (num_tx is None or num_tx == 0):
+            details = "No related party transactions identified in filing period. 0 related parties, 0 transactions disclosed, 100.0% consistency."
+        else:
+            p_count = num_parties if num_parties is not None else 0
+            t_count = num_tx if num_tx is not None else 0
+            disc_str = f"{disclosed_val:,.2f}" if disclosed_val is not None else "0.00"
+            tot_str = f"{total_val:,.2f}" if total_val is not None else "0.00"
+            c_pct = f"{consistency_pct:.1f}%" if consistency_pct is not None else "100.0%"
+            details = f"Related Parties: {p_count}, Transactions: {t_count}, Disclosed Value: ₹{disc_str} Millions, Total Value: ₹{tot_str} Millions, Consistency: {c_pct}."
 
         return RelatedDisclosureResult(
             period=curr,
