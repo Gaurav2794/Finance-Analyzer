@@ -36,12 +36,11 @@ export default function AuthModal({ isOpen, onClose }) {
     setError("");
     setLoading(true);
     try {
-      await login("demo@financeanalyzer.local", "DemoPassword123!");
+      await login("auditor@example.com", "DemoPassword123!");
       onClose();
     } catch (err) {
-      // If demo user does not exist yet on fresh DB, register it
       try {
-        await register("demo@financeanalyzer.local", "DemoPassword123!", "Demo Auditor");
+        await login("demo@financeanalyzer.local", "DemoPassword123!");
         onClose();
       } catch (regErr) {
         setError(regErr.message || "Demo login failed");
@@ -67,6 +66,7 @@ export default function AuthModal({ isOpen, onClose }) {
       onClick={onClose}
     >
       <div
+        className="fd-card animate-fade-up"
         style={{
           background: "#FFFFFF",
           borderRadius: "16px",
@@ -95,12 +95,12 @@ export default function AuthModal({ isOpen, onClose }) {
                 width: "36px",
                 height: "36px",
                 borderRadius: "8px",
-                background: "rgba(16, 185, 129, 0.2)",
-                border: "1px solid rgba(16, 185, 129, 0.4)",
+                background: "var(--color-primary-soft, #EFF6FF)",
+                border: "1px solid rgba(59, 130, 246, 0.3)",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                color: "#10B981",
+                color: "var(--color-primary, #3B82F6)",
               }}
             >
               <ShieldCheck size={20} />
@@ -137,9 +137,9 @@ export default function AuthModal({ isOpen, onClose }) {
               style={{
                 padding: "10px 12px",
                 borderRadius: "8px",
-                background: "#FEE2E2",
+                background: "var(--color-danger-soft, #FEF2F2)",
                 border: "1px solid #FCA5A5",
-                color: "#B91C1C",
+                color: "var(--color-danger, #EF4444)",
                 fontSize: "12px",
                 display: "flex",
                 alignItems: "center",
@@ -179,9 +179,10 @@ export default function AuthModal({ isOpen, onClose }) {
                   />
                   <input
                     type="text"
+                    required={isRegister}
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="e.g. Aditya Dolas"
+                    placeholder="Auditor Lead"
                     style={{
                       width: "100%",
                       padding: "9px 12px 9px 36px",
@@ -224,7 +225,7 @@ export default function AuthModal({ isOpen, onClose }) {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="auditor@firm.com"
+                  placeholder="auditor@example.com"
                   style={{
                     width: "100%",
                     padding: "9px 12px 9px 36px",
@@ -284,14 +285,12 @@ export default function AuthModal({ isOpen, onClose }) {
             <button
               type="submit"
               disabled={loading}
+              className="fd-btn fd-btn-primary"
               style={{
                 marginTop: "6px",
                 width: "100%",
-                padding: "10px",
+                padding: "11px",
                 borderRadius: "8px",
-                border: "none",
-                background: "#059669",
-                color: "#FFFFFF",
                 fontSize: "13px",
                 fontWeight: 700,
                 cursor: loading ? "not-allowed" : "pointer",
@@ -299,7 +298,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "8px",
-                boxShadow: "0 2px 4px rgba(5, 150, 105, 0.2)",
+                boxShadow: "0 4px 12px rgba(59, 130, 246, 0.25)",
               }}
             >
               {loading ? <Loader2 size={16} className="animate-spin" /> : isRegister ? "Create Account" : "Sign In"}
@@ -314,11 +313,11 @@ export default function AuthModal({ isOpen, onClose }) {
               disabled={loading}
               style={{
                 width: "100%",
-                padding: "8px",
+                padding: "9px",
                 borderRadius: "8px",
-                border: "1px dashed #10B981",
-                background: "rgba(16, 185, 129, 0.05)",
-                color: "#059669",
+                border: "1px dashed var(--color-primary, #3B82F6)",
+                background: "var(--color-primary-soft, #EFF6FF)",
+                color: "var(--color-primary, #3B82F6)",
                 fontSize: "12px",
                 fontWeight: 600,
                 cursor: "pointer",
@@ -326,9 +325,12 @@ export default function AuthModal({ isOpen, onClose }) {
                 alignItems: "center",
                 justifyContent: "center",
                 gap: "6px",
+                transition: "background 0.15s ease",
               }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = "#DBEAFE")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-primary-soft, #EFF6FF)")}
             >
-              <Sparkles size={14} /> Quick Demo Login (demo@financeanalyzer.local)
+              <Sparkles size={14} /> Quick Demo Login (auditor@example.com)
             </button>
           </div>
 
@@ -351,7 +353,7 @@ export default function AuthModal({ isOpen, onClose }) {
               style={{
                 background: "transparent",
                 border: "none",
-                color: "#059669",
+                color: "var(--color-primary, #3B82F6)",
                 fontWeight: 700,
                 cursor: "pointer",
                 padding: 0,

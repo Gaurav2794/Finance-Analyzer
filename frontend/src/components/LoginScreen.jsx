@@ -76,7 +76,7 @@ export default function LoginScreen() {
     <div
       style={{
         minHeight: "100vh",
-        background: "var(--bg-main, #F8FAFC)",
+        background: "var(--bg-main, #F5F7FB)",
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -92,18 +92,19 @@ export default function LoginScreen() {
               width: "56px",
               height: "56px",
               borderRadius: "14px",
-              background: "linear-gradient(135deg, #059669 0%, #10B981 100%)",
-              color: "#FFFFFF",
+              background: "var(--color-primary-soft, #EFF6FF)",
+              color: "var(--color-primary, #3B82F6)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
               margin: "0 auto 16px",
-              boxShadow: "0 10px 15px -3px rgba(16, 185, 129, 0.3)",
+              boxShadow: "0 8px 16px -4px rgba(59, 130, 246, 0.2)",
+              border: "1px solid rgba(59, 130, 246, 0.15)",
             }}
           >
             <Activity size={30} strokeWidth={2.5} />
           </div>
-          <h1 style={{ fontSize: "26px", fontWeight: 800, color: "var(--text-primary, #0F172A)", margin: "0 0 6px" }}>
+          <h1 style={{ fontSize: "26px", fontWeight: 800, color: "var(--text-primary, #1E293B)", margin: "0 0 6px" }}>
             Finance Analyzer
           </h1>
           <p style={{ color: "var(--text-secondary, #64748B)", fontSize: "13.5px", margin: 0 }}>
@@ -115,9 +116,9 @@ export default function LoginScreen() {
         <div
           className="fd-card animate-fade-up"
           style={{
-            background: "#FFFFFF",
+            background: "var(--bg-card, #FFFFFF)",
             borderRadius: "16px",
-            boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
+            boxShadow: "var(--shadow-card, 0 4px 15px -3px rgba(0, 0, 0, 0.05))",
             border: "1px solid var(--border-light, #E2E8F0)",
             overflow: "hidden",
           }}
@@ -127,7 +128,7 @@ export default function LoginScreen() {
             style={{
               display: "flex",
               borderBottom: "1px solid var(--border-light, #E2E8F0)",
-              background: "#F8FAFC",
+              background: "var(--bg-sidebar, #F8FAFC)",
             }}
           >
             <button
@@ -143,10 +144,10 @@ export default function LoginScreen() {
                 border: "none",
                 background: !isRegister ? "#FFFFFF" : "transparent",
                 fontWeight: !isRegister ? 700 : 600,
-                color: !isRegister ? "#059669" : "var(--text-secondary, #64748B)",
+                color: !isRegister ? "var(--color-primary, #3B82F6)" : "var(--text-secondary, #64748B)",
                 fontSize: "13.5px",
                 cursor: "pointer",
-                borderBottom: !isRegister ? "2px solid #059669" : "none",
+                borderBottom: !isRegister ? "2px solid var(--color-primary, #3B82F6)" : "none",
                 transition: "all 0.15s ease",
               }}
             >
@@ -165,10 +166,10 @@ export default function LoginScreen() {
                 border: "none",
                 background: isRegister ? "#FFFFFF" : "transparent",
                 fontWeight: isRegister ? 700 : 600,
-                color: isRegister ? "#059669" : "var(--text-secondary, #64748B)",
+                color: isRegister ? "var(--color-primary, #3B82F6)" : "var(--text-secondary, #64748B)",
                 fontSize: "13.5px",
                 cursor: "pointer",
-                borderBottom: isRegister ? "2px solid #059669" : "none",
+                borderBottom: isRegister ? "2px solid var(--color-primary, #3B82F6)" : "none",
                 transition: "all 0.15s ease",
               }}
             >
@@ -183,9 +184,9 @@ export default function LoginScreen() {
                 style={{
                   padding: "11px 14px",
                   borderRadius: "8px",
-                  background: "#FEE2E2",
+                  background: "var(--color-danger-soft, #FEF2F2)",
                   border: "1px solid #FCA5A5",
-                  color: "#B91C1C",
+                  color: "var(--color-danger, #EF4444)",
                   fontSize: "12.5px",
                   display: "flex",
                   alignItems: "flex-start",
@@ -220,7 +221,7 @@ export default function LoginScreen() {
                         left: "12px",
                         top: "50%",
                         transform: "translateY(-50%)",
-                        color: "#94A3B8",
+                        color: "var(--text-muted, #94A3B8)",
                       }}
                     />
                     <input
@@ -237,6 +238,8 @@ export default function LoginScreen() {
                         fontSize: "13.5px",
                         outline: "none",
                         boxSizing: "border-box",
+                        background: "#FFFFFF",
+                        color: "var(--text-primary, #1E293B)",
                       }}
                     />
                   </div>
@@ -263,7 +266,7 @@ export default function LoginScreen() {
                       left: "12px",
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#94A3B8",
+                      color: "var(--text-muted, #94A3B8)",
                     }}
                   />
                   <input
@@ -280,6 +283,8 @@ export default function LoginScreen() {
                       fontSize: "13.5px",
                       outline: "none",
                       boxSizing: "border-box",
+                      background: "#FFFFFF",
+                      color: "var(--text-primary, #1E293B)",
                     }}
                   />
                 </div>
@@ -305,7 +310,7 @@ export default function LoginScreen() {
                       left: "12px",
                       top: "50%",
                       transform: "translateY(-50%)",
-                      color: "#94A3B8",
+                      color: "var(--text-muted, #94A3B8)",
                     }}
                   />
                   <input
@@ -323,6 +328,8 @@ export default function LoginScreen() {
                       fontSize: "13.5px",
                       outline: "none",
                       boxSizing: "border-box",
+                      background: "#FFFFFF",
+                      color: "var(--text-primary, #1E293B)",
                     }}
                   />
                 </div>
@@ -349,7 +356,7 @@ export default function LoginScreen() {
                         left: "12px",
                         top: "50%",
                         transform: "translateY(-50%)",
-                        color: "#94A3B8",
+                        color: "var(--text-muted, #94A3B8)",
                       }}
                     />
                     <input
@@ -367,6 +374,8 @@ export default function LoginScreen() {
                         fontSize: "13.5px",
                         outline: "none",
                         boxSizing: "border-box",
+                        background: "#FFFFFF",
+                        color: "var(--text-primary, #1E293B)",
                       }}
                     />
                   </div>
@@ -376,14 +385,12 @@ export default function LoginScreen() {
               <button
                 type="submit"
                 disabled={loading}
+                className="fd-btn fd-btn-primary"
                 style={{
                   marginTop: "6px",
                   width: "100%",
-                  padding: "11px",
+                  padding: "12px",
                   borderRadius: "8px",
-                  border: "none",
-                  background: "#059669",
-                  color: "#FFFFFF",
                   fontSize: "14px",
                   fontWeight: 700,
                   cursor: loading ? "not-allowed" : "pointer",
@@ -391,8 +398,7 @@ export default function LoginScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  boxShadow: "0 4px 6px -1px rgba(5, 150, 105, 0.2)",
-                  transition: "background 0.15s ease",
+                  boxShadow: "0 4px 14px rgba(59, 130, 246, 0.3)",
                 }}
               >
                 {loading ? (
@@ -409,7 +415,7 @@ export default function LoginScreen() {
             <div style={{ marginTop: "20px" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                 <div style={{ flex: 1, height: "1px", background: "var(--border-light, #E2E8F0)" }} />
-                <span style={{ fontSize: "11px", color: "#94A3B8", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
+                <span style={{ fontSize: "11px", color: "var(--text-muted, #94A3B8)", textTransform: "uppercase", fontWeight: 700, letterSpacing: "0.05em" }}>
                   Fast Demo Access
                 </span>
                 <div style={{ flex: 1, height: "1px", background: "var(--border-light, #E2E8F0)" }} />
@@ -421,11 +427,11 @@ export default function LoginScreen() {
                 disabled={loading}
                 style={{
                   width: "100%",
-                  padding: "9px 12px",
+                  padding: "10px 12px",
                   borderRadius: "8px",
-                  border: "1px dashed #10B981",
-                  background: "rgba(16, 185, 129, 0.05)",
-                  color: "#059669",
+                  border: "1px dashed var(--color-primary, #3B82F6)",
+                  background: "var(--color-primary-soft, #EFF6FF)",
+                  color: "var(--color-primary, #3B82F6)",
                   fontSize: "12.5px",
                   fontWeight: 600,
                   cursor: "pointer",
@@ -433,10 +439,10 @@ export default function LoginScreen() {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "8px",
-                  transition: "background 0.15s ease",
+                  transition: "all 0.15s ease",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(16, 185, 129, 0.1)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(16, 185, 129, 0.05)")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#DBEAFE")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--color-primary-soft, #EFF6FF)")}
               >
                 <Sparkles size={15} /> Sign in as Lead Auditor (auditor@example.com)
               </button>
