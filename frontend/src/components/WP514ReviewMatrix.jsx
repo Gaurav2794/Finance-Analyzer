@@ -132,6 +132,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
   // Default all collapsed for clean, summarized-first executive view
   const [expandedCategories, setExpandedCategories] = useState({});
   const [showAllCategories, setShowAllCategories] = useState(false);
+  const [showAllSummaryCategories, setShowAllSummaryCategories] = useState(false);
 
   const toggleCategory = (catId) => {
     setExpandedCategories((prev) => ({
@@ -549,9 +550,9 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          4. SUMMARIZED & ANIMATED AUDIT REVIEW CHECKS
+          4. SUMMARIZED & COMPACT AUDIT REVIEW CHECKS WITH VIEW MORE
           ──────────────────────────────────────────────────────────── */}
-      <div className="fd-card animate-fade-up" style={{ padding: "24px" }}>
+      <div className="fd-card animate-fade-up" style={{ padding: "18px 20px" }}>
         {/* Header & Controls */}
         <div
           style={{
@@ -559,23 +560,23 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: "16px",
-            marginBottom: "18px",
-            paddingBottom: "16px",
+            gap: "12px",
+            marginBottom: "14px",
+            paddingBottom: "12px",
             borderBottom: "1px solid var(--border-subtle)",
           }}
         >
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              <h3 style={{ fontSize: "15px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
                 Audit Review Checks Summary
               </h3>
               <span
                 style={{
-                  fontSize: "11px",
+                  fontSize: "10px",
                   fontWeight: 700,
-                  padding: "2px 8px",
-                  borderRadius: "12px",
+                  padding: "2px 7px",
+                  borderRadius: "10px",
                   background: "var(--color-primary-soft)",
                   color: "var(--color-primary)",
                   letterSpacing: "0.03em",
@@ -584,17 +585,46 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                 Executive Summary
               </span>
             </div>
-            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "4px 0 0" }}>
-              Categorized compliance checks across 10 WP-514 audit procedures. Click any category to drill down.
+            <p style={{ fontSize: "11px", color: "var(--text-secondary)", margin: "2px 0 0" }}>
+              Categorized compliance checks across WP-514 audit procedures. Click any category to drill down.
             </p>
           </div>
 
-          {/* Quick Actions: Expand/Collapse All + Filter Badges */}
-          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+          {/* Quick Actions: View More/Less Toggle + Expand/Collapse + Filter Badges */}
+          <div style={{ display: "flex", gap: "6px", alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              onClick={() => setShowAllSummaryCategories((prev) => !prev)}
+              className="fd-btn fd-btn-outline hover-scale"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "5px",
+                padding: "4px 10px",
+                fontSize: "11px",
+                fontWeight: 600,
+                borderRadius: "6px",
+                color: "var(--color-primary)",
+                borderColor: "var(--color-primary)",
+                background: showAllSummaryCategories ? "var(--color-primary-soft)" : "transparent",
+              }}
+            >
+              {showAllSummaryCategories ? (
+                <>
+                  View Less <ChevronUp size={13} />
+                </>
+              ) : (
+                <>
+                  View More <ChevronDown size={13} />
+                </>
+              )}
+            </button>
+
+            <div style={{ height: "16px", width: "1px", background: "var(--border-subtle)", margin: "0 2px" }} />
+
             <button
               onClick={expandAllCategories}
               style={{
-                padding: "5px 10px",
+                padding: "4px 8px",
                 borderRadius: "6px",
                 fontSize: "11px",
                 fontWeight: 600,
@@ -610,7 +640,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             <button
               onClick={collapseAllCategories}
               style={{
-                padding: "5px 10px",
+                padding: "4px 8px",
                 borderRadius: "6px",
                 fontSize: "11px",
                 fontWeight: 600,
@@ -624,14 +654,14 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               Collapse All
             </button>
 
-            <div style={{ height: "18px", width: "1px", background: "var(--border-subtle)", margin: "0 4px" }} />
+            <div style={{ height: "16px", width: "1px", background: "var(--border-subtle)", margin: "0 2px" }} />
 
             {["ALL", "REVIEW", "FAILED", "PASSED", "NOT_AVAILABLE"].map((st) => (
               <button
                 key={st}
                 onClick={() => setStatusFilter(st)}
                 style={{
-                  padding: "5px 10px",
+                  padding: "4px 8px",
                   borderRadius: "6px",
                   fontSize: "11px",
                   fontWeight: statusFilter === st ? 700 : 500,
@@ -648,7 +678,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
           </div>
         </div>
 
-        {/* Executive Summary Meter / Segmented Progress Bar */}
+        {/* Compact Executive Summary Meter / Segmented Progress Bar */}
         {(() => {
           const totalAll = checks.length || 1;
           const passTotal = checks.filter((c) => c.status === "PASSED").length;
@@ -665,17 +695,17 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             <div
               style={{
                 background: "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)",
-                borderRadius: "10px",
-                padding: "14px 18px",
-                marginBottom: "20px",
+                borderRadius: "8px",
+                padding: "10px 14px",
+                marginBottom: "14px",
                 border: "1px solid var(--border-subtle)",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
-                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "6px", flexWrap: "wrap", gap: "6px" }}>
+                <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-primary)" }}>
                   Overall Checks Distribution
                 </span>
-                <span style={{ fontSize: "12px", fontWeight: 600, color: passTotal === totalAll ? "#059669" : "#D97706" }}>
+                <span style={{ fontSize: "11px", fontWeight: 600, color: passTotal === totalAll ? "#059669" : "#D97706" }}>
                   {passTotal} Passed ({passPct.toFixed(0)}%) • {revTotal + failTotal} Attention Items
                 </span>
               </div>
@@ -684,7 +714,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               <div
                 style={{
                   display: "flex",
-                  height: "10px",
+                  height: "6px",
                   borderRadius: "9999px",
                   overflow: "hidden",
                   background: "#E2E8F0",
@@ -734,24 +764,24 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               </div>
 
               {/* Legend Badges */}
-              <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap", fontSize: "11px" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#059669", fontWeight: 600 }}>
-                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981" }} />
+              <div style={{ display: "flex", gap: "12px", marginTop: "8px", flexWrap: "wrap", fontSize: "10px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#059669", fontWeight: 600 }}>
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#10B981" }} />
                   {passTotal} Passed ({passPct.toFixed(0)}%)
                 </span>
-                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#D97706", fontWeight: 600 }}>
-                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#F59E0B" }} />
+                <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#D97706", fontWeight: 600 }}>
+                  <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#F59E0B" }} />
                   {revTotal} Review Required ({revPct.toFixed(0)}%)
                 </span>
                 {failTotal > 0 && (
-                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#DC2626", fontWeight: 600 }}>
-                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444" }} />
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#DC2626", fontWeight: 600 }}>
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#EF4444" }} />
                     {failTotal} Failed ({failPct.toFixed(0)}%)
                   </span>
                 )}
                 {naTotal > 0 && (
-                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B", fontWeight: 500 }}>
-                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94A3B8" }} />
+                  <span style={{ display: "flex", alignItems: "center", gap: "5px", color: "#64748B", fontWeight: 500 }}>
+                    <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#94A3B8" }} />
                     {naTotal} Not in Filing ({naPct.toFixed(0)}%)
                   </span>
                 )}
@@ -761,232 +791,293 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
         })()}
 
         {filteredChecks.length === 0 ? (
-          <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+          <div style={{ padding: "24px", textAlign: "center", color: "var(--text-muted)", fontSize: "12px" }}>
             No checks match the active filter criteria.
           </div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            {categories
-              .filter((cat) => selectedCatId === "ALL" || cat.id === selectedCatId)
-              .map((cat) => {
-                const catChecks = filteredChecks.filter((c) => c.category === cat.id);
-                if (catChecks.length === 0) return null;
+          (() => {
+            const availableCategories = categories.filter((cat) => {
+              const catChecks = filteredChecks.filter((c) => c.category === cat.id);
+              return (selectedCatId === "ALL" || cat.id === selectedCatId) && catChecks.length > 0;
+            });
 
-                const passedCount = catChecks.filter((c) => c.status === "PASSED").length;
-                const reviewCount = catChecks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
-                const failedCount = catChecks.filter((c) => c.status === "FAILED").length;
-                const notAvailCount = catChecks.filter((c) => c.status === "NOT_AVAILABLE").length;
-                const isExpanded = q ? true : Boolean(expandedCategories[cat.id]);
-                const passRate = catChecks.length > 0 ? (passedCount / catChecks.length) * 100 : 0;
+            const displayedCategories =
+              showAllSummaryCategories || q || selectedCatId !== "ALL"
+                ? availableCategories
+                : availableCategories.slice(0, 3);
 
-                return (
-                  <div
-                    key={cat.id}
-                    className="interactive-card animate-fade-in"
-                    style={{
-                      border: isExpanded ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--border-subtle)",
-                      borderRadius: "10px",
-                      overflow: "hidden",
-                      background: "var(--bg-card)",
-                      boxShadow: isExpanded ? "0 4px 12px rgba(0, 0, 0, 0.04)" : "0 1px 3px rgba(0,0,0,0.02)",
-                    }}
-                  >
-                    {/* Category Summary Card Header (Click to Expand / Collapse) */}
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+                {displayedCategories.map((cat) => {
+                  const catChecks = filteredChecks.filter((c) => c.category === cat.id);
+                  if (catChecks.length === 0) return null;
+
+                  const passedCount = catChecks.filter((c) => c.status === "PASSED").length;
+                  const reviewCount = catChecks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
+                  const failedCount = catChecks.filter((c) => c.status === "FAILED").length;
+                  const notAvailCount = catChecks.filter((c) => c.status === "NOT_AVAILABLE").length;
+                  const isExpanded = q ? true : Boolean(expandedCategories[cat.id]);
+                  const passRate = catChecks.length > 0 ? (passedCount / catChecks.length) * 100 : 0;
+
+                  return (
                     <div
-                      onClick={() => toggleCategory(cat.id)}
+                      key={cat.id}
+                      className="interactive-card animate-fade-in"
                       style={{
-                        padding: "14px 18px",
-                        background: isExpanded
-                          ? "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, #FFFFFF 100%)"
-                          : "var(--bg-card)",
-                        cursor: "pointer",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        flexWrap: "wrap",
-                        gap: "12px",
-                        borderBottom: isExpanded ? "1px solid var(--border-subtle)" : "none",
-                        transition: "background 0.2s ease",
+                        border: isExpanded ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--border-subtle)",
+                        borderRadius: "8px",
+                        overflow: "hidden",
+                        background: "var(--bg-card)",
+                        boxShadow: isExpanded ? "0 4px 10px rgba(0, 0, 0, 0.03)" : "0 1px 2px rgba(0,0,0,0.02)",
                       }}
                     >
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "260px" }}>
-                        <div
-                          style={{
-                            width: "28px",
-                            height: "28px",
-                            borderRadius: "6px",
-                            background: isExpanded ? "var(--color-primary-soft)" : "var(--bg-secondary)",
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            transition: "transform 0.25s ease, background 0.2s ease",
-                            transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
-                          }}
-                        >
-                          <ChevronRight size={16} color={isExpanded ? "var(--color-primary)" : "var(--text-secondary)"} />
-                        </div>
-                        <div>
-                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
-                              {cat.name}
-                            </span>
-                            {cat.score !== null && cat.score !== undefined && (
-                              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 6px", borderRadius: "4px" }}>
-                                {cat.score.toFixed(0)}/100
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
-                            {catChecks.length} checks • {cat.description || "Automated audit procedure"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Micro Progress Bar & Status Badges */}
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
-                        {/* Miniature Category Health Gauge */}
-                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", width: "100px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)", fontWeight: 600 }}>
-                            <span>Pass Rate</span>
-                            <span>{passRate.toFixed(0)}%</span>
-                          </div>
-                          <div style={{ height: "4px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
-                            <div
-                              style={{
-                                height: "100%",
-                                width: `${passRate}%`,
-                                background: passRate === 100 ? "#10B981" : passRate >= 60 ? "#F59E0B" : "#EF4444",
-                                transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
-                              }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Breakdown pills */}
-                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
-                          {passedCount > 0 && (
-                            <span style={{ fontSize: "11px", color: "#059669", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
-                              {passedCount} passed
-                            </span>
-                          )}
-                          {reviewCount > 0 && (
-                            <span style={{ fontSize: "11px", color: "#d97706", background: "rgba(245, 158, 11, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
-                              {reviewCount} review
-                            </span>
-                          )}
-                          {failedCount > 0 && (
-                            <span style={{ fontSize: "11px", color: "#dc2626", background: "rgba(239, 68, 68, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
-                              {failedCount} failed
-                            </span>
-                          )}
-                          {notAvailCount > 0 && (
-                            <span style={{ fontSize: "11px", color: "#64748b", background: "rgba(100, 116, 139, 0.08)", padding: "2px 6px", borderRadius: "4px" }}>
-                              {notAvailCount} n/a
-                            </span>
-                          )}
-                          <StatusBadge status={cat.status} />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Detailed Checks Sub-table when expanded */}
-                    {isExpanded && (
+                      {/* Category Summary Card Header (Click to Expand / Collapse) */}
                       <div
-                        className="animate-slide-down"
+                        onClick={() => toggleCategory(cat.id)}
                         style={{
-                          overflowX: "auto",
+                          padding: "10px 14px",
+                          background: isExpanded
+                            ? "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, #FFFFFF 100%)"
+                            : "var(--bg-card)",
+                          cursor: "pointer",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          flexWrap: "wrap",
+                          gap: "8px",
+                          borderBottom: isExpanded ? "1px solid var(--border-subtle)" : "none",
+                          transition: "background 0.2s ease",
                         }}
                       >
-                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
-                          <thead>
-                            <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", width: "60px" }}>ID</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", width: "100px" }}>Status</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>
-                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {catChecks.map((chk, i) => {
-                              const isEven = i % 2 === 0;
-                              return (
-                                <tr
-                                  key={chk.id}
-                                  style={{
-                                    background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
-                                    borderBottom: "1px solid var(--border-subtle)",
-                                  }}
-                                >
-                                  <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: "11px", color: "var(--text-muted)" }}>
-                                    {chk.id}
-                                  </td>
-                                  <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)" }}>
-                                    <div>{chk.check}</div>
-                                    {chk.evidence && (
-                                      <div style={{ fontSize: "11px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
-                                        {chk.evidence}
-                                      </div>
-                                    )}
-                                  </td>
-                                  <td style={{ padding: "8px 12px" }}>
-                                    <StatusBadge status={chk.status} />
-                                  </td>
-                                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                    {chk.expected_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
-                                  </td>
-                                  <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
-                                    {chk.actual_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
-                                  </td>
-                                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                    {chk.difference || chk.difference_percent || <span style={{ color: "var(--text-muted)" }}>—</span>}
-                                  </td>
-                                  <td style={{ padding: "8px 12px", fontSize: "11px", color: "var(--text-muted)" }}>
-                                    {chk.threshold || "—"}
-                                  </td>
-                                  <td style={{ padding: "8px 12px", textAlign: "right" }}>
-                                    {chk.finding_id ? (
-                                      <button
-                                        onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
-                                        style={{
-                                          display: "inline-flex",
-                                          alignItems: "center",
-                                          gap: "4px",
-                                          padding: "3px 8px",
-                                          borderRadius: "4px",
-                                          fontSize: "11px",
-                                          fontWeight: 600,
-                                          background: "rgba(16, 185, 129, 0.1)",
-                                          color: "var(--color-primary)",
-                                          border: "1px solid rgba(16, 185, 129, 0.3)",
-                                          cursor: "pointer",
-                                        }}
-                                      >
-                                        <ExternalLink size={12} />
-                                        {chk.finding_id}
-                                      </button>
-                                    ) : chk.source ? (
-                                      <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                                        {chk.source.page != null ? `p.${chk.source.page}` : (chk.source.sheet ? `Sheet: ${chk.source.sheet}` : (chk.source.file || "—"))}
-                                      </span>
-                                    ) : (
-                                      <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>—</span>
-                                    )}
-                                  </td>
-                                </tr>
-                              );
-                            })}
-                          </tbody>
-                        </table>
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
+                          <div
+                            style={{
+                              width: "24px",
+                              height: "24px",
+                              borderRadius: "6px",
+                              background: isExpanded ? "var(--color-primary-soft)" : "var(--bg-secondary)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              transition: "transform 0.25s ease, background 0.2s ease",
+                              transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                            }}
+                          >
+                            <ChevronRight size={14} color={isExpanded ? "var(--color-primary)" : "var(--text-secondary)"} />
+                          </div>
+                          <div>
+                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                                {cat.name}
+                              </span>
+                              {cat.score !== null && cat.score !== undefined && (
+                                <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 5px", borderRadius: "4px" }}>
+                                  {cat.score.toFixed(0)}/100
+                                </span>
+                              )}
+                            </div>
+                            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "1px" }}>
+                              {catChecks.length} checks • {cat.description || "Automated audit procedure"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Micro Progress Bar & Status Badges */}
+                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                          {/* Miniature Category Health Gauge */}
+                          <div style={{ display: "flex", flexDirection: "column", gap: "2px", width: "80px" }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "var(--text-muted)", fontWeight: 600 }}>
+                              <span>Pass</span>
+                              <span>{passRate.toFixed(0)}%</span>
+                            </div>
+                            <div style={{ height: "3px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
+                              <div
+                                style={{
+                                  height: "100%",
+                                  width: `${passRate}%`,
+                                  background: passRate === 100 ? "#10B981" : passRate >= 60 ? "#F59E0B" : "#EF4444",
+                                  transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Breakdown pills */}
+                          <div style={{ display: "flex", gap: "4px", alignItems: "center" }}>
+                            {passedCount > 0 && (
+                              <span style={{ fontSize: "10px", color: "#059669", background: "rgba(16, 185, 129, 0.1)", padding: "1px 5px", borderRadius: "4px", fontWeight: 600 }}>
+                                {passedCount} passed
+                              </span>
+                            )}
+                            {reviewCount > 0 && (
+                              <span style={{ fontSize: "10px", color: "#d97706", background: "rgba(245, 158, 11, 0.12)", padding: "1px 5px", borderRadius: "4px", fontWeight: 700 }}>
+                                {reviewCount} review
+                              </span>
+                            )}
+                            {failedCount > 0 && (
+                              <span style={{ fontSize: "10px", color: "#dc2626", background: "rgba(239, 68, 68, 0.12)", padding: "1px 5px", borderRadius: "4px", fontWeight: 700 }}>
+                                {failedCount} failed
+                              </span>
+                            )}
+                            {notAvailCount > 0 && (
+                              <span style={{ fontSize: "10px", color: "#64748b", background: "rgba(100, 116, 139, 0.08)", padding: "1px 5px", borderRadius: "4px" }}>
+                                {notAvailCount} n/a
+                              </span>
+                            )}
+                            <StatusBadge status={cat.status} />
+                          </div>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-          </div>
+
+                      {/* Detailed Checks Sub-table when expanded */}
+                      {isExpanded && (
+                        <div
+                          className="animate-slide-down"
+                          style={{
+                            overflowX: "auto",
+                          }}
+                        >
+                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+                            <thead>
+                              <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "55px" }}>ID</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "90px" }}>Status</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>
+                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {catChecks.map((chk, i) => {
+                                const isEven = i % 2 === 0;
+                                return (
+                                  <tr
+                                    key={chk.id}
+                                    style={{
+                                      background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
+                                      borderBottom: "1px solid var(--border-subtle)",
+                                    }}
+                                  >
+                                    <td style={{ padding: "6px 10px", fontFamily: "monospace", fontSize: "10px", color: "var(--text-muted)" }}>
+                                      {chk.id}
+                                    </td>
+                                    <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)" }}>
+                                      <div>{chk.check}</div>
+                                      {chk.evidence && (
+                                        <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
+                                          {chk.evidence}
+                                        </div>
+                                      )}
+                                    </td>
+                                    <td style={{ padding: "6px 10px" }}>
+                                      <StatusBadge status={chk.status} />
+                                    </td>
+                                    <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                      {chk.expected_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                    </td>
+                                    <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                      {chk.actual_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                    </td>
+                                    <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                      {chk.difference || chk.difference_percent || <span style={{ color: "var(--text-muted)" }}>—</span>}
+                                    </td>
+                                    <td style={{ padding: "6px 10px", fontSize: "10px", color: "var(--text-muted)" }}>
+                                      {chk.threshold || "—"}
+                                    </td>
+                                    <td style={{ padding: "6px 10px", textAlign: "right" }}>
+                                      {chk.finding_id ? (
+                                        <button
+                                          onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
+                                          style={{
+                                            display: "inline-flex",
+                                            alignItems: "center",
+                                            gap: "3px",
+                                            padding: "2px 6px",
+                                            borderRadius: "4px",
+                                            fontSize: "10px",
+                                            fontWeight: 600,
+                                            background: "rgba(16, 185, 129, 0.1)",
+                                            color: "var(--color-primary)",
+                                            border: "1px solid rgba(16, 185, 129, 0.3)",
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          <ExternalLink size={11} />
+                                          {chk.finding_id}
+                                        </button>
+                                      ) : chk.source ? (
+                                        <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+                                          {chk.source.page != null ? `p.${chk.source.page}` : (chk.source.sheet ? `Sheet: ${chk.source.sheet}` : (chk.source.file || "—"))}
+                                        </span>
+                                      ) : (
+                                        <span style={{ fontSize: "10px", color: "var(--text-muted)" }}>—</span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Bottom View More / View Less toggle bar */}
+                {!showAllSummaryCategories && !q && selectedCatId === "ALL" && availableCategories.length > 3 && (
+                  <button
+                    onClick={() => setShowAllSummaryCategories(true)}
+                    className="fd-btn fd-btn-outline hover-scale animate-fade-in"
+                    style={{
+                      width: "100%",
+                      padding: "8px 14px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      color: "var(--color-primary)",
+                      borderColor: "rgba(16, 185, 129, 0.3)",
+                      background: "rgba(240, 253, 244, 0.7)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    View More Checks <ChevronDown size={14} />
+                  </button>
+                )}
+
+                {showAllSummaryCategories && !q && selectedCatId === "ALL" && availableCategories.length > 3 && (
+                  <button
+                    onClick={() => setShowAllSummaryCategories(false)}
+                    className="fd-btn fd-btn-outline hover-scale animate-fade-in"
+                    style={{
+                      width: "100%",
+                      padding: "7px 14px",
+                      fontSize: "11px",
+                      fontWeight: 600,
+                      borderRadius: "6px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      gap: "6px",
+                      color: "var(--text-secondary)",
+                      borderColor: "var(--border-subtle)",
+                      background: "var(--bg-main)",
+                      marginTop: "4px",
+                    }}
+                  >
+                    View Less <ChevronUp size={14} />
+                  </button>
+                )}
+              </div>
+            );
+          })()
         )}
       </div>
     </div>
