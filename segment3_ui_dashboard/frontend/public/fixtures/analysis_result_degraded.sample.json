@@ -1,0 +1,118 @@
+{
+  "document_id": "c1f4e8b2-3d5a-49c7-8e6f-12a3b4c5d6e7",
+  "overall_score": 52,
+  "score_formula_version": "v1",
+  "checks": {
+    "mathematical_accuracy": 71,
+    "cash_flow": 38,
+    "prior_year_tieout": 45,
+    "internal_consistency": 60
+  },
+  "financial_metrics": {
+    "revenue": {
+      "current": 420,
+      "previous": 380,
+      "growth_pct": 10.5
+    },
+    "expenses": {
+      "current": null,
+      "previous": null,
+      "growth_pct": null,
+      "reason": "source_missing"
+    },
+    "gross_profit": {
+      "current": 180,
+      "previous": 165,
+      "growth_pct": 9.1
+    },
+    "operating_profit": {
+      "current": 95,
+      "previous": 88,
+      "growth_pct": 8
+    },
+    "net_profit": {
+      "current": 42,
+      "previous": 50,
+      "growth_pct": -16
+    },
+    "assets": {
+      "current": 620,
+      "previous": 590,
+      "growth_pct": 5.1
+    },
+    "liabilities": {
+      "current": 290,
+      "previous": 280,
+      "growth_pct": 3.6
+    },
+    "equity": {
+      "current": 330,
+      "previous": 310,
+      "growth_pct": 6.5
+    },
+    "cash": {
+      "current": null,
+      "previous": 45,
+      "growth_pct": null,
+      "reason": "source_missing"
+    },
+    "debt": {
+      "current": 140,
+      "previous": 150,
+      "growth_pct": -6.7
+    }
+  },
+  "ratios": {
+    "current_ratio": 1.45,
+    "quick_ratio": 0.88,
+    "debt_to_equity": 0.82,
+    "debt_ratio": 0.47,
+    "gross_margin_pct": 42.8,
+    "operating_margin_pct": 22.6,
+    "net_margin_pct": 10,
+    "roa_pct": 6.8,
+    "roe_pct": 12.7
+  },
+  "findings": [
+    {
+      "finding_id": "f-9101",
+      "category": "MISSING_DISCLOSURE",
+      "title": "Cash Flow Statement Not Extracted",
+      "status": "OPEN",
+      "severity": "CRITICAL",
+      "threshold_pct": 0,
+      "explanation": "Cash flow statement could not be extracted from document due to missing section in source filing.",
+      "source_ref": {
+        "page": 1,
+        "section": "Table of Contents"
+      },
+      "expected_value": null,
+      "actual_value": null,
+      "difference": null,
+      "check_id": "chk-f-9101"
+    },
+    {
+      "finding_id": "f-9102",
+      "category": "UNIT_MISMATCH",
+      "title": "Prior Period Stated in Lakhs vs Current in Crores",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "threshold_pct": 5,
+      "explanation": "Prior year reported in Lakhs while current year reported in Crores without restatement footnote. Data presented with warning flag.",
+      "source_ref": {
+        "page": 12,
+        "section": "Financial Highlights"
+      },
+      "expected_value": 380,
+      "actual_value": 420,
+      "difference": 10.5,
+      "check_id": "chk-f-9102"
+    }
+  ],
+  "findings_summary": {
+    "critical": 1,
+    "high": 1,
+    "review": 0,
+    "passed": 12
+  }
+}

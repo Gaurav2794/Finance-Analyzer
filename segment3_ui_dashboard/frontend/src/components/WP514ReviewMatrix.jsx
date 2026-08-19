@@ -1,0 +1,919 @@
+import React, { useState } from "react";
+import {
+  ShieldCheck,
+  AlertTriangle,
+  AlertOctagon,
+  HelpCircle,
+  ChevronDown,
+  ChevronRight,
+  ExternalLink,
+  Filter,
+  Layers,
+  FileCheck2,
+  Scale,
+  Calendar,
+  Building,
+  FileSpreadsheet,
+  Calculator,
+  TrendingUp,
+  Coins,
+  Repeat,
+  FileSearch,
+  CheckCircle2,
+  Activity,
+  Percent,
+  Sliders,
+  SpellCheck
+} from "lucide-react";
+
+/* ────────────────────────────────────────────────────────────
+   STATUS HELPERS
+   ──────────────────────────────────────────────────────────── */
+const STATUS_CONFIG = {
+  PASSED: {
+    label: "PASSED",
+    bg: "rgba(16, 185, 129, 0.12)",
+    color: "#059669",
+    border: "rgba(16, 185, 129, 0.3)",
+    Icon: ShieldCheck,
+  },
+  REVIEW: {
+    label: "REVIEW",
+    bg: "rgba(245, 158, 11, 0.12)",
+    color: "#d97706",
+    border: "rgba(245, 158, 11, 0.3)",
+    Icon: AlertTriangle,
+  },
+  WARNING: {
+    label: "REVIEW",
+    bg: "rgba(245, 158, 11, 0.12)",
+    color: "#d97706",
+    border: "rgba(245, 158, 11, 0.3)",
+    Icon: AlertTriangle,
+  },
+  FAILED: {
+    label: "FAILED",
+    bg: "rgba(239, 68, 68, 0.12)",
+    color: "#dc2626",
+    border: "rgba(239, 68, 68, 0.3)",
+    Icon: AlertOctagon,
+  },
+  NOT_AVAILABLE: {
+    label: "NOT AVAILABLE",
+    bg: "rgba(100, 116, 139, 0.08)",
+    color: "#64748b",
+    border: "rgba(100, 116, 139, 0.2)",
+    Icon: HelpCircle,
+  },
+};
+
+function StatusBadge({ status }) {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG.NOT_AVAILABLE;
+  const Icon = cfg.Icon;
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        padding: "3px 8px",
+        borderRadius: "6px",
+        fontSize: "11px",
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        background: cfg.bg,
+        color: cfg.color,
+        border: `1px solid ${cfg.border}`,
+        whiteSpace: "nowrap",
+      }}
+    >
+      <Icon size={12} />
+      {cfg.label}
+    </span>
+  );
+}
+
+function getCategoryIcon(catId, catName) {
+  const c = `${catId || ""} ${catName || ""}`.toLowerCase();
+  if (c.includes("math") || c.includes("accuracy")) return Calculator;
+  if (c.includes("cash") || c.includes("flow")) return Coins;
+  if (c.includes("prior") || c.includes("tie")) return Repeat;
+  if (c.includes("consistency") || c.includes("internal")) return Layers;
+  if (c.includes("comparison") || c.includes("analytical")) return Activity;
+  if (c.includes("ratio") || c.includes("key")) return Percent;
+  if (c.includes("fluctuation") || c.includes("unusual")) return TrendingUp;
+  if (c.includes("gain") || c.includes("loss")) return Scale;
+  if (c.includes("related") || c.includes("party")) return FileSearch;
+  if (c.includes("language") || c.includes("spelling") || c.includes("grammar")) return SpellCheck;
+  return FileCheck2;
+}
+
+export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenEvidence }) {
+  if (!wp514Data) {
+    return (
+      <div className="fd-card" style={{ padding: "32px", textAlign: "center", color: "var(--text-secondary)" }}>
+        No WP-514 Review data available.
+      </div>
+    );
+  }
+
+  const {
+    title = "WP-514 Financial Statement Review",
+    subtitle = "Standardized Financial Statement Review Matrix",
+    document_information: docInfo = {},
+    categories = [],
+    checks = [],
+    overall = {},
+  } = wp514Data;
+
+  const [selectedCatId, setSelectedCatId] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  // Default all collapsed for clean, summarized-first executive view
+  const [expandedCategories, setExpandedCategories] = useState({});
+
+  const toggleCategory = (catId) => {
+    setExpandedCategories((prev) => ({
+      ...prev,
+      [catId]: !prev[catId],
+    }));
+  };
+
+  const expandAllCategories = () => {
+    const all = {};
+    categories.forEach((c) => {
+      all[c.id] = true;
+    });
+    setExpandedCategories(all);
+  };
+
+  const collapseAllCategories = () => {
+    setExpandedCategories({});
+  };
+
+  const q = (searchQuery || "").trim().toLowerCase();
+
+  // Filter checks by category, status, and search query
+  const filteredChecks = checks.filter((c) => {
+    const matchCat = selectedCatId === "ALL" || c.category === selectedCatId;
+    const matchStatus =
+      statusFilter === "ALL" ||
+      (statusFilter === "REVIEW" && (c.status === "REVIEW" || c.status === "WARNING")) ||
+      c.status === statusFilter;
+    if (!matchCat || !matchStatus) return false;
+    if (!q) return true;
+
+    return (
+      (c.check || "").toLowerCase().includes(q) ||
+      (c.id || "").toLowerCase().includes(q) ||
+      (c.category || "").toLowerCase().includes(q) ||
+      (c.status || "").toLowerCase().includes(q) ||
+      (c.evidence || "").toLowerCase().includes(q) ||
+      (c.actual_value || "").toLowerCase().includes(q) ||
+      (c.expected_value || "").toLowerCase().includes(q) ||
+      (c.threshold || "").toLowerCase().includes(q) ||
+      (c.difference || "").toLowerCase().includes(q)
+    );
+  });
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      {/* ────────────────────────────────────────────────────────────
+          1. HEADER & DOCUMENT INFORMATION
+          ──────────────────────────────────────────────────────────── */}
+      <div
+        className="fd-card animate-fade-up"
+        style={{
+          padding: "24px",
+          background: "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.9) 100%)",
+          borderLeft: "4px solid var(--color-primary)",
+        }}
+      >
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "4px" }}>
+              <span
+                style={{
+                  background: "var(--color-primary-soft)",
+                  color: "var(--color-primary)",
+                  padding: "3px 8px",
+                  borderRadius: "4px",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.05em",
+                }}
+              >
+                WP-514 WORKPAPER
+              </span>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                Engine v{docInfo.engine_version || "2.0.0"}
+              </span>
+            </div>
+            <h2 style={{ fontSize: "20px", fontWeight: 700, color: "var(--text-primary)", margin: "0 0 4px 0" }}>
+              {title}
+            </h2>
+            <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0 }}>
+              {subtitle} • Grounded against verified document extractions and financial checks.
+            </p>
+          </div>
+
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <div
+              style={{
+                textAlign: "right",
+                background: "white",
+                padding: "8px 14px",
+                borderRadius: "8px",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", fontWeight: 500 }}>
+                OVERALL COMPLIANCE SCORE
+              </div>
+              <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--color-primary)" }}>
+                {overall.score?.toFixed(1) ?? "0.0"}
+                <span style={{ fontSize: "13px", fontWeight: 500, color: "var(--text-muted)" }}> / 100</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Metadata Badges */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+            gap: "12px",
+            marginTop: "18px",
+            paddingTop: "16px",
+            borderTop: "1px solid var(--border-subtle)",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Building size={16} color="var(--color-primary)" />
+            <div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Entity</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {docInfo.company_name || "Not available"}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Calendar size={16} color="var(--color-primary)" />
+            <div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Period / FY</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {docInfo.reporting_period || docInfo.financial_year || "Not available"}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <Scale size={16} color="var(--color-primary)" />
+            <div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Unit & Scale</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {docInfo.currency && docInfo.scale ? `${docInfo.currency} in ${docInfo.scale}` : (docInfo.currency || docInfo.scale || "Not available")}
+                {docInfo.statement_type ? ` (${docInfo.statement_type})` : ""}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <FileSpreadsheet size={16} color="var(--color-primary)" />
+            <div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>Framework</div>
+              <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {docInfo.reporting_framework || "Not available"}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────────────────────────────────────────────────
+          2. EXECUTIVE SUMMARY METRICS WITH VISUAL ICONS
+          ──────────────────────────────────────────────────────────── */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gap: "14px",
+        }}
+      >
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Layers size={20} color="var(--text-primary)" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>TOTAL CHECKS</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", marginTop: "2px" }}>
+              {overall.total_checks ?? checks.length}
+            </div>
+          </div>
+        </div>
+
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #10b981" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(16, 185, 129, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CheckCircle2 size={20} color="#059669" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#059669", letterSpacing: "0.04em" }}>PASSED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#059669", marginTop: "2px" }}>
+              {overall.passed ?? 0}
+            </div>
+          </div>
+        </div>
+
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #f59e0b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(245, 158, 11, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} color="#d97706" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#d97706", letterSpacing: "0.04em" }}>REVIEW REQUIRED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#d97706", marginTop: "2px" }}>
+              {overall.review ?? 0}
+            </div>
+          </div>
+        </div>
+
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #ef4444" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertOctagon size={20} color="#dc2626" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#dc2626", letterSpacing: "0.04em" }}>FAILED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#dc2626", marginTop: "2px" }}>
+              {overall.failed ?? 0}
+            </div>
+          </div>
+        </div>
+
+        <div className="fd-card interactive-card" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", borderTop: "3px solid #64748b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(100, 116, 139, 0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <HelpCircle size={20} color="#64748b" />
+          </div>
+          <div>
+            <div style={{ fontSize: "11px", fontWeight: 600, color: "#64748b", letterSpacing: "0.04em" }}>NOT IN FILING</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#64748b", marginTop: "2px" }}>
+              {overall.not_available ?? 0}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ────────────────────────────────────────────────────────────
+          3. CATEGORIES OVERVIEW GRID WITH VISUAL ICONS & BARS
+          ──────────────────────────────────────────────────────────── */}
+      <div>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+          <div>
+            <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+              WP-514 Audit Review Categories ({categories.length})
+            </h3>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "2px 0 0" }}>
+              Click any category card to filter and highlight check details below.
+            </p>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))",
+            gap: "14px",
+          }}
+        >
+          {categories.map((cat) => {
+            const isSelected = selectedCatId === cat.id;
+            const CatIcon = getCategoryIcon(cat.id, cat.name);
+            const catScore = cat.score ?? 100;
+            const scoreColor = catScore >= 80 ? "#059669" : catScore >= 60 ? "#D97706" : "#DC2626";
+
+            return (
+              <div
+                key={cat.id}
+                onClick={() => setSelectedCatId((prev) => (prev === cat.id ? "ALL" : cat.id))}
+                className="fd-card interactive-card"
+                style={{
+                  padding: "16px",
+                  cursor: "pointer",
+                  border: isSelected ? "2px solid var(--color-primary)" : "1px solid var(--border-subtle)",
+                  background: isSelected ? "rgba(16, 185, 129, 0.05)" : "var(--bg-card)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "12px",
+                  boxShadow: isSelected ? "0 4px 14px rgba(16, 185, 129, 0.15)" : "0 1px 3px rgba(0,0,0,0.03)",
+                }}
+              >
+                <div>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "10px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "34px",
+                          height: "34px",
+                          borderRadius: "8px",
+                          background: isSelected ? "var(--color-primary-soft)" : "rgba(16, 185, 129, 0.08)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                        }}
+                      >
+                        <CatIcon size={18} color={isSelected ? "var(--color-primary)" : "#059669"} />
+                      </div>
+                      <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", lineHeight: 1.3 }}>
+                        {cat.name}
+                      </div>
+                    </div>
+                    <StatusBadge status={cat.status} />
+                  </div>
+
+                  {/* Visual Category Score Bar */}
+                  {cat.score !== null && cat.score !== undefined && (
+                    <div style={{ marginTop: "12px" }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", fontSize: "11px", marginBottom: "4px" }}>
+                        <span style={{ color: "var(--text-secondary)", fontWeight: 500 }}>Category Score</span>
+                        <strong style={{ color: scoreColor }}>{cat.score.toFixed(0)} / 100</strong>
+                      </div>
+                      <div style={{ height: "4px", width: "100%", background: "#F1F5F9", borderRadius: "2px", overflow: "hidden" }}>
+                        <div
+                          style={{
+                            height: "100%",
+                            width: `${Math.min(100, Math.max(0, cat.score))}%`,
+                            background: scoreColor,
+                            transition: "width 0.3s ease",
+                          }}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    fontSize: "11px",
+                    color: "var(--text-muted)",
+                    paddingTop: "8px",
+                    borderTop: "1px dashed var(--border-subtle)",
+                  }}
+                >
+                  <span style={{ fontWeight: 600, color: "var(--text-secondary)" }}>{cat.total_checks} verification checks</span>
+                  <span style={{ fontWeight: 600, color: cat.findings_count > 0 ? "#D97706" : "var(--text-muted)" }}>
+                    {cat.findings_count} {cat.findings_count === 1 ? "finding" : "findings"}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ────────────────────────────────────────────────────────────
+          4. SUMMARIZED & ANIMATED AUDIT REVIEW CHECKS
+          ──────────────────────────────────────────────────────────── */}
+      <div className="fd-card animate-fade-up" style={{ padding: "24px" }}>
+        {/* Header & Controls */}
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: "16px",
+            marginBottom: "18px",
+            paddingBottom: "16px",
+            borderBottom: "1px solid var(--border-subtle)",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
+                Audit Review Checks Summary ({filteredChecks.length})
+              </h3>
+              <span
+                style={{
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  padding: "2px 8px",
+                  borderRadius: "12px",
+                  background: "var(--color-primary-soft)",
+                  color: "var(--color-primary)",
+                  letterSpacing: "0.03em",
+                }}
+              >
+                Executive Summary
+              </span>
+            </div>
+            <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "4px 0 0" }}>
+              Categorized compliance checks across 10 WP-514 audit procedures. Click any category to drill down.
+            </p>
+          </div>
+
+          {/* Quick Actions: Expand/Collapse All + Filter Badges */}
+          <div style={{ display: "flex", gap: "8px", alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              onClick={expandAllCategories}
+              style={{
+                padding: "5px 10px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 600,
+                background: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-subtle)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Expand All
+            </button>
+            <button
+              onClick={collapseAllCategories}
+              style={{
+                padding: "5px 10px",
+                borderRadius: "6px",
+                fontSize: "11px",
+                fontWeight: 600,
+                background: "var(--bg-secondary)",
+                color: "var(--text-primary)",
+                border: "1px solid var(--border-subtle)",
+                cursor: "pointer",
+                transition: "all 0.15s ease",
+              }}
+            >
+              Collapse All
+            </button>
+
+            <div style={{ height: "18px", width: "1px", background: "var(--border-subtle)", margin: "0 4px" }} />
+
+            {["ALL", "REVIEW", "FAILED", "PASSED", "NOT_AVAILABLE"].map((st) => (
+              <button
+                key={st}
+                onClick={() => setStatusFilter(st)}
+                style={{
+                  padding: "5px 10px",
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                  fontWeight: statusFilter === st ? 700 : 500,
+                  background: statusFilter === st ? "var(--color-primary)" : "var(--bg-secondary)",
+                  color: statusFilter === st ? "white" : "var(--text-secondary)",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "all 0.15s ease",
+                }}
+              >
+                {st === "ALL" ? "All Checks" : st === "REVIEW" ? "Review Required" : st === "NOT_AVAILABLE" ? "Not in Filing" : st}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Executive Summary Meter / Segmented Progress Bar */}
+        {(() => {
+          const totalAll = checks.length || 1;
+          const passTotal = checks.filter((c) => c.status === "PASSED").length;
+          const revTotal = checks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
+          const failTotal = checks.filter((c) => c.status === "FAILED").length;
+          const naTotal = checks.filter((c) => c.status === "NOT_AVAILABLE").length;
+
+          const passPct = (passTotal / totalAll) * 100;
+          const revPct = (revTotal / totalAll) * 100;
+          const failPct = (failTotal / totalAll) * 100;
+          const naPct = (naTotal / totalAll) * 100;
+
+          return (
+            <div
+              style={{
+                background: "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)",
+                borderRadius: "10px",
+                padding: "14px 18px",
+                marginBottom: "20px",
+                border: "1px solid var(--border-subtle)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
+                <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+                  Overall Checks Distribution ({checks.length} Total Verification Items)
+                </span>
+                <span style={{ fontSize: "12px", fontWeight: 600, color: passTotal === totalAll ? "#059669" : "#D97706" }}>
+                  {passTotal} Passed ({passPct.toFixed(0)}%) • {revTotal + failTotal} Attention Items
+                </span>
+              </div>
+
+              {/* Segmented Progress Bar */}
+              <div
+                style={{
+                  display: "flex",
+                  height: "10px",
+                  borderRadius: "9999px",
+                  overflow: "hidden",
+                  background: "#E2E8F0",
+                  boxShadow: "inset 0 1px 2px rgba(0,0,0,0.06)",
+                }}
+              >
+                {passPct > 0 && (
+                  <div
+                    style={{
+                      width: `${passPct}%`,
+                      background: "linear-gradient(90deg, #10B981, #059669)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Passed: ${passTotal}`}
+                  />
+                )}
+                {revPct > 0 && (
+                  <div
+                    style={{
+                      width: `${revPct}%`,
+                      background: "linear-gradient(90deg, #F59E0B, #D97706)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Review Required: ${revTotal}`}
+                  />
+                )}
+                {failPct > 0 && (
+                  <div
+                    style={{
+                      width: `${failPct}%`,
+                      background: "linear-gradient(90deg, #EF4444, #DC2626)",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Failed: ${failTotal}`}
+                  />
+                )}
+                {naPct > 0 && (
+                  <div
+                    style={{
+                      width: `${naPct}%`,
+                      background: "#94A3B8",
+                      transition: "width 0.4s ease",
+                    }}
+                    title={`Not in Filing: ${naTotal}`}
+                  />
+                )}
+              </div>
+
+              {/* Legend Badges */}
+              <div style={{ display: "flex", gap: "16px", marginTop: "10px", flexWrap: "wrap", fontSize: "11px" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#059669", fontWeight: 600 }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#10B981" }} />
+                  {passTotal} Passed ({passPct.toFixed(0)}%)
+                </span>
+                <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#D97706", fontWeight: 600 }}>
+                  <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#F59E0B" }} />
+                  {revTotal} Review Required ({revPct.toFixed(0)}%)
+                </span>
+                {failTotal > 0 && (
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#DC2626", fontWeight: 600 }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#EF4444" }} />
+                    {failTotal} Failed ({failPct.toFixed(0)}%)
+                  </span>
+                )}
+                {naTotal > 0 && (
+                  <span style={{ display: "flex", alignItems: "center", gap: "6px", color: "#64748B", fontWeight: 500 }}>
+                    <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#94A3B8" }} />
+                    {naTotal} Not in Filing ({naPct.toFixed(0)}%)
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })()}
+
+        {filteredChecks.length === 0 ? (
+          <div style={{ padding: "32px", textAlign: "center", color: "var(--text-muted)", fontSize: "13px" }}>
+            No checks match the active filter criteria.
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {categories
+              .filter((cat) => selectedCatId === "ALL" || cat.id === selectedCatId)
+              .map((cat) => {
+                const catChecks = filteredChecks.filter((c) => c.category === cat.id);
+                if (catChecks.length === 0) return null;
+
+                const passedCount = catChecks.filter((c) => c.status === "PASSED").length;
+                const reviewCount = catChecks.filter((c) => c.status === "REVIEW" || c.status === "WARNING").length;
+                const failedCount = catChecks.filter((c) => c.status === "FAILED").length;
+                const notAvailCount = catChecks.filter((c) => c.status === "NOT_AVAILABLE").length;
+                const isExpanded = q ? true : Boolean(expandedCategories[cat.id]);
+                const passRate = catChecks.length > 0 ? (passedCount / catChecks.length) * 100 : 0;
+
+                return (
+                  <div
+                    key={cat.id}
+                    className="interactive-card animate-fade-in"
+                    style={{
+                      border: isExpanded ? "1px solid rgba(16, 185, 129, 0.4)" : "1px solid var(--border-subtle)",
+                      borderRadius: "10px",
+                      overflow: "hidden",
+                      background: "var(--bg-card)",
+                      boxShadow: isExpanded ? "0 4px 12px rgba(0, 0, 0, 0.04)" : "0 1px 3px rgba(0,0,0,0.02)",
+                    }}
+                  >
+                    {/* Category Summary Card Header (Click to Expand / Collapse) */}
+                    <div
+                      onClick={() => toggleCategory(cat.id)}
+                      style={{
+                        padding: "14px 18px",
+                        background: isExpanded
+                          ? "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, #FFFFFF 100%)"
+                          : "var(--bg-card)",
+                        cursor: "pointer",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: "12px",
+                        borderBottom: isExpanded ? "1px solid var(--border-subtle)" : "none",
+                        transition: "background 0.2s ease",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "260px" }}>
+                        <div
+                          style={{
+                            width: "28px",
+                            height: "28px",
+                            borderRadius: "6px",
+                            background: isExpanded ? "var(--color-primary-soft)" : "var(--bg-secondary)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            transition: "transform 0.25s ease, background 0.2s ease",
+                            transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                          }}
+                        >
+                          <ChevronRight size={16} color={isExpanded ? "var(--color-primary)" : "var(--text-secondary)"} />
+                        </div>
+                        <div>
+                          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                            <span style={{ fontSize: "14px", fontWeight: 700, color: "var(--text-primary)" }}>
+                              {cat.name}
+                            </span>
+                            {cat.score !== null && cat.score !== undefined && (
+                              <span style={{ fontSize: "11px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 6px", borderRadius: "4px" }}>
+                                {cat.score.toFixed(0)}/100
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "2px" }}>
+                            {catChecks.length} checks • {cat.description || "Automated audit procedure"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Micro Progress Bar & Status Badges */}
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+                        {/* Miniature Category Health Gauge */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: "3px", width: "100px" }}>
+                          <div style={{ display: "flex", justifyContent: "space-between", fontSize: "10px", color: "var(--text-muted)", fontWeight: 600 }}>
+                            <span>Pass Rate</span>
+                            <span>{passRate.toFixed(0)}%</span>
+                          </div>
+                          <div style={{ height: "4px", width: "100%", background: "#E2E8F0", borderRadius: "2px", overflow: "hidden" }}>
+                            <div
+                              style={{
+                                height: "100%",
+                                width: `${passRate}%`,
+                                background: passRate === 100 ? "#10B981" : passRate >= 60 ? "#F59E0B" : "#EF4444",
+                                transition: "width 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Breakdown pills */}
+                        <div style={{ display: "flex", gap: "6px", alignItems: "center" }}>
+                          {passedCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#059669", background: "rgba(16, 185, 129, 0.1)", padding: "2px 6px", borderRadius: "4px", fontWeight: 600 }}>
+                              {passedCount} passed
+                            </span>
+                          )}
+                          {reviewCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#d97706", background: "rgba(245, 158, 11, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                              {reviewCount} review
+                            </span>
+                          )}
+                          {failedCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#dc2626", background: "rgba(239, 68, 68, 0.12)", padding: "2px 6px", borderRadius: "4px", fontWeight: 700 }}>
+                              {failedCount} failed
+                            </span>
+                          )}
+                          {notAvailCount > 0 && (
+                            <span style={{ fontSize: "11px", color: "#64748b", background: "rgba(100, 116, 139, 0.08)", padding: "2px 6px", borderRadius: "4px" }}>
+                              {notAvailCount} n/a
+                            </span>
+                          )}
+                          <StatusBadge status={cat.status} />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Detailed Checks Sub-table when expanded */}
+                    {isExpanded && (
+                      <div
+                        className="animate-slide-down"
+                        style={{
+                          overflowX: "auto",
+                        }}
+                      >
+                        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "12px" }}>
+                          <thead>
+                            <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", width: "60px" }}>ID</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", width: "100px" }}>Status</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>
+                              <th style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {catChecks.map((chk, i) => {
+                              const isEven = i % 2 === 0;
+                              return (
+                                <tr
+                                  key={chk.id}
+                                  style={{
+                                    background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
+                                    borderBottom: "1px solid var(--border-subtle)",
+                                  }}
+                                >
+                                  <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: "11px", color: "var(--text-muted)" }}>
+                                    {chk.id}
+                                  </td>
+                                  <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)" }}>
+                                    <div>{chk.check}</div>
+                                    {chk.evidence && (
+                                      <div style={{ fontSize: "11px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
+                                        {chk.evidence}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td style={{ padding: "8px 12px" }}>
+                                    <StatusBadge status={chk.status} />
+                                  </td>
+                                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                    {chk.expected_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                  </td>
+                                  <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                    {chk.actual_value || <span style={{ color: "var(--text-muted)", fontStyle: "italic" }}>Not available</span>}
+                                  </td>
+                                  <td style={{ padding: "8px 12px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                    {chk.difference || chk.difference_percent || <span style={{ color: "var(--text-muted)" }}>—</span>}
+                                  </td>
+                                  <td style={{ padding: "8px 12px", fontSize: "11px", color: "var(--text-muted)" }}>
+                                    {chk.threshold || "—"}
+                                  </td>
+                                  <td style={{ padding: "8px 12px", textAlign: "right" }}>
+                                    {chk.finding_id ? (
+                                      <button
+                                        onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
+                                        style={{
+                                          display: "inline-flex",
+                                          alignItems: "center",
+                                          gap: "4px",
+                                          padding: "3px 8px",
+                                          borderRadius: "4px",
+                                          fontSize: "11px",
+                                          fontWeight: 600,
+                                          background: "rgba(16, 185, 129, 0.1)",
+                                          color: "var(--color-primary)",
+                                          border: "1px solid rgba(16, 185, 129, 0.3)",
+                                          cursor: "pointer",
+                                        }}
+                                      >
+                                        <ExternalLink size={12} />
+                                        {chk.finding_id}
+                                      </button>
+                                    ) : chk.source ? (
+                                      <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                                        {chk.source.page != null ? `p.${chk.source.page}` : (chk.source.sheet ? `Sheet: ${chk.source.sheet}` : (chk.source.file || "—"))}
+                                      </span>
+                                    ) : (
+                                      <span style={{ fontSize: "11px", color: "var(--text-muted)" }}>—</span>
+                                    )}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

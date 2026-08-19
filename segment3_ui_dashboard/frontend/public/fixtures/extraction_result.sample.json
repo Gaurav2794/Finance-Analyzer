@@ -1,0 +1,12 @@
+{
+  "document_id": "b7e3c9a0-1e2f-4a3b-9c1d-77f0a1b2c3d4",
+  "file_name": "ABC_Industries_2025.pdf",
+  "currency": "INR",
+  "unit": "Cr",
+  "period": { "current": "FY2025", "previous": "FY2024" },
+  "document_quality": {
+    "extraction_completeness_pct": 92,
+    "data_quality_status": "PARTIAL",
+    "missing_sections": ["Related Party Notes"]
+  }
+}

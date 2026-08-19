@@ -1,0 +1,150 @@
+{
+  "document_id": "b7e3c9a0-1e2f-4a3b-9c1d-77f0a1b2c3d4",
+  "overall_score": 84,
+  "score_formula_version": "v1",
+  "checks": {
+    "mathematical_accuracy": 96,
+    "cash_flow": 88,
+    "prior_year_tieout": 79,
+    "internal_consistency": 91
+  },
+  "financial_metrics": {
+    "revenue": {
+      "current": 612,
+      "previous": 510,
+      "growth_pct": 20
+    },
+    "expenses": {
+      "current": 71,
+      "previous": 50,
+      "growth_pct": 42
+    },
+    "gross_profit": {
+      "current": 245,
+      "previous": 218,
+      "growth_pct": 12.4
+    },
+    "operating_profit": {
+      "current": 168,
+      "previous": 152,
+      "growth_pct": 10.5
+    },
+    "net_profit": {
+      "current": 97,
+      "previous": 110,
+      "growth_pct": -11.5
+    },
+    "assets": {
+      "current": 940,
+      "previous": 860,
+      "growth_pct": 9.3
+    },
+    "liabilities": {
+      "current": 410,
+      "previous": 392,
+      "growth_pct": 4.6
+    },
+    "equity": {
+      "current": 530,
+      "previous": 468,
+      "growth_pct": 13.2
+    },
+    "cash": {
+      "current": 88,
+      "previous": 61,
+      "growth_pct": 44.3
+    },
+    "debt": {
+      "current": 210,
+      "previous": 224,
+      "growth_pct": -6.3
+    }
+  },
+  "ratios": {
+    "current_ratio": 1.82,
+    "quick_ratio": 1.14,
+    "debt_to_equity": 0.74,
+    "debt_ratio": 0.44,
+    "gross_margin_pct": 40,
+    "operating_margin_pct": 27.5,
+    "net_margin_pct": 15.8,
+    "roa_pct": 10.3,
+    "roe_pct": 18.3
+  },
+  "findings": [
+    {
+      "finding_id": "f-9021",
+      "category": "UNUSUAL_FLUCTUATION",
+      "title": "Operating Expenses",
+      "status": "OPEN",
+      "severity": "HIGH",
+      "threshold_pct": 20,
+      "explanation": "Operating expenses rose 42% year-over-year against a 20% materiality threshold. Driven primarily by a jump in administrative costs.",
+      "source_ref": {
+        "page": 29,
+        "section": "Notes to Accounts"
+      },
+      "expected_value": 50,
+      "actual_value": 71,
+      "difference": 42,
+      "check_id": "chk-f-9021"
+    },
+    {
+      "finding_id": "f-9022",
+      "category": "UNUSUAL_GAIN",
+      "title": "Other Income vs. Profit Growth",
+      "status": "OPEN",
+      "severity": "CRITICAL",
+      "threshold_pct": 30,
+      "explanation": "Profit growth (78%) diverges from revenue growth (12%) by 66 percentage points, largely from a one-time gain on asset disposal.",
+      "source_ref": {
+        "page": 34,
+        "section": "Other Income"
+      },
+      "expected_value": 12,
+      "actual_value": 78,
+      "difference": 66,
+      "check_id": "chk-f-9022"
+    },
+    {
+      "finding_id": "f-9023",
+      "category": "PRIOR_YEAR_TIEOUT",
+      "title": "Retained Earnings Opening Balance",
+      "status": "OPEN",
+      "severity": "REVIEW",
+      "threshold_pct": 1,
+      "explanation": "Opening retained earnings differs from prior year's closing balance by ₹4 Cr — just above the 1% tie-out threshold.",
+      "source_ref": {
+        "page": 41,
+        "section": "Statement of Changes in Equity"
+      },
+      "expected_value": 308,
+      "actual_value": 312,
+      "difference": 1.3,
+      "check_id": "chk-f-9023"
+    },
+    {
+      "finding_id": "f-9024",
+      "category": "RELATED_DISCLOSURE",
+      "title": "Related-Party Transaction Value",
+      "status": "OPEN",
+      "severity": "CRITICAL",
+      "threshold_pct": 15,
+      "explanation": "Statement shows ₹8 Cr in related-party value; disclosure notes account for only ₹5 Cr — a ₹3 Cr undisclosed difference.",
+      "source_ref": {
+        "page": 47,
+        "section": "Related Party Disclosures"
+      },
+      "expected_value": 5,
+      "actual_value": 8,
+      "difference": 60,
+      "check_id": "chk-f-9024"
+    }
+  ],
+  "findings_summary": {
+    "critical": 2,
+    "high": 1,
+    "review": 1,
+    "passed": 18
+  }
+}

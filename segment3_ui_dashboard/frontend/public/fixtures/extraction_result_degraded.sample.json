@@ -1,0 +1,18 @@
+{
+  "document_id": "c1f4e8b2-3d5a-49c7-8e6f-12a3b4c5d6e7",
+  "file_name": "XYZ_Holdings_Q3_2025.pdf",
+  "currency": "INR",
+  "unit": "Cr",
+  "period": { "current": "Q3 FY2025", "previous": "Q3 FY2024" },
+  "document_quality": {
+    "extraction_completeness_pct": 64,
+    "data_quality_status": "INSUFFICIENT",
+    "missing_sections": [
+      "Cash Flow Statement",
+      "Segment Reporting Notes",
+      "Related Party Disclosures"
+    ],
+    "unit_mismatch_detected": true,
+    "unit_mismatch_detail": "Current year reported in Cr; prior year source in Lakhs — not normalized"
+  }
+}
