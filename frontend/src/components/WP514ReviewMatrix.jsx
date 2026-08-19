@@ -922,10 +922,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
 
                       {/* Detailed Checks Sub-table when expanded */}
                       {isExpanded && (() => {
-                        const hasExpected = catChecks.some((chk) => chk.expected_value != null && String(chk.expected_value).trim() !== "" && chk.expected_value !== "—" && chk.expected_value !== "-");
                         const hasActual = catChecks.some((chk) => chk.actual_value != null && String(chk.actual_value).trim() !== "" && chk.actual_value !== "—" && chk.actual_value !== "-");
-                        const hasDiff = catChecks.some((chk) => (chk.difference != null && String(chk.difference).trim() !== "" && chk.difference !== "—" && chk.difference !== "-") || (chk.difference_percent != null && String(chk.difference_percent).trim() !== "" && chk.difference_percent !== "—" && chk.difference_percent !== "-"));
-                        const hasThreshold = catChecks.some((chk) => chk.threshold != null && String(chk.threshold).trim() !== "" && chk.threshold !== "—" && chk.threshold !== "-");
 
                         return (
                           <div
@@ -940,12 +937,9 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                 <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left", borderBottom: "1px solid var(--border-light, #E2E8F0)" }}>
                                   <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "55px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
                                   <th style={{ padding: "8px 10px", fontWeight: 700, color: "var(--text-secondary)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
-                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "82px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
-                                  {hasExpected && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "13%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
-                                  {hasActual && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "13%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
-                                  {hasDiff && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "11%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
-                                  {hasThreshold && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "11%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
-                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "72px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
+                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "85px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
+                                  {hasActual && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "150px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
+                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "85px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -974,24 +968,9 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                       <td style={{ padding: "8px 8px", whiteSpace: "nowrap" }}>
                                         <StatusBadge status={chk.status} />
                                       </td>
-                                      {hasExpected && (
-                                        <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
-                                          {formatCheckValue(chk.expected_value, chk.check)}
-                                        </td>
-                                      )}
                                       {hasActual && (
                                         <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
                                           {formatCheckValue(chk.actual_value, chk.check)}
-                                        </td>
-                                      )}
-                                      {hasDiff && (
-                                        <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
-                                          {chk.difference || chk.difference_percent || ""}
-                                        </td>
-                                      )}
-                                      {hasThreshold && (
-                                        <td style={{ padding: "8px 8px", textAlign: "right", fontSize: "10px", color: "var(--text-muted)", wordBreak: "break-word" }}>
-                                          {chk.threshold || ""}
                                         </td>
                                       )}
                                       <td style={{ padding: "8px 8px", textAlign: "right", whiteSpace: "nowrap" }}>

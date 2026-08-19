@@ -652,11 +652,10 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
               <table className="print-table" style={{ fontSize: "8.5pt" }}>
                 <thead>
                   <tr>
-                    <th style={{ width: "12%" }}>Check ID</th>
-                    <th style={{ width: hasExp ? "38%" : "55%" }}>Audit Procedure</th>
+                    <th style={{ width: "10%" }}>Check ID</th>
+                    <th style={{ width: "56%" }}>Audit Procedure</th>
                     <th style={{ width: "14%" }}>Status</th>
-                    {hasExp && <th style={{ textAlign: "right", width: "18%" }}>Expected / Prior</th>}
-                    <th style={{ textAlign: "right", width: hasExp ? "18%" : "20%" }}>Actual / Current</th>
+                    <th style={{ textAlign: "right", width: "20%" }}>Actual / Current</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -672,7 +671,6 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                           {chk.status}
                         </span>
                       </td>
-                      {hasExp && <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{formatCheckValue(chk.expected_value, chk.check)}</td>}
                       <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{formatCheckValue(chk.actual_value, chk.check)}</td>
                     </tr>
                   ))}
@@ -846,11 +844,10 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
           <thead>
             <tr>
               <th style={{ width: "8%" }}>ID</th>
-              <th style={{ width: "16%" }}>Category</th>
-              <th style={{ width: "32%" }}>Procedure / Check Name</th>
+              <th style={{ width: "18%" }}>Category</th>
+              <th style={{ width: "42%" }}>Procedure / Check Name</th>
               <th style={{ width: "12%" }}>Status</th>
-              <th style={{ textAlign: "right", width: "16%" }}>Prior / Expected</th>
-              <th style={{ textAlign: "right", width: "16%" }}>Current / Actual</th>
+              <th style={{ textAlign: "right", width: "20%" }}>Current / Actual</th>
             </tr>
           </thead>
           <tbody>
@@ -867,7 +864,6 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                     {chk.status}
                   </span>
                 </td>
-                <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{formatCheckValue(chk.expected_value, chk.check)}</td>
                 <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{formatCheckValue(chk.actual_value, chk.check)}</td>
               </tr>
             ))}
