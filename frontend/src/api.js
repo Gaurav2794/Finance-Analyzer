@@ -1,29 +1,42 @@
 /**
  * api.js — Finance Analyzer Team 3 Data Layer
  *
- * Includes Bearer Token authentication, document ownership,
- * audit history querying, and WP-514 matrix fetching.
+ * Centralized Token Management, Global 401 Session Handling,
+ * and Protected API Request Execution.
  */
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || false;
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
 
-const TOKEN_KEY = "fa_auth_token";
+export const AUTH_TOKEN_KEY = "finance_analyzer_token";
+
+let authStateListeners = [];
+
+export function subscribeAuthChange(listener) {
+  authStateListeners.push(listener);
+  return () => {
+    authStateListeners = authStateListeners.filter((l) => l !== listener);
+  };
+}
+
+function notifyAuthChange(user, errorMsg = null) {
+  authStateListeners.forEach((fn) => fn(user, errorMsg));
+}
 
 export function getAuthToken() {
-  return localStorage.getItem(TOKEN_KEY) || "";
+  return localStorage.getItem(AUTH_TOKEN_KEY) || "";
 }
 
 export function setAuthToken(token) {
   if (token) {
-    localStorage.setItem(TOKEN_KEY, token);
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
   } else {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
   }
 }
 
 export function clearAuthToken() {
-  localStorage.removeItem(TOKEN_KEY);
+  localStorage.removeItem(AUTH_TOKEN_KEY);
 }
 
 // ── Fixture paths (mock mode only) ───────────────────────────────────────────
@@ -36,6 +49,8 @@ async function apiFetch(url, options = {}) {
   const headers = new Headers(options.headers || {});
   
   const token = getAuthToken();
+  const isAuthEndpoint = url.includes("/auth/login") || url.includes("/auth/register");
+  
   if (token && !headers.has("Authorization")) {
     headers.set("Authorization", `Bearer ${token}`);
   }
@@ -60,9 +75,11 @@ async function apiFetch(url, options = {}) {
       detail = body.detail || detail;
     } catch (_) {}
     
-    // Auto-clear invalid/expired token on 401
-    if (response.status === 401 && !url.includes("/auth/login")) {
+    // Handle 401 Unauthorized globally
+    if (response.status === 401 && !isAuthEndpoint) {
       clearAuthToken();
+      notifyAuthChange(null, "Your session has expired. Please sign in again.");
+      throw new Error("Your session has expired. Please sign in again.");
     }
     
     throw new Error(`API ${response.status}: ${detail}`);
@@ -90,6 +107,7 @@ export async function loginUser(email, password) {
   });
   if (res.access_token) {
     setAuthToken(res.access_token);
+    notifyAuthChange(res.user, null);
   }
   return res;
 }
@@ -102,11 +120,14 @@ export async function registerUser(email, password, fullName = "") {
   });
   if (res.access_token) {
     setAuthToken(res.access_token);
+    notifyAuthChange(res.user, null);
   }
   return res;
 }
 
 export async function fetchCurrentUser() {
+  const token = getAuthToken();
+  if (!token) return null;
   return apiFetch(`${API_BASE}/auth/me`);
 }
 
@@ -115,6 +136,7 @@ export async function logoutUser() {
     await apiFetch(`${API_BASE}/auth/logout`, { method: "POST" });
   } catch (_) {}
   clearAuthToken();
+  notifyAuthChange(null, null);
 }
 
 // ── Upload ────────────────────────────────────────────────────────────────────
@@ -131,23 +153,14 @@ export async function uploadDocument(file) {
 
 // ── Audit History & Document Management ──────────────────────────────────────
 
-/**
- * Fetch all documents owned by current user.
- */
 export async function fetchMyDocuments() {
   return apiFetch(`${API_BASE}/documents`);
 }
 
-/**
- * Fetch single document metadata.
- */
 export async function fetchDocumentMetadata(documentId) {
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}`);
 }
 
-/**
- * Delete a user-owned document.
- */
 export async function deleteDocument(documentId) {
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}`, {
     method: "DELETE",
@@ -156,23 +169,12 @@ export async function deleteDocument(documentId) {
 
 // ── Pipeline status ───────────────────────────────────────────────────────────
 
-/**
- * Poll pipeline status for a document.
- * Returns { document_id, status, step, error }
- * status values: UPLOADED | EXTRACTING | EXTRACTED | REVIEWING | COMPLETED | FAILED
- * @param {string} documentId
- */
 export async function fetchStatus(documentId) {
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/status`);
 }
 
 // ── Dashboard data ────────────────────────────────────────────────────────────
 
-/**
- * Fetch the combined dashboard data (Team 1 + Team 2 via presentation adapter).
- * Returns { extraction_result, analysis_result }.
- * @param {string} documentId
- */
 export async function fetchDashboard(documentId) {
   if (USE_MOCK) return apiFetch(FIXTURE_DASHBOARD);
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/dashboard`);
@@ -186,13 +188,6 @@ export async function fetchWP514Review(documentId) {
 
 // ── Evidence ──────────────────────────────────────────────────────────────────
 
-/**
- * Fetch source evidence for a finding.
- * Real mode: GET /api/documents/{id}/evidence/{finding_id}
- * Returns { status, finding, source, passage, message }
- * @param {string} documentId
- * @param {string} findingId
- */
 export async function fetchEvidence(documentId, findingId) {
   if (USE_MOCK) return apiFetch(FIXTURE_EVIDENCE);
   return apiFetch(
@@ -202,14 +197,6 @@ export async function fetchEvidence(documentId, findingId) {
 
 // ── AI ────────────────────────────────────────────────────────────────────────
 
-/**
- * Ask AI about a finding or general report review.
- * Returns { answer, sections, grounded, sources, ai_provider }
- * @param {string} documentId
- * @param {string|null} findingId
- * @param {string} question
- * @param {string|null} category
- */
 export async function askAI(documentId, findingId = null, question = "Why was this flagged?", category = null) {
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/ai`, {
     method: "POST",
@@ -224,11 +211,6 @@ export async function askAI(documentId, findingId = null, question = "Why was th
 
 // ── Report ────────────────────────────────────────────────────────────────────
 
-/**
- * Fetch the full report payload (same data as dashboard + full check blocks).
- * @param {string} documentId
- */
 export async function fetchReport(documentId) {
   if (USE_MOCK) return apiFetch(FIXTURE_DASHBOARD);
-  return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/report`);
 }

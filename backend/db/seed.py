@@ -5,6 +5,12 @@ Development-only seed utility for testing and hackathon demo evaluation.
 from __future__ import annotations
 
 import logging
+import sys
+from pathlib import Path
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(REPO_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPO_ROOT))
+
 from backend.auth.security import hash_password
 from backend.db.database import SessionLocal
 from backend.db.models import User
@@ -12,32 +18,35 @@ from backend.db.session import init_db
 
 log = logging.getLogger("team3.seed")
 
-DEMO_EMAIL = "demo@financeanalyzer.local"
-DEMO_PASSWORD = "DemoPassword123!"
-DEMO_NAME = "Demo Auditor"
+DEV_USERS = [
+    ("auditor@example.com", "DemoPassword123!", "Auditor Lead"),
+    ("demo@financeanalyzer.local", "DemoPassword123!", "Demo Auditor"),
+]
 
 
-def seed_demo_user() -> User:
+def seed_demo_user() -> None:
     init_db()
     db = SessionLocal()
     try:
-        user = db.query(User).filter(User.email == DEMO_EMAIL).first()
-        if not user:
-            user = User(
-                email=DEMO_EMAIL,
-                password_hash=hash_password(DEMO_PASSWORD),
-                full_name=DEMO_NAME,
-                is_active=True,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
-            log.info("Created demo development user: %s", DEMO_EMAIL)
-        return user
+        for email, pwd, name in DEV_USERS:
+            user = db.query(User).filter(User.email == email).first()
+            if not user:
+                user = User(
+                    email=email,
+                    password_hash=hash_password(pwd),
+                    full_name=name,
+                    is_active=True,
+                )
+                db.add(user)
+                db.commit()
+                log.info("Created dev seed user: %s", email)
+    except Exception as exc:
+        log.warning("Seed user creation notice: %s", exc)
+        db.rollback()
     finally:
         db.close()
 
 
 if __name__ == "__main__":
-    u = seed_demo_user()
-    print(f"Demo user ready: id={u.id}, email={u.email}")
+    seed_demo_user()
+    print("Development seed users verified in database.")

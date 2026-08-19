@@ -7,6 +7,7 @@ import {
   askAI,
 } from "./src/api.js";
 import { useAuth } from "./src/context/AuthContext.jsx";
+import LoginScreen from "./src/components/LoginScreen.jsx";
 import AuthModal from "./src/components/AuthModal.jsx";
 import AuditHistoryModal from "./src/components/AuditHistoryModal.jsx";
 import EvidencePanel from "./src/components/EvidencePanel.jsx";
@@ -395,12 +396,12 @@ function UploadScreen({ onDocumentReady }) {
    LOADING / ERROR SCREENS
    ============================================================ */
 
-function LoadingScreen() {
+function LoadingScreen({ message = "Loading Dashboard..." }) {
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
       <div style={{ width: 48, height: 48, borderRadius: "50%", border: "3px solid #E2E8F0", borderTopColor: "var(--color-primary)", animation: "spin 0.8s linear infinite" }} />
       <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
-      <div style={{ fontSize: "15px", color: "var(--text-secondary)", fontWeight: 600 }}>Loading Dashboard...</div>
+      <div style={{ fontSize: "15px", color: "var(--text-secondary)", fontWeight: 600 }}>{message}</div>
     </div>
   );
 }
@@ -1007,6 +1008,7 @@ export default function FinancialAuditDashboard() {
   const {
     user,
     isAuthenticated,
+    loading: isAuthLoading,
     logout,
     showAuthModal,
     setShowAuthModal,
@@ -1050,14 +1052,25 @@ export default function FinancialAuditDashboard() {
     loadDashboard(docId);
   }, [loadDashboard]);
 
-  // Show upload screen if no document loaded
+  // 1. Initial auth initialization loading state
+  if (isAuthLoading) {
+    return <LoadingScreen message="Initializing Finance Analyzer session..." />;
+  }
+
+  // 2. Gatekeeper: Unauthenticated users are shown LoginScreen
+  if (!isAuthenticated || !user) {
+    return <LoginScreen />;
+  }
+
+  // 3. Authenticated user without loaded document sees UploadScreen
   if (!documentId && !loading) {
     return <UploadScreen onDocumentReady={handleDocumentReady} />;
   }
 
-  if (loading) return <LoadingScreen />;
+  // 4. Loading / error states
+  if (loading) return <LoadingScreen message="Loading Dashboard..." />;
   if (error) return <ErrorScreen message={error} onRetry={() => loadDashboard(documentId)} />;
-  if (!extractionResult || !analysisResult) return <LoadingScreen />;
+  if (!extractionResult || !analysisResult) return <LoadingScreen message="Assembling Review..." />;
 
   if (route === "#report") {
     return (
