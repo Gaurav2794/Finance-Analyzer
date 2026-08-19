@@ -1,22 +1,30 @@
 /**
  * api.js — Finance Analyzer Team 3 Data Layer
  *
- * MODE SWITCH
- * -----------
- * USE_MOCK=true  → reads fixture files from /fixtures/ (offline demo)
- * USE_MOCK=false → calls the real FastAPI backend (real pipeline results)
- *
- * The response shape returned by each function is IDENTICAL in both modes.
- * The UI components are never aware of which mode is active.
- *
- * Non-negotiable constraints:
- *  - Never compute growth_pct, ratios, or overall_score here.
- *  - Do not rename Team 1/2 fields.
- *  - If a value is missing, pass null through — the UI renders "Not available".
+ * Includes Bearer Token authentication, document ownership,
+ * audit history querying, and WP-514 matrix fetching.
  */
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || false;
 const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
+
+const TOKEN_KEY = "fa_auth_token";
+
+export function getAuthToken() {
+  return localStorage.getItem(TOKEN_KEY) || "";
+}
+
+export function setAuthToken(token) {
+  if (token) {
+    localStorage.setItem(TOKEN_KEY, token);
+  } else {
+    localStorage.removeItem(TOKEN_KEY);
+  }
+}
+
+export function clearAuthToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
 
 // ── Fixture paths (mock mode only) ───────────────────────────────────────────
 const FIXTURE_DASHBOARD = "/fixtures/dashboard.sample.json";
@@ -25,9 +33,22 @@ const FIXTURE_EVIDENCE  = "/fixtures/evidence.sample.json";
 // ── Generic fetch helper ──────────────────────────────────────────────────────
 
 async function apiFetch(url, options = {}) {
+  const headers = new Headers(options.headers || {});
+  
+  const token = getAuthToken();
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
+
+  const fetchOptions = {
+    ...options,
+    headers,
+    credentials: options.credentials || "include",
+  };
+
   let response;
   try {
-    response = await fetch(url, options);
+    response = await fetch(url, fetchOptions);
   } catch (networkErr) {
     throw new Error(`Network error reaching ${url}: ${networkErr.message}`);
   }
@@ -38,6 +59,12 @@ async function apiFetch(url, options = {}) {
       const body = await response.json();
       detail = body.detail || detail;
     } catch (_) {}
+    
+    // Auto-clear invalid/expired token on 401
+    if (response.status === 401 && !url.includes("/auth/login")) {
+      clearAuthToken();
+    }
+    
     throw new Error(`API ${response.status}: ${detail}`);
   }
 
@@ -53,6 +80,43 @@ async function apiFetch(url, options = {}) {
   return response.json();
 }
 
+// ── Authentication Endpoints ─────────────────────────────────────────────────
+
+export async function loginUser(email, password) {
+  const res = await apiFetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  if (res.access_token) {
+    setAuthToken(res.access_token);
+  }
+  return res;
+}
+
+export async function registerUser(email, password, fullName = "") {
+  const res = await apiFetch(`${API_BASE}/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password, full_name: fullName }),
+  });
+  if (res.access_token) {
+    setAuthToken(res.access_token);
+  }
+  return res;
+}
+
+export async function fetchCurrentUser() {
+  return apiFetch(`${API_BASE}/auth/me`);
+}
+
+export async function logoutUser() {
+  try {
+    await apiFetch(`${API_BASE}/auth/logout`, { method: "POST" });
+  } catch (_) {}
+  clearAuthToken();
+}
+
 // ── Upload ────────────────────────────────────────────────────────────────────
 
 /**
@@ -63,6 +127,31 @@ export async function uploadDocument(file) {
   const form = new FormData();
   form.append("file", file);
   return apiFetch(`${API_BASE}/documents/upload`, { method: "POST", body: form });
+}
+
+// ── Audit History & Document Management ──────────────────────────────────────
+
+/**
+ * Fetch all documents owned by current user.
+ */
+export async function fetchMyDocuments() {
+  return apiFetch(`${API_BASE}/documents`);
+}
+
+/**
+ * Fetch single document metadata.
+ */
+export async function fetchDocumentMetadata(documentId) {
+  return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}`);
+}
+
+/**
+ * Delete a user-owned document.
+ */
+export async function deleteDocument(documentId) {
+  return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}`, {
+    method: "DELETE",
+  });
 }
 
 // ── Pipeline status ───────────────────────────────────────────────────────────
@@ -89,24 +178,10 @@ export async function fetchDashboard(documentId) {
   return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/dashboard`);
 }
 
-// ── Legacy compatibility shims (keep EvidencePanel/AskAIPanel working) ────────
+// ── WP-514 Matrix ─────────────────────────────────────────────────────────────
 
-/**
- * @deprecated Use fetchDashboard() instead.
- * Kept for backward-compat with EvidencePanel / AskAIPanel.
- */
-export async function fetchExtractionResult(documentId) {
-  const dash = await fetchDashboard(documentId);
-  return dash.extraction_result;
-}
-
-/**
- * @deprecated Use fetchDashboard() instead.
- * Kept for backward-compat with EvidencePanel / AskAIPanel.
- */
-export async function fetchAnalysisResult(documentId) {
-  const dash = await fetchDashboard(documentId);
-  return dash.analysis_result;
+export async function fetchWP514Review(documentId) {
+  return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/wp514`);
 }
 
 // ── Evidence ──────────────────────────────────────────────────────────────────

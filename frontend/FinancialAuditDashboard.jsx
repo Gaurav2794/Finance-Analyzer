@@ -6,6 +6,9 @@ import {
   fetchEvidence,
   askAI,
 } from "./src/api.js";
+import { useAuth } from "./src/context/AuthContext.jsx";
+import AuthModal from "./src/components/AuthModal.jsx";
+import AuditHistoryModal from "./src/components/AuditHistoryModal.jsx";
 import EvidencePanel from "./src/components/EvidencePanel.jsx";
 import AskAIPanel from "./src/components/AskAIPanel.jsx";
 import AuditReport from "./src/components/AuditReport.jsx";
@@ -59,6 +62,10 @@ import {
   ChevronDown,
   ChevronRight,
   Filter,
+  User,
+  LogOut,
+  LogIn,
+  FolderArchive,
 } from "lucide-react";
 
 /* ============================================================
@@ -220,6 +227,7 @@ const PIPELINE_STEPS = [
 ];
 
 function UploadScreen({ onDocumentReady }) {
+  const { user, isAuthenticated, logout, setShowAuthModal, setShowAuditHistoryModal } = useAuth();
   const [dragging, setDragging] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [jobId, setJobId] = useState(null);
@@ -279,7 +287,46 @@ function UploadScreen({ onDocumentReady }) {
   const stepIndex = PIPELINE_STEPS.findIndex(s => s.status === pipelineStatus);
 
   return (
-    <div style={{ minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px" }}>
+    <div style={{ minHeight: "100vh", background: "var(--bg-main)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "32px", position: "relative" }}>
+      {/* Top Auth Bar */}
+      <div style={{ position: "absolute", top: "24px", right: "32px", display: "flex", alignItems: "center", gap: "10px" }}>
+        {isAuthenticated ? (
+          <>
+            <button
+              onClick={() => setShowAuditHistoryModal(true)}
+              className="fd-btn fd-btn-outline"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", padding: "7px 12px" }}
+            >
+              <FolderArchive size={14} /> My Audits
+            </button>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--bg-card)", padding: "4px 10px 4px 6px", borderRadius: "20px", border: "1px solid var(--border-light)" }}>
+              <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#10B981", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700 }}>
+                {(user?.full_name || user?.email || "A")[0].toUpperCase()}
+              </div>
+              <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
+                {user?.full_name || user?.email}
+              </span>
+            </div>
+            <button
+              onClick={logout}
+              className="fd-btn fd-btn-outline"
+              style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", padding: "7px 12px" }}
+              title="Sign Out"
+            >
+              <LogOut size={13} />
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setShowAuthModal(true)}
+            className="fd-btn fd-btn-primary"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", padding: "7px 14px" }}
+          >
+            <LogIn size={14} /> Auditor Sign In
+          </button>
+        )}
+      </div>
+
       <div style={{ maxWidth: "520px", width: "100%" }}>
         <div style={{ textAlign: "center", marginBottom: "32px" }}>
           <div style={{ width: "56px", height: "56px", borderRadius: "50%", background: "var(--color-primary-soft)", color: "var(--color-primary)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
@@ -957,6 +1004,15 @@ function GlobalSearchDropdown({
    ============================================================ */
 
 export default function FinancialAuditDashboard() {
+  const {
+    user,
+    isAuthenticated,
+    logout,
+    showAuthModal,
+    setShowAuthModal,
+    showAuditHistoryModal,
+    setShowAuditHistoryModal,
+  } = useAuth();
   const [documentId, setDocumentId] = useState(null);
   const [extractionResult, setExtractionResult] = useState(null);
   const [analysisResult, setAnalysisResult] = useState(null);
@@ -1163,18 +1219,54 @@ export default function FinancialAuditDashboard() {
           ))}
         </nav>
 
-        <div style={{ padding: "20px 24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "14px" }}>
-            <div style={{ width: "38px", height: "38px", borderRadius: "50%", background: "var(--color-purple-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--color-purple)", fontWeight: 700 }}>A</div>
+        <div style={{ padding: "20px 24px", borderTop: "1px solid var(--border-light)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "12px" }}>
+            <div style={{ width: "36px", height: "36px", borderRadius: "50%", background: isAuthenticated ? "#10B981" : "var(--color-purple-soft)", display: "flex", alignItems: "center", justifyContent: "center", color: isAuthenticated ? "#FFFFFF" : "var(--color-purple)", fontWeight: 700, fontSize: "12px" }}>
+              {(user?.full_name || user?.email || "A")[0].toUpperCase()}
+            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>Auditor</div>
-              <div style={{ fontSize: "11px", color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{extractionResult.file_name}</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {user?.full_name || user?.email || "Auditor (Demo)"}
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--text-secondary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {extractionResult.file_name}
+              </div>
             </div>
           </div>
-          <button onClick={() => { setDocumentId(null); setExtractionResult(null); setAnalysisResult(null); window.location.hash = ""; }}
-            className="fd-btn fd-btn-outline" style={{ width: "100%", fontSize: "12px" }}>
-            <Upload size={14} /> Upload New Document
-          </button>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <button
+              onClick={() => setShowAuditHistoryModal(true)}
+              className="fd-btn fd-btn-outline"
+              style={{ width: "100%", fontSize: "12px", justifyContent: "flex-start", padding: "8px 12px" }}
+            >
+              <FolderArchive size={14} /> My Audits
+            </button>
+            <button
+              onClick={() => { setDocumentId(null); setExtractionResult(null); setAnalysisResult(null); window.location.hash = ""; }}
+              className="fd-btn fd-btn-outline"
+              style={{ width: "100%", fontSize: "12px", justifyContent: "flex-start", padding: "8px 12px" }}
+            >
+              <Upload size={14} /> Upload Document
+            </button>
+            {isAuthenticated ? (
+              <button
+                onClick={logout}
+                className="fd-btn fd-btn-outline"
+                style={{ width: "100%", fontSize: "12px", justifyContent: "flex-start", padding: "8px 12px", color: "var(--color-danger)" }}
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="fd-btn fd-btn-primary"
+                style={{ width: "100%", fontSize: "12px", justifyContent: "center", padding: "8px 12px" }}
+              >
+                <LogIn size={14} /> Sign In
+              </button>
+            )}
+          </div>
         </div>
       </aside>
 
@@ -1200,7 +1292,7 @@ export default function FinancialAuditDashboard() {
               )}
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <GlobalSearchDropdown
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -1229,6 +1321,22 @@ export default function FinancialAuditDashboard() {
               onOpenAI={() => setShowGlobalAI(true)}
             />
             <button
+              onClick={() => setShowAuditHistoryModal(true)}
+              className="fd-btn fd-btn-outline"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "6px",
+                padding: "8px 14px",
+                borderRadius: "20px",
+                fontSize: "12px",
+                fontWeight: 600,
+                cursor: "pointer",
+              }}
+            >
+              <FolderArchive size={14} /> My Audits
+            </button>
+            <button
               onClick={() => setShowGlobalAI(true)}
               className="fd-btn"
               style={{
@@ -1247,12 +1355,41 @@ export default function FinancialAuditDashboard() {
             >
               <Sparkles size={14} /> Ask AI Assistant
             </button>
-            <div style={{ width: "42px", height: "42px", borderRadius: "50%", background: "var(--bg-card)", display: "flex", alignItems: "center", justifyContent: "center", position: "relative", cursor: "pointer" }}>
-              <Bell size={18} color="var(--text-secondary)" />
-              {(fs.critical || 0) > 0 && (
-                <div className="animate-pulse-soft" style={{ position: "absolute", top: "10px", right: "11px", width: "8px", height: "8px", background: "var(--color-danger)", borderRadius: "50%", border: "2px solid var(--bg-card)" }} />
-              )}
-            </div>
+            {isAuthenticated ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  background: "var(--bg-card)",
+                  border: "1px solid var(--border-light)",
+                  padding: "4px 10px 4px 6px",
+                  borderRadius: "20px",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                }}
+              >
+                <div style={{ width: "24px", height: "24px", borderRadius: "50%", background: "#10B981", color: "#FFFFFF", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "11px", fontWeight: 700 }}>
+                  {(user?.full_name || user?.email || "A")[0].toUpperCase()}
+                </div>
+                <span style={{ color: "var(--text-primary)" }}>{user?.full_name || user?.email}</span>
+                <button
+                  onClick={logout}
+                  title="Sign Out"
+                  style={{ background: "transparent", border: "none", color: "var(--text-muted)", cursor: "pointer", padding: "2px 4px", display: "flex" }}
+                >
+                  <LogOut size={13} />
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="fd-btn fd-btn-primary"
+                style={{ display: "inline-flex", alignItems: "center", gap: "6px", fontSize: "12px", padding: "7px 14px", borderRadius: "20px" }}
+              >
+                <LogIn size={14} /> Sign In
+              </button>
+            )}
           </div>
         </header>
 
@@ -1672,6 +1809,18 @@ export default function FinancialAuditDashboard() {
           onClose={() => setShowGlobalAI(false)}
         />
       )}
+
+      {/* Authentication & Audit History Modals */}
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
+      />
+      <AuditHistoryModal
+        isOpen={showAuditHistoryModal}
+        onClose={() => setShowAuditHistoryModal(false)}
+        currentDocId={documentId}
+        onSelectDocument={handleDocumentReady}
+      />
     </div>
   );
 }

@@ -1,10 +1,12 @@
 """
 backend/main.py — Team 3 FastAPI orchestration layer.
 Single backend. No duplicate financial logic.
+Includes User Authentication, Database Persistence, and Audit History.
 """
 from __future__ import annotations
 
 import logging
+import os
 import sys
 from pathlib import Path
 
@@ -23,7 +25,8 @@ except ImportError:
     pass
 
 from backend.config import API_PREFIX, CORS_ORIGINS
-from backend.routes import documents, financial, evidence, ai
+from backend.db.session import init_db
+from backend.routes import auth, documents, financial, evidence, ai
 
 # ── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -32,22 +35,31 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+# ── Initialize Database Tables ────────────────────────────────────────────────
+init_db()
+
 # ── App ───────────────────────────────────────────────────────────────────────
 app = FastAPI(
     title="Finance Analyzer — Team 3 API",
-    description="Orchestration layer connecting Segment 1 → Segment 2 → React Dashboard",
-    version="1.0.0",
+    description="Orchestration layer connecting Segment 1 → Segment 2 → React Dashboard with Authentication & Persistence",
+    version="2.0.0",
 )
+
+# Ensure no wildcard origins with credentials enabled
+origins = [o.strip() for o in CORS_ORIGINS if o.strip()]
+if "*" in origins and len(origins) > 1:
+    origins.remove("*")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=CORS_ORIGINS,
+    allow_origins=origins if "*" not in origins else ["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(auth.router, prefix=f"{API_PREFIX}/auth", tags=["Authentication"])
 app.include_router(documents.router, prefix=f"{API_PREFIX}/documents", tags=["Documents"])
 app.include_router(financial.router, prefix=f"{API_PREFIX}/documents", tags=["Financial Data"])
 app.include_router(evidence.router, prefix=f"{API_PREFIX}/documents", tags=["Evidence"])
@@ -63,6 +75,7 @@ async def health():
 async def root():
     return {
         "service": "Finance Analyzer — Team 3 API",
+        "version": "2.0.0",
         "docs": "/docs",
         "health": "/health",
     }

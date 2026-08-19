@@ -1,29 +1,39 @@
 """
 backend/routes/evidence.py
 GET /api/documents/{id}/evidence/{finding_id}
+Enforces ownership validation: users can only view evidence for their own documents.
 """
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
 
-from backend.services.storage_service import get_job, JobStatus, financial_data_path, review_result_path, load_json
+from backend.auth.dependencies import get_current_active_user, get_user_document
+from backend.db.database import get_db
+from backend.db.models import User
+from backend.services.storage_service import (
+    financial_data_path,
+    load_json,
+    review_result_path,
+)
 from backend.services.evidence_service import resolve_evidence
 
 router = APIRouter()
 
 
 @router.get("/{document_id}/evidence/{finding_id}")
-async def get_evidence(document_id: str, finding_id: str):
+async def get_evidence(
+    document_id: str,
+    finding_id: str,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+):
     """
-    Return source evidence for a specific finding.
-    Evidence comes from Team 1 source traces and Team 2 finding metadata.
-    No fabrication — if unavailable, returns metadata_only status.
+    Return source evidence for a specific finding with strict ownership validation.
+    Evidence is sourced from Team 1 traces and Team 2 finding metadata.
     """
-    job = get_job(document_id)
-    if not job:
-        raise HTTPException(404, f"Document '{document_id}' not found.")
-    if job["status"] != JobStatus.COMPLETED:
-        raise HTTPException(409, f"Pipeline not complete. Status: {job['status']}")
+    # Enforce document ownership
+    get_user_document(document_id, db, current_user)
 
     fd = load_json(financial_data_path(document_id))
     rr = load_json(review_result_path(document_id))
