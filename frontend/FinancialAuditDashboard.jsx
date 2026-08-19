@@ -794,20 +794,32 @@ export default function FinancialAuditDashboard() {
           </div>
         </section>
 
-        {/* WP-514 REVIEW SECTION */}
+        {/* WP-514 REVIEW SECTION - HERO HIGHLIGHTED CENTERPIECE */}
         {analysisResult.wp514 && (
-          <section className="animate-fade-up" style={{ marginBottom: "28px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                <FileCheck2 size={20} color="var(--color-primary)" />
-                <h2 style={{ fontSize: "17px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-                  WP-514 Financial Statement Review
-                </h2>
+          <section className="wp514-hero-wrapper animate-fade-up">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "18px", flexWrap: "wrap", gap: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "32px", height: "32px", borderRadius: "8px", background: "var(--color-primary-soft)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <FileCheck2 size={18} color="var(--color-primary)" />
+                </div>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <h2 style={{ fontSize: "18px", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
+                      WP-514 Financial Statement Review
+                    </h2>
+                    <span className="wp514-badge-pulse">
+                      <span className="dot" /> Core Audit Engine
+                    </span>
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginTop: "2px" }}>
+                    Standardized compliance review & continuous assurance workpaper
+                  </div>
+                </div>
               </div>
               <button
                 onClick={() => { window.location.hash = "#wp514"; }}
-                className="fd-btn fd-btn-outline"
-                style={{ fontSize: "12px", padding: "6px 14px" }}
+                className="fd-btn fd-btn-primary hover-scale"
+                style={{ fontSize: "12px", padding: "8px 18px", boxShadow: "0 4px 14px rgba(16, 185, 129, 0.25)" }}
               >
                 View Full WP-514 Matrix →
               </button>

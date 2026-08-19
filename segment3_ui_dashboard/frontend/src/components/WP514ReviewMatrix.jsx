@@ -180,173 +180,117 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
       {/* ────────────────────────────────────────────────────────────
-          1. EXECUTIVE WORKPAPER BANNER WITH RADIAL COMPLIANCE SEAL
+          1. HEADER & DOCUMENT INFORMATION - HIGHLIGHTED HERO
           ──────────────────────────────────────────────────────────── */}
       <div
-        className="fd-card animate-fade-up hover-scale"
+        className="fd-card animate-fade-up"
         style={{
-          padding: "26px 30px",
-          background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)",
-          color: "#FFFFFF",
-          borderRadius: "16px",
-          border: "1px solid rgba(255, 255, 255, 0.08)",
-          boxShadow: "0 10px 30px -10px rgba(15, 23, 42, 0.4)",
-          position: "relative",
-          overflow: "hidden",
+          padding: "26px 28px",
+          background: "linear-gradient(135deg, rgba(236, 253, 245, 0.85) 0%, #FFFFFF 50%, rgba(240, 253, 244, 0.7) 100%)",
+          borderLeft: "6px solid var(--color-primary)",
+          borderTop: "1px solid rgba(16, 185, 129, 0.25)",
+          borderRight: "1px solid rgba(16, 185, 129, 0.2)",
+          borderBottom: "1px solid rgba(16, 185, 129, 0.2)",
+          boxShadow: "0 8px 24px -4px rgba(16, 185, 129, 0.12), 0 2px 6px rgba(0, 0, 0, 0.02)",
         }}
       >
-        {/* Ambient background glow */}
-        <div
-          style={{
-            position: "absolute",
-            top: "-40px",
-            right: "-40px",
-            width: "220px",
-            height: "220px",
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(16, 185, 129, 0.25) 0%, rgba(16, 185, 129, 0) 70%)",
-            pointerEvents: "none",
-          }}
-        />
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "20px", position: "relative", zIndex: 1 }}>
-          <div style={{ flex: 1, minWidth: "280px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "6px" }}>
               <span
                 style={{
-                  background: "rgba(16, 185, 129, 0.2)",
-                  color: "#34D399",
+                  background: "linear-gradient(135deg, #059669 0%, #10B981 100%)",
+                  color: "#FFFFFF",
                   padding: "4px 10px",
-                  borderRadius: "20px",
+                  borderRadius: "6px",
                   fontSize: "11px",
                   fontWeight: 800,
                   letterSpacing: "0.06em",
-                  border: "1px solid rgba(52, 211, 153, 0.3)",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "5px",
+                  boxShadow: "0 2px 6px rgba(16, 185, 129, 0.3)",
                 }}
               >
-                <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#34D399", boxShadow: "0 0 8px #34D399" }} />
                 WP-514 WORKPAPER
               </span>
-              <span style={{ fontSize: "11px", color: "#94A3B8", background: "rgba(255, 255, 255, 0.08)", padding: "3px 8px", borderRadius: "6px" }}>
+              <span style={{ fontSize: "12px", color: "var(--text-muted)", fontWeight: 600 }}>
                 Engine v{docInfo.engine_version || "2.0.0"}
               </span>
             </div>
-
-            <h2 style={{ fontSize: "22px", fontWeight: 800, color: "#FFFFFF", margin: "0 0 6px 0", letterSpacing: "-0.02em" }}>
+            <h2 style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 4px 0" }}>
               {title}
             </h2>
-            <p style={{ fontSize: "13px", color: "#94A3B8", margin: 0, lineHeight: 1.5 }}>
-              Standardized Financial Statement Review Matrix • Grounded against verified document extractions.
+            <p style={{ fontSize: "13px", color: "var(--text-secondary)", margin: 0, fontWeight: 500 }}>
+              {subtitle} • Grounded against verified document extractions and financial checks.
             </p>
           </div>
 
-          {/* Radial Compliance Gauge */}
-          {(() => {
-            const scoreVal = overall.score ?? 0;
-            const radius = 34;
-            const circumference = 2 * Math.PI * radius;
-            const strokeDash = circumference - (Math.min(100, Math.max(0, scoreVal)) / 100) * circumference;
-            const ringColor = scoreVal >= 80 ? "#10B981" : scoreVal >= 60 ? "#F59E0B" : "#EF4444";
-            const statusText = scoreVal >= 80 ? "CLEAN AUDIT" : scoreVal >= 60 ? "ATTENTION" : "HIGH RISK";
-
-            return (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  background: "rgba(255, 255, 255, 0.05)",
-                  padding: "10px 18px",
-                  borderRadius: "14px",
-                  border: "1px solid rgba(255, 255, 255, 0.1)",
-                  backdropFilter: "blur(8px)",
-                }}
-              >
-                <div style={{ position: "relative", width: "80px", height: "80px", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <svg width="80" height="80" viewBox="0 0 80 80" style={{ transform: "rotate(-90deg)" }}>
-                    <circle cx="40" cy="40" r={radius} stroke="rgba(255, 255, 255, 0.1)" strokeWidth="6" fill="none" />
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r={radius}
-                      stroke={ringColor}
-                      strokeWidth="6"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDash}
-                      strokeLinecap="round"
-                      fill="none"
-                      style={{ transition: "stroke-dashoffset 0.8s ease" }}
-                    />
-                  </svg>
-                  <div style={{ position: "absolute", textAlign: "center" }}>
-                    <span style={{ fontSize: "17px", fontWeight: 800, color: "#FFFFFF", lineHeight: 1 }}>
-                      {scoreVal.toFixed(1)}
-                    </span>
-                  </div>
-                </div>
-                <div>
-                  <div style={{ fontSize: "10px", color: "#94A3B8", textTransform: "uppercase", letterSpacing: "0.05em", fontWeight: 700 }}>
-                    Overall Compliance
-                  </div>
-                  <div style={{ fontSize: "11px", fontWeight: 800, color: ringColor, background: `${ringColor}25`, padding: "2px 8px", borderRadius: "6px", marginTop: "4px", display: "inline-block" }}>
-                    {statusText}
-                  </div>
-                </div>
+          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            <div className="wp514-score-box">
+              <div style={{ fontSize: "10px", color: "var(--text-secondary)", fontWeight: 700, letterSpacing: "0.05em", textTransform: "uppercase" }}>
+                Overall Compliance Score
               </div>
-            );
-          })()}
+              <div style={{ fontSize: "26px", fontWeight: 800, color: "var(--color-primary)", lineHeight: 1.1, marginTop: "2px" }}>
+                {overall.score?.toFixed(1) ?? "0.0"}
+                <span style={{ fontSize: "14px", fontWeight: 500, color: "var(--text-muted)" }}> / 100</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Metadata Frosted Pills */}
+        {/* Metadata Badges */}
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))",
-            gap: "10px",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "12px",
             marginTop: "20px",
-            paddingTop: "16px",
-            borderTop: "1px solid rgba(255, 255, 255, 0.1)",
+            paddingTop: "18px",
+            borderTop: "1px solid rgba(16, 185, 129, 0.15)",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255, 255, 255, 0.04)", padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <Building size={16} color="#34D399" />
+          <div className="wp514-meta-card">
+            <div style={{ width: "30px", height: "30px", borderRadius: "6px", background: "var(--color-primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Building size={16} color="var(--color-primary)" />
+            </div>
             <div>
-              <div style={{ fontSize: "10px", color: "#94A3B8", textTransform: "uppercase" }}>Entity</div>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#FFFFFF", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Entity</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {docInfo.company_name || "Not available"}
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255, 255, 255, 0.04)", padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <Calendar size={16} color="#34D399" />
+          <div className="wp514-meta-card">
+            <div style={{ width: "30px", height: "30px", borderRadius: "6px", background: "var(--color-primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Calendar size={16} color="var(--color-primary)" />
+            </div>
             <div>
-              <div style={{ fontSize: "10px", color: "#94A3B8", textTransform: "uppercase" }}>Period / FY</div>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#FFFFFF" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Period / FY</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {docInfo.reporting_period || docInfo.financial_year || "Not available"}
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255, 255, 255, 0.04)", padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <Scale size={16} color="#34D399" />
+          <div className="wp514-meta-card">
+            <div style={{ width: "30px", height: "30px", borderRadius: "6px", background: "var(--color-primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Scale size={16} color="var(--color-primary)" />
+            </div>
             <div>
-              <div style={{ fontSize: "10px", color: "#94A3B8", textTransform: "uppercase" }}>Unit & Scale</div>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#FFFFFF" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Unit & Scale</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {docInfo.currency && docInfo.scale ? `${docInfo.currency} in ${docInfo.scale}` : (docInfo.currency || docInfo.scale || "Not available")}
                 {docInfo.statement_type ? ` (${docInfo.statement_type})` : ""}
               </div>
             </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", background: "rgba(255, 255, 255, 0.04)", padding: "8px 12px", borderRadius: "10px", border: "1px solid rgba(255, 255, 255, 0.06)" }}>
-            <FileSpreadsheet size={16} color="#34D399" />
+          <div className="wp514-meta-card">
+            <div style={{ width: "30px", height: "30px", borderRadius: "6px", background: "var(--color-primary-soft)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <FileSpreadsheet size={16} color="var(--color-primary)" />
+            </div>
             <div>
-              <div style={{ fontSize: "10px", color: "#94A3B8", textTransform: "uppercase" }}>Framework</div>
-              <div style={{ fontSize: "12px", fontWeight: 700, color: "#FFFFFF" }}>
+              <div style={{ fontSize: "10px", color: "var(--text-muted)", fontWeight: 600, textTransform: "uppercase" }}>Framework</div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
                 {docInfo.reporting_framework || "Not available"}
               </div>
             </div>
@@ -355,130 +299,70 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          2. INTERACTIVE EXECUTIVE STATUS STRIP (KPI PILLS)
+          2. EXECUTIVE SUMMARY METRICS WITH VISUAL ICONS
           ──────────────────────────────────────────────────────────── */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: "12px",
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gap: "14px",
         }}
       >
-        <div
-          onClick={() => setStatusFilter("ALL")}
-          className="fd-card interactive-card hover-scale"
-          style={{
-            padding: "14px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            border: statusFilter === "ALL" ? "2px solid var(--color-primary)" : "1px solid var(--border-subtle)",
-            background: statusFilter === "ALL" ? "var(--color-primary-soft)" : "var(--bg-card)",
-          }}
-        >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Layers size={18} color="var(--text-primary)" />
+        <div className="fd-card interactive-card hover-scale" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", background: "#FFFFFF", borderTop: "3px solid #64748b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Layers size={20} color="var(--text-primary)" />
           </div>
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>TOTAL CHECKS</div>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "var(--text-primary)", marginTop: "1px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", letterSpacing: "0.04em" }}>TOTAL CHECKS</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "var(--text-primary)", marginTop: "2px" }}>
               {overall.total_checks ?? checks.length}
             </div>
           </div>
         </div>
 
-        <div
-          onClick={() => setStatusFilter("PASSED")}
-          className="fd-card interactive-card hover-scale"
-          style={{
-            padding: "14px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            border: statusFilter === "PASSED" ? "2px solid #10B981" : "1px solid var(--border-subtle)",
-            background: statusFilter === "PASSED" ? "rgba(16, 185, 129, 0.1)" : "var(--bg-card)",
-          }}
-        >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(16, 185, 129, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <CheckCircle2 size={18} color="#059669" />
+        <div className="fd-card interactive-card hover-scale" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", background: "#FFFFFF", borderTop: "3px solid #10b981", boxShadow: "0 2px 8px rgba(16, 185, 129, 0.08)" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(16, 185, 129, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CheckCircle2 size={20} color="#059669" />
           </div>
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "#059669", letterSpacing: "0.04em" }}>PASSED</div>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "#059669", marginTop: "1px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#059669", letterSpacing: "0.04em" }}>PASSED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#059669", marginTop: "2px" }}>
               {overall.passed ?? 0}
             </div>
           </div>
         </div>
 
-        <div
-          onClick={() => setStatusFilter("REVIEW")}
-          className="fd-card interactive-card hover-scale"
-          style={{
-            padding: "14px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            border: statusFilter === "REVIEW" ? "2px solid #F59E0B" : "1px solid var(--border-subtle)",
-            background: statusFilter === "REVIEW" ? "rgba(245, 158, 11, 0.1)" : "var(--bg-card)",
-          }}
-        >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(245, 158, 11, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <AlertTriangle size={18} color="#D97706" />
+        <div className="fd-card interactive-card hover-scale" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", background: "#FFFFFF", borderTop: "3px solid #f59e0b", boxShadow: "0 2px 8px rgba(245, 158, 11, 0.08)" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(245, 158, 11, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertTriangle size={20} color="#d97706" />
           </div>
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "#D97706", letterSpacing: "0.04em" }}>REVIEW REQUIRED</div>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "#D97706", marginTop: "1px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#d97706", letterSpacing: "0.04em" }}>REVIEW REQUIRED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#d97706", marginTop: "2px" }}>
               {overall.review ?? 0}
             </div>
           </div>
         </div>
 
-        <div
-          onClick={() => setStatusFilter("FAILED")}
-          className="fd-card interactive-card hover-scale"
-          style={{
-            padding: "14px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            border: statusFilter === "FAILED" ? "2px solid #EF4444" : "1px solid var(--border-subtle)",
-            background: statusFilter === "FAILED" ? "rgba(239, 68, 68, 0.1)" : "var(--bg-card)",
-          }}
-        >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <AlertOctagon size={18} color="#DC2626" />
+        <div className="fd-card interactive-card hover-scale" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", background: "#FFFFFF", borderTop: "3px solid #ef4444", boxShadow: "0 2px 8px rgba(239, 68, 68, 0.08)" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(239, 68, 68, 0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <AlertOctagon size={20} color="#dc2626" />
           </div>
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "#DC2626", letterSpacing: "0.04em" }}>FAILED</div>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "#DC2626", marginTop: "1px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#dc2626", letterSpacing: "0.04em" }}>FAILED</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#dc2626", marginTop: "2px" }}>
               {overall.failed ?? 0}
             </div>
           </div>
         </div>
 
-        <div
-          onClick={() => setStatusFilter("NOT_AVAILABLE")}
-          className="fd-card interactive-card hover-scale"
-          style={{
-            padding: "14px 18px",
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            cursor: "pointer",
-            border: statusFilter === "NOT_AVAILABLE" ? "2px solid #64748B" : "1px solid var(--border-subtle)",
-            background: statusFilter === "NOT_AVAILABLE" ? "rgba(100, 116, 139, 0.1)" : "var(--bg-card)",
-          }}
-        >
-          <div style={{ width: "38px", height: "38px", borderRadius: "10px", background: "rgba(100, 116, 139, 0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <HelpCircle size={18} color="#64748B" />
+        <div className="fd-card interactive-card hover-scale" style={{ padding: "16px 18px", display: "flex", alignItems: "center", gap: "14px", background: "#FFFFFF", borderTop: "3px solid #64748b" }}>
+          <div style={{ width: "42px", height: "42px", borderRadius: "10px", background: "rgba(100, 116, 139, 0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <HelpCircle size={20} color="#64748b" />
           </div>
           <div>
-            <div style={{ fontSize: "10px", fontWeight: 700, color: "#64748B", letterSpacing: "0.04em" }}>NOT IN FILING</div>
-            <div style={{ fontSize: "20px", fontWeight: 800, color: "#64748B", marginTop: "1px" }}>
+            <div style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", letterSpacing: "0.04em" }}>NOT IN FILING</div>
+            <div style={{ fontSize: "22px", fontWeight: 800, color: "#64748b", marginTop: "2px" }}>
               {overall.not_available ?? 0}
             </div>
           </div>

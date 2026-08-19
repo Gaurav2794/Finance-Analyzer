@@ -349,3 +349,88 @@ body {
   animation: shimmer 2.5s infinite;
 }
 
+/* ============================================================
+   WP-514 HERO SECTION HIGHLIGHTS
+   ============================================================ */
+
+.wp514-hero-wrapper {
+  position: relative;
+  background: linear-gradient(180deg, rgba(240, 253, 244, 0.6) 0%, rgba(248, 250, 252, 0.4) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 20px;
+  padding: 24px 28px;
+  margin-bottom: 32px;
+  box-shadow: 0 10px 30px -5px rgba(16, 185, 129, 0.08), 0 4px 16px -2px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.wp514-hero-wrapper:hover {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 14px 36px -6px rgba(16, 185, 129, 0.12), 0 6px 20px -3px rgba(0, 0, 0, 0.04);
+}
+
+.wp514-badge-pulse {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #059669 0%, #10B981 100%);
+  color: #FFFFFF;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+}
+
+.wp514-badge-pulse .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #FFFFFF;
+  box-shadow: 0 0 8px #FFFFFF;
+  animation: pulse-dot 1.8s infinite;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.35); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.wp514-score-box {
+  background: linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%);
+  border: 1.5px solid rgba(16, 185, 129, 0.3);
+  border-radius: 12px;
+  padding: 10px 18px;
+  text-align: right;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.12);
+  transition: all 0.2s ease;
+}
+
+.wp514-score-box:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-primary);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.2);
+}
+
+.wp514-meta-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #FFFFFF;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  transition: all 0.15s ease;
+}
+
+.wp514-meta-card:hover {
+  border-color: rgba(16, 185, 129, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.04);
+}
+
+
