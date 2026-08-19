@@ -82,19 +82,28 @@ FINANCIAL_LEXICON: Set[str] = {
     "receivable", "receivables", "payable", "payables", "inventories", "inventory",
     "borrowing", "borrowings", "leasehold", "freehold", "subordinated", "unsecured",
     "secured", "reconciliation", "reconcile", "reconciled", "derecognition", "derecognise",
-    "derecognize", "derecognised", "derecognized", "impairment", "impaired",
+    "derecognize", "derecognised", "derecognized", "recognition", "recognise", "recognize",
+    "recognised", "recognized", "impairment", "impaired",
     "goodwill", "contingencies", "contingency", "contingent", "segmental", "segment",
     "carrying", "realisable", "realizable", "indemnification", "annexure", "standalone",
     "consolidated", "disinvestment", "remittance", "statutory", "actuarial", "gratuity",
     "superannuation", "encashment", "hedging", "derivative", "derivatives", "notional",
-    "prepayment", "prepayments", "syndicated", "consortium", "hypothecation",
-    "mortgage", "mortgages", "pledged", "encumbrance", "encumbrances", "unencumbered",
-    "solvency", "liquidity", "leverage", "profitability", "equity", "liabilities",
-    "assets", "turnover", "working", "capital", "provision", "provisions",
+    "prepayment", "prepayments", "repayment", "repayments", "syndicated", "consortium",
+    "hypothecation", "mortgage", "mortgages", "pledged", "encumbrance", "encumbrances",
+    "unencumbered", "solvency", "liquidity", "leverage", "profitability", "equity",
+    "liabilities", "assets", "turnover", "working", "capital", "provision", "provisions",
     "reserves", "surplus", "retained", "earnings", "accrual", "accruals", "accrued",
     "dividend", "dividends", "annuity", "annuities", "collateral", "collaterals",
     "coupon", "coupons", "yield", "yields", "inter-alia", "pari-passu", "pro-rata",
-    "mutatis-mutandis", "bonafide", "prima-facie", "ad-hoc",
+    "mutatis-mutandis", "bonafide", "prima-facie", "ad-hoc", "lease", "leases", "leasing",
+    "leased", "sales", "sale", "ageing", "aging", "aged", "unrecorded", "recorded",
+    "legal", "legally", "fall", "shift", "shifts", "shifted", "retirement", "range",
+    "ranges", "overheads", "automotive", "automobile", "powertrain", "components",
+    "component", "passenger", "commercial", "software", "manufactures", "manufacturing",
+    "vehicle", "vehicles", "bonuses",
+    "bonus", "incentives", "incentive", "supplier", "suppliers", "personnel", "quarter",
+    "quarters", "quarterly", "methodology", "appropriation", "appropriations", "seasonality",
+    "seasonal",
     
     # Common Business & Audit Vocabulary
     "auditor", "auditors", "audit", "audited", "unaudited", "review", "reviewed",
@@ -519,6 +528,8 @@ class LanguageQualityEngine:
 
         for token in tokens:
             token_clean = token.strip("'-").lower()
+            if token_clean.endswith("'s"):
+                token_clean = token_clean[:-2]
             if not token_clean or len(token_clean) <= 2:
                 continue
 

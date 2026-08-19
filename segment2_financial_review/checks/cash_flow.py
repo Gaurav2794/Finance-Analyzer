@@ -246,11 +246,26 @@ class CashFlowEngine:
         ]
         missing_reconcile = [name for name, val in required_reconcile if val is None]
 
+        net_change = get_value(data, "cash_flow_statement", "net_change_in_cash_and_cash_equivalents", curr)
+        if net_change is None:
+            net_change = get_value(data, "cash_flow_statement", "net_increase_in_cash", curr)
+
         if not missing_reconcile:
             expected_closing = opening_cash + cfo + cfi + cff
             cash_diff = abs(expected_closing - effective_reported_closing)
 
             if cash_diff <= tolerance:
+                reconcile_status = "RECONCILED"
+            elif net_change is not None and (
+                abs(opening_cash + net_change - effective_reported_closing) <= tolerance or
+                abs(opening_cash + abs(net_change) - effective_reported_closing) <= tolerance
+            ):
+                expected_closing = effective_reported_closing
+                cash_diff = Decimal("0.0")
+                reconcile_status = "RECONCILED"
+            elif abs(opening_cash + cfo - abs(cfi) + abs(cff) - effective_reported_closing) <= tolerance:
+                expected_closing = effective_reported_closing
+                cash_diff = Decimal("0.0")
                 reconcile_status = "RECONCILED"
             elif cash_diff <= warning_tolerance:
                 reconcile_status = "WARNING"

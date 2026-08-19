@@ -1000,11 +1000,12 @@ class WP514Service:
         # Check 4: Spelling Review
         spell_errs = lq_data.get("spelling_errors_count")
         lq_status = lq_data.get("status", "NOT_AVAILABLE")
+        spell_status = "PASSED" if (spell_errs is not None and spell_errs == 0) else ("FAILED" if (spell_errs and spell_errs > 0) else lq_status)
         checks.append({
             "id": "WP514-DQ-04",
             "category": "DOCUMENT_QUALITY",
             "check": "Narrative Notes & Disclosures Spelling Review",
-            "status": lq_status,
+            "status": spell_status,
             "expected_value": "0 spelling errors" if lq_status != "NOT_AVAILABLE" else None,
             "actual_value": f"{spell_errs} spelling errors" if (lq_status != "NOT_AVAILABLE" and spell_errs is not None) else None,
             "difference": None,
@@ -1017,11 +1018,12 @@ class WP514Service:
 
         # Check 5: Grammar Review
         gram_errs = lq_data.get("grammar_issues_count")
+        gram_status = "PASSED" if (gram_errs is not None and gram_errs == 0) else ("FAILED" if (gram_errs and gram_errs > 0) else lq_status)
         checks.append({
             "id": "WP514-DQ-05",
             "category": "DOCUMENT_QUALITY",
             "check": "Narrative Notes & Disclosures Grammar Review",
-            "status": lq_status,
+            "status": gram_status,
             "expected_value": "0 grammar issues" if lq_status != "NOT_AVAILABLE" else None,
             "actual_value": f"{gram_errs} grammar issues" if (lq_status != "NOT_AVAILABLE" and gram_errs is not None) else None,
             "difference": None,

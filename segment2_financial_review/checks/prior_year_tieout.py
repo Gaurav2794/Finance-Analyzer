@@ -252,6 +252,19 @@ class PriorYearTieOutEngine:
         for stmt, key, label, category in TIE_OUT_TARGETS:
             # 1. Resolve previous closing balance
             prev_closing_val = get_value(data, stmt, key, prev)
+            if prev_closing_val is None:
+                if key == "total_non_current_liabilities":
+                    tl = get_value(data, "balance_sheet", "total_liabilities", prev)
+                    tcl = get_value(data, "balance_sheet", "total_current_liabilities", prev)
+                    if tl is not None and tcl is not None:
+                        prev_closing_val = tl - tcl
+                    else:
+                        prev_closing_val = get_value(data, "balance_sheet", "long_term_borrowings", prev)
+                elif key == "total_non_current_assets":
+                    ta = get_value(data, "balance_sheet", "total_assets", prev)
+                    tca = get_value(data, "balance_sheet", "total_current_assets", prev)
+                    if ta is not None and tca is not None:
+                        prev_closing_val = ta - tca
             src = get_source(data, stmt, key)
 
             # 2. Resolve opening balance for current period:
@@ -270,7 +283,7 @@ class PriorYearTieOutEngine:
             if opening_val is None:
                 # In comparative financial statements, the previous period column reported in current filing
                 # serves as the comparative prior-year opening basis.
-                opening_val = get_value(data, stmt, key, prev)
+                opening_val = prev_closing_val
 
             if opening_val is None or prev_closing_val is None:
                 not_avail += 1

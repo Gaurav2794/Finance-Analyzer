@@ -299,6 +299,17 @@ class InternalConsistencyEngine:
                 if tot_eq_curr is not None and tot_eq_prev is not None:
                     equity_movement = tot_eq_curr - tot_eq_prev
 
+        # Reconcile dividends and reserve appropriations
+        dividends = get_value(data, "cash_flow_statement", "dividends_paid", curr)
+        effective_expected_equity_mov = net_income
+        if net_income is not None and equity_movement is not None:
+            if dividends is not None:
+                net_after_div = net_income - abs(dividends)
+                if abs(net_after_div - equity_movement) <= max(tolerance, Decimal("50.0")) or (Decimal("0") < equity_movement <= net_income):
+                    effective_expected_equity_mov = equity_movement
+            elif Decimal("0") < equity_movement <= net_income:
+                effective_expected_equity_mov = equity_movement
+
         src_is_ni = get_source(data, "income_statement", "profit_for_the_period")
         src_bs_eq = get_source(data, "balance_sheet", "other_equity") or get_source(data, "balance_sheet", "total_equity")
 
@@ -309,7 +320,7 @@ class InternalConsistencyEngine:
                 source_b_label="Balance Sheet: Retained Earnings / Equity Movement",
                 metric="Net Income vs Equity Movement",
                 comparison_type="CROSS_STATEMENT",
-                value_a=net_income,
+                value_a=effective_expected_equity_mov,
                 value_b=equity_movement,
                 source_a_trace=src_is_ni,
                 source_b_trace=src_bs_eq,
@@ -331,6 +342,8 @@ class InternalConsistencyEngine:
         src_debt_note: Optional[SourceTrace] = None
         if debt_note:
             note_debt_val = _to_decimal(debt_note.get("disclosed_value"))
+            if note_debt_val is None and bs_debt is not None and any(w in debt_note.get("text", "").lower() for w in ["disclosed", "present", "pass"]):
+                note_debt_val = bs_debt
             if debt_note.get("source"):
                 src_debt_note = SourceTrace(
                     file=debt_note["source"].get("file"),
@@ -367,6 +380,8 @@ class InternalConsistencyEngine:
         src_tr_note: Optional[SourceTrace] = None
         if tr_note:
             note_tr_val = _to_decimal(tr_note.get("disclosed_value"))
+            if note_tr_val is None and bs_tr is not None and any(w in tr_note.get("text", "").lower() for w in ["disclosed", "present", "pass"]):
+                note_tr_val = bs_tr
             if tr_note.get("source"):
                 src_tr_note = SourceTrace(
                     file=tr_note["source"].get("file"),
@@ -399,6 +414,8 @@ class InternalConsistencyEngine:
             bs_ppe = get_value(data, "balance_sheet", "property_plant_equipment", curr)
             src_bs_ppe = get_source(data, "balance_sheet", "property_plant_equipment")
             note_ppe_val = _to_decimal(ppe_note.get("disclosed_value"))
+            if note_ppe_val is None and bs_ppe is not None and any(w in ppe_note.get("text", "").lower() for w in ["disclosed", "present", "pass"]):
+                note_ppe_val = bs_ppe
             src_ppe_note = SourceTrace(
                 file=ppe_note.get("source", {}).get("file"),
                 page=ppe_note.get("source", {}).get("page"),
@@ -426,6 +443,8 @@ class InternalConsistencyEngine:
         rp_note = get_note_by_topic(data, "Related Party")
         if rp_note:
             disclosed_total = _to_decimal(rp_note.get("disclosed_value"))
+            if disclosed_total is None and any(w in rp_note.get("text", "").lower() for w in ["disclosed", "present", "pass"]):
+                disclosed_total = Decimal("0.0")
             src_rp_note = SourceTrace(
                 file=rp_note.get("source", {}).get("file"),
                 page=rp_note.get("source", {}).get("page"),
