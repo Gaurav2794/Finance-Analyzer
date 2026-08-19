@@ -371,7 +371,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
           <div>
             <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-              WP-514 Audit Review Categories ({categories.length})
+              WP-514 Audit Review Categories
             </h3>
             <p style={{ fontSize: "12px", color: "var(--text-secondary)", margin: "2px 0 0" }}>
               Click any category card to filter and highlight check details below.
@@ -399,7 +399,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               </>
             ) : (
               <>
-                Show More Categories ({categories.length}) <ChevronDown size={15} />
+                Show More Categories <ChevronDown size={15} />
               </>
             )}
           </button>
@@ -533,10 +533,10 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                 <ChevronDown size={20} />
               </div>
               <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
-                +{categories.length - 3} More Categories
+                + More Categories
               </div>
               <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
-                Click to view all {categories.length} review procedures
+                Click to view all review procedures
               </div>
             </div>
           )}
