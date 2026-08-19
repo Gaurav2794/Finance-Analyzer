@@ -253,9 +253,12 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
     >
       <style>{`
         @media print {
+          /* Zero out the @page top/bottom margins so the browser has no space
+             to render its default header (date/time) and footer (URL/page num).
+             Left/right margins are kept for a clean gutter. */
           @page {
-            margin: 12mm 14mm;
             size: A4 portrait;
+            margin: 0mm 14mm;
           }
           body {
             background: #FFFFFF !important;
@@ -266,7 +269,11 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
           }
           .audit-report-container {
             background: #FFFFFF !important;
-            padding: 0 !important;
+            /* Restore breathing room that @page margin-top:0 removed */
+            padding-top: 10mm !important;
+            padding-bottom: 10mm !important;
+            padding-left: 0 !important;
+            padding-right: 0 !important;
             max-width: 100% !important;
             margin: 0 !important;
           }
@@ -320,7 +327,15 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
 
         <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
           <button
-            onClick={() => window.print()}
+            onClick={() => {
+              // Blank document.title so the browser print header
+              // shows nothing (or just whitespace) instead of
+              // "Financial Audit Dashboard". Restore after print closes.
+              const prev = document.title;
+              document.title = " ";
+              window.print();
+              document.title = prev;
+            }}
             className="fd-btn fd-btn-primary hover-scale"
             style={{
               display: "inline-flex",
