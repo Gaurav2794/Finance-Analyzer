@@ -44,6 +44,45 @@ const cleanText = (str) => {
     .replace(/\bNone\b/g, "N/A");
 };
 
+const formatCheckValue = (val, checkName = "") => {
+  if (val === null || val === undefined || val === "") return "";
+  let str = String(val).trim();
+  if (!str) return "";
+
+  const isMargin = /margin/i.test(checkName);
+
+  if (isMargin) {
+    str = str.replace(/[₹$]/g, "").replace(/\s*(Millions|Cr|Crores|Billion|M)\b/gi, "").trim();
+    const match = str.match(/[-+]?\d*\.?\d+/);
+    if (match) {
+      const num = parseFloat(match[0]);
+      if (!isNaN(num)) {
+        return `${num.toFixed(2)}%`;
+      }
+    }
+  }
+
+  const currencyMatch = str.match(/^([+-]?[₹$]?-?)\s*([-+]?\d+(?:\.\d+)?)\s*(.*)$/);
+  if (currencyMatch) {
+    const rawPrefix = currencyMatch[1] || "";
+    const num = parseFloat(currencyMatch[2]);
+    const suffix = currencyMatch[3] ? ` ${currencyMatch[3].trim()}` : "";
+    if (!isNaN(num)) {
+      const isNegative = num < 0 || rawPrefix.includes("-");
+      const absVal = Math.abs(num);
+      const isWhole = absVal === Math.floor(absVal);
+      const formattedNum = isWhole 
+        ? absVal.toLocaleString("en-IN") 
+        : absVal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const sign = isNegative ? "-" : (rawPrefix.includes("+") ? "+" : "");
+      const sym = rawPrefix.replace(/[-+]/g, "");
+      return `${sign}${sym}${formattedNum}${suffix}`.trim();
+    }
+  }
+
+  return str;
+};
+
 export default function AuditReportPrint({ extractionResult, analysisResult }) {
   const fm = analysisResult?.financial_metrics || {};
   const findings = analysisResult?.findings || [];
@@ -621,8 +660,8 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                           {chk.status}
                         </span>
                       </td>
-                      {hasExp && <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>}
-                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || ""}</td>
+                      {hasExp && <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{formatCheckValue(chk.expected_value, chk.check)}</td>}
+                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{formatCheckValue(chk.actual_value, chk.check)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -788,8 +827,8 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                     {chk.status}
                   </span>
                 </td>
-                <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>
-                <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || ""}</td>
+                <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{formatCheckValue(chk.expected_value, chk.check)}</td>
+                <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{formatCheckValue(chk.actual_value, chk.check)}</td>
               </tr>
             ))}
           </tbody>

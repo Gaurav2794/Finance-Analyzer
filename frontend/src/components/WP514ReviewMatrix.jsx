@@ -68,6 +68,45 @@ const STATUS_CONFIG = {
   },
 };
 
+function formatCheckValue(val, checkName = "") {
+  if (val === null || val === undefined || val === "") return "";
+  let str = String(val).trim();
+  if (!str) return "";
+
+  const isMargin = /margin/i.test(checkName);
+
+  if (isMargin) {
+    str = str.replace(/[₹$]/g, "").replace(/\s*(Millions|Cr|Crores|Billion|M)\b/gi, "").trim();
+    const match = str.match(/[-+]?\d*\.?\d+/);
+    if (match) {
+      const num = parseFloat(match[0]);
+      if (!isNaN(num)) {
+        return `${num.toFixed(2)}%`;
+      }
+    }
+  }
+
+  const currencyMatch = str.match(/^([+-]?[₹$]?-?)\s*([-+]?\d+(?:\.\d+)?)\s*(.*)$/);
+  if (currencyMatch) {
+    const rawPrefix = currencyMatch[1] || "";
+    const num = parseFloat(currencyMatch[2]);
+    const suffix = currencyMatch[3] ? ` ${currencyMatch[3].trim()}` : "";
+    if (!isNaN(num)) {
+      const isNegative = num < 0 || rawPrefix.includes("-");
+      const absVal = Math.abs(num);
+      const isWhole = absVal === Math.floor(absVal);
+      const formattedNum = isWhole 
+        ? absVal.toLocaleString("en-IN") 
+        : absVal.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const sign = isNegative ? "-" : (rawPrefix.includes("+") ? "+" : "");
+      const sym = rawPrefix.replace(/[-+]/g, "");
+      return `${sign}${sym}${formattedNum}${suffix}`.trim();
+    }
+  }
+
+  return str;
+}
+
 function getCategoryDisplayStatus(cat) {
   if (!cat) return "PASSED";
   if (cat.failed_checks > 0) return "FAILED";
@@ -911,12 +950,12 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                       </td>
                                       {hasExpected && (
                                         <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                                          {chk.expected_value || ""}
+                                          {formatCheckValue(chk.expected_value, chk.check)}
                                         </td>
                                       )}
                                       {hasActual && (
                                         <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
-                                          {chk.actual_value || ""}
+                                          {formatCheckValue(chk.actual_value, chk.check)}
                                         </td>
                                       )}
                                       {hasDiff && (
