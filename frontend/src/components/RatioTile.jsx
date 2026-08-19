@@ -139,7 +139,7 @@ export default function RatioTile({ label, value }) {
           margin: "2px 0",
         }}
       >
-        {formattedValue}
+        {isMissing ? "Not in Filing" : formattedValue}
       </div>
 
       {/* Visual Indicator Bar */}
