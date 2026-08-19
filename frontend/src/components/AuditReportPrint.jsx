@@ -662,10 +662,10 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                 <tbody>
                   {catChecks.map(chk => (
                     <tr key={chk.id}>
-                      <td style={{ fontFamily: "Courier, monospace", fontSize: "8pt", color: "#64748B" }}>{chk.id}</td>
+                      <td style={{ fontFamily: "Courier, monospace", fontSize: "8pt", color: "#64748B" }}>{chk.id.replace(/^WP514-/, "")}</td>
                       <td>
-                        <strong>{chk.check}</strong>
-                        {chk.evidence && <div style={{ fontSize: "7.5pt", color: "#64748B", marginTop: 2 }}>{chk.evidence}</div>}
+                        <strong>{cleanText(chk.check)}</strong>
+                        {chk.evidence && <div style={{ fontSize: "7.5pt", color: "#64748B", marginTop: 2 }}>{cleanText(chk.evidence)}</div>}
                       </td>
                       <td>
                         <span className={`status-tag ${chk.status === "PASSED" ? "status-passed" : chk.status === "FAILED" ? "status-failed" : chk.status === "NOT_AVAILABLE" ? "status-na" : "status-review"}`}>
@@ -828,11 +828,11 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
           <tbody>
             {allChecks.map((chk, i) => (
               <tr key={chk.id || i}>
-                <td style={{ fontFamily: "Courier, monospace", color: "#64748B" }}>{chk.id}</td>
+                <td style={{ fontFamily: "Courier, monospace", color: "#64748B" }}>{chk.id.replace(/^WP514-/, "")}</td>
                 <td style={{ textTransform: "capitalize" }}>{(chk.category || "").replace(/_/g, " ")}</td>
                 <td>
-                  <strong>{chk.check}</strong>
-                  {chk.evidence && <div style={{ fontSize: "7.5pt", color: "#64748B", marginTop: 1 }}>{chk.evidence}</div>}
+                  <strong>{cleanText(chk.check)}</strong>
+                  {chk.evidence && <div style={{ fontSize: "7.5pt", color: "#64748B", marginTop: 1 }}>{cleanText(chk.evidence)}</div>}
                 </td>
                 <td>
                   <span className={`status-tag ${chk.status === "PASSED" ? "status-passed" : chk.status === "FAILED" ? "status-failed" : chk.status === "NOT_AVAILABLE" ? "status-na" : "status-review"}`}>

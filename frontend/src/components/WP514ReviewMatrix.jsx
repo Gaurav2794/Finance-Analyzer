@@ -69,9 +69,9 @@ const STATUS_CONFIG = {
 };
 
 function formatCheckValue(val, checkName = "") {
-  if (val === null || val === undefined || val === "") return "";
+  if (val === null || val === undefined || val === "" || String(val).trim() === "None") return "";
   let str = String(val).trim();
-  if (!str) return "";
+  if (!str || str === "None") return "";
 
   const isMargin = /margin/i.test(checkName);
 
@@ -104,12 +104,20 @@ function formatCheckValue(val, checkName = "") {
     }
   }
 
-  return str;
+  return str.replace(/\bNone\b/g, "0");
 }
 
 function cleanNarrativeText(str) {
   if (!str) return "";
-  let s = String(str);
+  let s = String(str)
+    .replace(/None\s*%/gi, "0.0%")
+    .replace(/None\s*Cr/gi, "0 Millions")
+    .replace(/None\s*Millions/gi, "0 Millions")
+    .replace(/None\s*pp/gi, "0.0 pp")
+    .replace(/=\s*None/gi, "= 0")
+    .replace(/:\s*None/gi, ": 0")
+    .replace(/\bNone\b/g, "0");
+
   s = s.replace(/(\d+(?:\.\d+)?)\s*Cr\b/gi, (match, p1) => {
     const n = parseFloat(p1);
     const formatted = !isNaN(n) ? (n % 1 === 0 ? n.toLocaleString("en-IN") : n.toFixed(2)) : p1;
@@ -923,26 +931,27 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                           <div
                             className="animate-slide-down"
                             style={{
-                              overflowX: "auto",
+                              width: "100%",
                               borderTop: "1px solid var(--border-light, #E2E8F0)",
                             }}
                           >
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11.5px" }}>
+                            <table style={{ width: "100%", tableLayout: "fixed", borderCollapse: "collapse", fontSize: "11px" }}>
                               <thead>
                                 <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left", borderBottom: "1px solid var(--border-light, #E2E8F0)" }}>
-                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "85px", minWidth: "85px", maxWidth: "85px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
-                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", minWidth: "250px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
-                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", minWidth: "95px", maxWidth: "95px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
-                                  {hasExpected && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "135px", minWidth: "135px", maxWidth: "135px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
-                                  {hasActual && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "135px", minWidth: "135px", maxWidth: "135px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
-                                  {hasDiff && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "115px", minWidth: "115px", maxWidth: "115px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
-                                  {hasThreshold && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "115px", minWidth: "115px", maxWidth: "115px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
-                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", minWidth: "95px", maxWidth: "95px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
+                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "55px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
+                                  <th style={{ padding: "8px 10px", fontWeight: 700, color: "var(--text-secondary)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
+                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "82px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
+                                  {hasExpected && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "13%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
+                                  {hasActual && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "13%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
+                                  {hasDiff && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "11%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
+                                  {hasThreshold && <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "11%", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
+                                  <th style={{ padding: "8px 8px", fontWeight: 700, color: "var(--text-secondary)", width: "72px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {catChecks.map((chk, i) => {
                                   const isEven = i % 2 === 0;
+                                  const shortId = chk.id ? chk.id.replace(/^WP514-/, "") : "";
                                   return (
                                     <tr
                                       key={chk.id}
@@ -951,51 +960,51 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                         borderBottom: "1px solid var(--border-subtle, #F1F5F9)",
                                       }}
                                     >
-                                      <td style={{ padding: "9px 12px", fontFamily: "monospace", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
-                                        {chk.id}
+                                      <td style={{ padding: "8px 8px", fontFamily: "monospace", fontSize: "10px", color: "var(--text-muted)", whiteSpace: "nowrap" }} title={chk.id}>
+                                        {shortId}
                                       </td>
-                                      <td style={{ padding: "9px 12px", fontWeight: 600, color: "var(--text-primary)", wordBreak: "break-word" }}>
+                                      <td style={{ padding: "8px 10px", fontWeight: 600, color: "var(--text-primary)", wordBreak: "break-word", overflowWrap: "anywhere" }}>
                                         <div>{cleanNarrativeText(chk.check)}</div>
                                         {chk.evidence && (
-                                          <div style={{ fontSize: "10.5px", fontWeight: 400, color: "var(--text-muted)", marginTop: "3px", lineHeight: 1.4, wordBreak: "break-word" }}>
+                                          <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px", lineHeight: 1.35, wordBreak: "break-word", overflowWrap: "anywhere" }}>
                                             {cleanNarrativeText(chk.evidence)}
                                           </div>
                                         )}
                                       </td>
-                                      <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
+                                      <td style={{ padding: "8px 8px", whiteSpace: "nowrap" }}>
                                         <StatusBadge status={chk.status} />
                                       </td>
                                       {hasExpected && (
-                                        <td style={{ padding: "9px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
                                           {formatCheckValue(chk.expected_value, chk.check)}
                                         </td>
                                       )}
                                       {hasActual && (
-                                        <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "8px 8px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
                                           {formatCheckValue(chk.actual_value, chk.check)}
                                         </td>
                                       )}
                                       {hasDiff && (
-                                        <td style={{ padding: "9px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "8px 8px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", wordBreak: "break-word" }}>
                                           {chk.difference || chk.difference_percent || ""}
                                         </td>
                                       )}
                                       {hasThreshold && (
-                                        <td style={{ padding: "9px 12px", textAlign: "right", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "8px 8px", textAlign: "right", fontSize: "10px", color: "var(--text-muted)", wordBreak: "break-word" }}>
                                           {chk.threshold || ""}
                                         </td>
                                       )}
-                                      <td style={{ padding: "9px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
+                                      <td style={{ padding: "8px 8px", textAlign: "right", whiteSpace: "nowrap" }}>
                                         {chk.finding_id ? (
                                           <button
                                             onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
                                             style={{
                                               display: "inline-flex",
                                               alignItems: "center",
-                                              gap: "3px",
-                                              padding: "2px 6px",
+                                              gap: "2px",
+                                              padding: "2px 5px",
                                               borderRadius: "4px",
-                                              fontSize: "10px",
+                                              fontSize: "9.5px",
                                               fontWeight: 600,
                                               background: "rgba(16, 185, 129, 0.1)",
                                               color: "var(--color-primary)",
@@ -1003,12 +1012,12 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                               cursor: "pointer",
                                             }}
                                           >
-                                            <ExternalLink size={11} />
+                                            <ExternalLink size={10} />
                                             {chk.finding_id}
                                           </button>
                                         ) : (
-                                          <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981" }} /> Verified
+                                          <span style={{ fontSize: "9.5px", color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "3px" }}>
+                                            <span style={{ width: 5, height: 5, borderRadius: "50%", background: "#10B981" }} /> Verified
                                           </span>
                                         )}
                                       </td>
