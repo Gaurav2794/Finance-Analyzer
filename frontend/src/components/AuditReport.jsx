@@ -69,16 +69,28 @@ const INTEGRITY_CONFIG = {
 const fmt = (n) => (n === null || n === undefined ? "" : n.toLocaleString("en-IN"));
 const pct = (n) => (n === null || n === undefined ? "" : `${n > 0 ? "+" : ""}${Number(n).toFixed(2)}%`);
 
-// Sanitizer helper for string leaks (None%, None Cr, None pp, None)
+// Sanitizer helper for string leaks (None%, None Cr, None pp, None) and unit normalization
 const cleanText = (str) => {
   if (!str) return "";
-  return str
+  let s = String(str)
     .replace(/None\s*%/gi, "N/A")
     .replace(/None\s*Cr/gi, "N/A")
     .replace(/None\s*pp/gi, "N/A")
     .replace(/=\s*None/gi, "= N/A")
     .replace(/:\s*None/gi, ": N/A")
     .replace(/\bNone\b/g, "N/A");
+
+  s = s.replace(/(\d+(?:\.\d+)?)\s*Cr\b/gi, (match, p1) => {
+    const n = parseFloat(p1);
+    const formatted = !isNaN(n) ? (n % 1 === 0 ? n.toLocaleString("en-IN") : n.toFixed(2)) : p1;
+    return `${formatted} Millions`;
+  });
+  s = s.replace(/(\d+)\.0+\s*(Millions|Cr)\b/gi, (match, p1) => {
+    const n = parseFloat(p1);
+    return !isNaN(n) ? `${n.toLocaleString("en-IN")} Millions` : `${p1} Millions`;
+  });
+  s = s.replace(/\bCr\b/g, "Millions");
+  return s;
 };
 
 // Safe growth formatter

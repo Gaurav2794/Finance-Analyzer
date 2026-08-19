@@ -107,6 +107,22 @@ function formatCheckValue(val, checkName = "") {
   return str;
 }
 
+function cleanNarrativeText(str) {
+  if (!str) return "";
+  let s = String(str);
+  s = s.replace(/(\d+(?:\.\d+)?)\s*Cr\b/gi, (match, p1) => {
+    const n = parseFloat(p1);
+    const formatted = !isNaN(n) ? (n % 1 === 0 ? n.toLocaleString("en-IN") : n.toFixed(2)) : p1;
+    return `${formatted} Millions`;
+  });
+  s = s.replace(/(\d+)\.0+\s*(Millions|Cr)\b/gi, (match, p1) => {
+    const n = parseFloat(p1);
+    return !isNaN(n) ? `${n.toLocaleString("en-IN")} Millions` : `${p1} Millions`;
+  });
+  s = s.replace(/\bCr\b/g, "Millions");
+  return s;
+}
+
 function getCategoryDisplayStatus(cat) {
   if (!cat) return "PASSED";
   if (cat.failed_checks > 0) return "FAILED";
@@ -773,7 +789,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             const displayedCategories = availableCategories;
 
             return (
-              <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "14px" }}>
                 {displayedCategories.map((cat) => {
                   const catChecks = filteredChecks.filter((c) => c.category === cat.id);
                   if (catChecks.length === 0) return null;
@@ -794,28 +810,28 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                         borderRadius: "8px",
                         overflow: "hidden",
                         background: "var(--bg-card)",
-                        boxShadow: isExpanded ? "0 4px 10px rgba(0, 0, 0, 0.03)" : "0 1px 2px rgba(0,0,0,0.02)",
+                        boxShadow: isExpanded ? "0 4px 12px rgba(0, 0, 0, 0.04)" : "0 1px 3px rgba(0,0,0,0.02)",
                       }}
                     >
                       {/* Category Summary Card Header (Click to Expand / Collapse) */}
                       <div
                         onClick={() => toggleCategory(cat.id)}
                         style={{
-                          padding: "10px 14px",
+                          padding: "12px 16px",
                           background: isExpanded
-                            ? "linear-gradient(135deg, rgba(16, 185, 129, 0.05) 0%, #FFFFFF 100%)"
+                            ? "linear-gradient(135deg, rgba(16, 185, 129, 0.06) 0%, #FFFFFF 100%)"
                             : "var(--bg-card)",
                           cursor: "pointer",
                           display: "flex",
                           justifyContent: "space-between",
                           alignItems: "center",
                           flexWrap: "wrap",
-                          gap: "8px",
+                          gap: "10px",
                           borderBottom: isExpanded ? "1px solid var(--border-subtle)" : "none",
                           transition: "background 0.2s ease",
                         }}
                       >
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flex: 1, minWidth: "220px" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", flex: 1, minWidth: "280px" }}>
                           <div
                             style={{
                               width: "24px",
@@ -827,29 +843,30 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                               justifyContent: "center",
                               transition: "transform 0.25s ease, background 0.2s ease",
                               transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)",
+                              flexShrink: 0,
                             }}
                           >
                             <ChevronRight size={14} color={isExpanded ? "var(--color-primary)" : "var(--text-secondary)"} />
                           </div>
-                          <div>
-                            <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-                              <span style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <span style={{ fontSize: "13.5px", fontWeight: 700, color: "var(--text-primary)" }}>
                                 {cat.name}
                               </span>
                               {cat.score !== null && cat.score !== undefined && (
-                                <span style={{ fontSize: "10px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 5px", borderRadius: "4px" }}>
+                                <span style={{ fontSize: "10.5px", fontWeight: 700, color: "var(--color-primary)", background: "var(--color-primary-soft)", padding: "1px 6px", borderRadius: "4px", border: "1px solid rgba(16, 185, 129, 0.25)", whiteSpace: "nowrap" }}>
                                   {cat.score.toFixed(0)}/100
                                 </span>
                               )}
                             </div>
-                            <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "1px" }}>
+                            <div style={{ fontSize: "10.5px", color: "var(--text-muted)", marginTop: "2px" }}>
                               {catChecks.length} checks • {cat.description || "Automated audit procedure"}
                             </div>
                           </div>
                         </div>
 
                         {/* Micro Progress Bar & Status Badges */}
-                        <div style={{ display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
                           {/* Miniature Category Health Gauge */}
                           <div style={{ display: "flex", flexDirection: "column", gap: "2px", width: "80px" }}>
                             <div style={{ display: "flex", justifyContent: "space-between", fontSize: "9px", color: "var(--text-muted)", fontWeight: 600 }}>
@@ -897,10 +914,10 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
 
                       {/* Detailed Checks Sub-table when expanded */}
                       {isExpanded && (() => {
-                        const hasExpected = catChecks.some((chk) => chk.expected_value != null && String(chk.expected_value).trim() !== "");
-                        const hasActual = catChecks.some((chk) => chk.actual_value != null && String(chk.actual_value).trim() !== "");
-                        const hasDiff = catChecks.some((chk) => (chk.difference != null && String(chk.difference).trim() !== "") || (chk.difference_percent != null && String(chk.difference_percent).trim() !== ""));
-                        const hasThreshold = catChecks.some((chk) => chk.threshold != null && String(chk.threshold).trim() !== "");
+                        const hasExpected = catChecks.some((chk) => chk.expected_value != null && String(chk.expected_value).trim() !== "" && chk.expected_value !== "—" && chk.expected_value !== "-");
+                        const hasActual = catChecks.some((chk) => chk.actual_value != null && String(chk.actual_value).trim() !== "" && chk.actual_value !== "—" && chk.actual_value !== "-");
+                        const hasDiff = catChecks.some((chk) => (chk.difference != null && String(chk.difference).trim() !== "" && chk.difference !== "—" && chk.difference !== "-") || (chk.difference_percent != null && String(chk.difference_percent).trim() !== "" && chk.difference_percent !== "—" && chk.difference_percent !== "-"));
+                        const hasThreshold = catChecks.some((chk) => chk.threshold != null && String(chk.threshold).trim() !== "" && chk.threshold !== "—" && chk.threshold !== "-");
 
                         return (
                           <div
@@ -913,14 +930,14 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11.5px" }}>
                               <thead>
                                 <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left", borderBottom: "1px solid var(--border-light, #E2E8F0)" }}>
-                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
-                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
-                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "100px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
-                                  {hasExpected && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "120px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
-                                  {hasActual && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "120px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
-                                  {hasDiff && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
-                                  {hasThreshold && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
-                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
+                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "85px", minWidth: "85px", maxWidth: "85px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
+                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", minWidth: "250px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
+                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", minWidth: "95px", maxWidth: "95px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
+                                  {hasExpected && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "135px", minWidth: "135px", maxWidth: "135px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
+                                  {hasActual && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "135px", minWidth: "135px", maxWidth: "135px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
+                                  {hasDiff && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "115px", minWidth: "115px", maxWidth: "115px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
+                                  {hasThreshold && <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "115px", minWidth: "115px", maxWidth: "115px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
+                                  <th style={{ padding: "9px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", minWidth: "95px", maxWidth: "95px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -934,41 +951,41 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                         borderBottom: "1px solid var(--border-subtle, #F1F5F9)",
                                       }}
                                     >
-                                      <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                                      <td style={{ padding: "9px 12px", fontFamily: "monospace", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                                         {chk.id}
                                       </td>
-                                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)" }}>
-                                        <div>{chk.check}</div>
+                                      <td style={{ padding: "9px 12px", fontWeight: 600, color: "var(--text-primary)", wordBreak: "break-word" }}>
+                                        <div>{cleanNarrativeText(chk.check)}</div>
                                         {chk.evidence && (
-                                          <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
-                                            {chk.evidence}
+                                          <div style={{ fontSize: "10.5px", fontWeight: 400, color: "var(--text-muted)", marginTop: "3px", lineHeight: 1.4, wordBreak: "break-word" }}>
+                                            {cleanNarrativeText(chk.evidence)}
                                           </div>
                                         )}
                                       </td>
-                                      <td style={{ padding: "8px 12px", whiteSpace: "nowrap" }}>
+                                      <td style={{ padding: "9px 12px", whiteSpace: "nowrap" }}>
                                         <StatusBadge status={chk.status} />
                                       </td>
                                       {hasExpected && (
-                                        <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "9px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {formatCheckValue(chk.expected_value, chk.check)}
                                         </td>
                                       )}
                                       {hasActual && (
-                                        <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "9px 12px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {formatCheckValue(chk.actual_value, chk.check)}
                                         </td>
                                       )}
                                       {hasDiff && (
-                                        <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "9px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {chk.difference || chk.difference_percent || ""}
                                         </td>
                                       )}
                                       {hasThreshold && (
-                                        <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
+                                        <td style={{ padding: "9px 12px", textAlign: "right", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                                           {chk.threshold || ""}
                                         </td>
                                       )}
-                                      <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
+                                      <td style={{ padding: "9px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
                                         {chk.finding_id ? (
                                           <button
                                             onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
