@@ -868,19 +868,20 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                             className="animate-slide-down"
                             style={{
                               overflowX: "auto",
+                              borderTop: "1px solid var(--border-light, #E2E8F0)",
                             }}
                           >
-                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11.5px" }}>
                               <thead>
-                                <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
-                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "55px" }}>ID</th>
-                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
-                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "90px" }}>Status</th>
-                                  {hasExpected && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>}
-                                  {hasActual && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>}
-                                  {hasDiff && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>}
-                                  {hasThreshold && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>}
-                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
+                                <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left", borderBottom: "1px solid var(--border-light, #E2E8F0)" }}>
+                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "95px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>ID</th>
+                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Audit Procedure / Check</th>
+                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "100px", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Status</th>
+                                  {hasExpected && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "120px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Expected / Prior</th>}
+                                  {hasActual && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "120px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Actual / Current</th>}
+                                  {hasDiff && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Variance / Diff</th>}
+                                  {hasThreshold && <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Threshold</th>}
+                                  <th style={{ padding: "8px 12px", fontWeight: 700, color: "var(--text-secondary)", width: "110px", textAlign: "right", fontSize: "10px", textTransform: "uppercase", letterSpacing: "0.04em" }}>Evidence</th>
                                 </tr>
                               </thead>
                               <tbody>
@@ -890,14 +891,14 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                     <tr
                                       key={chk.id}
                                       style={{
-                                        background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
-                                        borderBottom: "1px solid var(--border-subtle)",
+                                        background: isEven ? "transparent" : "rgba(248, 250, 252, 0.6)",
+                                        borderBottom: "1px solid var(--border-subtle, #F1F5F9)",
                                       }}
                                     >
-                                      <td style={{ padding: "6px 10px", fontFamily: "monospace", fontSize: "10px", color: "var(--text-muted)" }}>
+                                      <td style={{ padding: "8px 12px", fontFamily: "monospace", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                                         {chk.id}
                                       </td>
-                                      <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)" }}>
+                                      <td style={{ padding: "8px 12px", fontWeight: 600, color: "var(--text-primary)" }}>
                                         <div>{chk.check}</div>
                                         {chk.evidence && (
                                           <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
@@ -905,30 +906,30 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                           </div>
                                         )}
                                       </td>
-                                      <td style={{ padding: "6px 10px" }}>
+                                      <td style={{ padding: "8px 12px", whiteSpace: "nowrap" }}>
                                         <StatusBadge status={chk.status} />
                                       </td>
                                       {hasExpected && (
-                                        <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                        <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {chk.expected_value || ""}
                                         </td>
                                       )}
                                       {hasActual && (
-                                        <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                        <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 700, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {chk.actual_value || ""}
                                         </td>
                                       )}
                                       {hasDiff && (
-                                        <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                        <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums", whiteSpace: "nowrap" }}>
                                           {chk.difference || chk.difference_percent || ""}
                                         </td>
                                       )}
                                       {hasThreshold && (
-                                        <td style={{ padding: "6px 10px", fontSize: "10px", color: "var(--text-muted)" }}>
+                                        <td style={{ padding: "8px 12px", textAlign: "right", fontSize: "10.5px", color: "var(--text-muted)", whiteSpace: "nowrap" }}>
                                           {chk.threshold || ""}
                                         </td>
                                       )}
-                                      <td style={{ padding: "6px 10px", textAlign: "right" }}>
+                                      <td style={{ padding: "8px 12px", textAlign: "right", whiteSpace: "nowrap" }}>
                                         {chk.finding_id ? (
                                           <button
                                             onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
@@ -950,8 +951,8 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                             {chk.finding_id}
                                           </button>
                                         ) : (
-                                          <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600 }}>
-                                            Verified
+                                          <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                                            <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#10B981" }} /> Verified
                                           </span>
                                         )}
                                       </td>
