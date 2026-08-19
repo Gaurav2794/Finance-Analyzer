@@ -10,6 +10,8 @@ import EvidencePanel from "./src/components/EvidencePanel.jsx";
 import AskAIPanel from "./src/components/AskAIPanel.jsx";
 import AuditReport from "./src/components/AuditReport.jsx";
 import WP514ReviewMatrix from "./src/components/WP514ReviewMatrix.jsx";
+import LedgerView from "./src/components/LedgerView.jsx";
+import IntegrityChecksView from "./src/components/IntegrityChecksView.jsx";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -434,7 +436,43 @@ export default function FinancialAuditDashboard() {
     );
   }
 
-  if (route === "#wp514" || route === "#integrity") {
+  if (route === "#ledger") {
+    return (
+      <LedgerView
+        extractionResult={extractionResult}
+        analysisResult={analysisResult}
+        onBack={() => { window.location.hash = ""; }}
+      />
+    );
+  }
+
+  if (route === "#integrity") {
+    return (
+      <>
+        <IntegrityChecksView
+          extractionResult={extractionResult}
+          analysisResult={analysisResult}
+          onBack={() => { window.location.hash = ""; }}
+          onOpenEvidence={(findingId) => {
+            const found = (analysisResult.findings || []).find(f => f.id === findingId);
+            if (found) setSelectedFindingForEvidence(found);
+          }}
+          onAskAI={(findingId) => {
+            setShowGlobalAI(true);
+          }}
+        />
+        {selectedFindingForEvidence && (
+          <EvidencePanel
+            documentId={documentId}
+            finding={selectedFindingForEvidence}
+            onClose={() => setSelectedFindingForEvidence(null)}
+          />
+        )}
+      </>
+    );
+  }
+
+  if (route === "#wp514") {
     return (
       <div style={{ background: "var(--bg-main)", minHeight: "100vh", padding: "32px 40px", maxWidth: 1200, margin: "0 auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
