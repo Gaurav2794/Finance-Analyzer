@@ -568,7 +568,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
           <div>
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
-                Audit Review Checks Summary ({filteredChecks.length})
+                Audit Review Checks Summary
               </h3>
               <span
                 style={{
@@ -673,7 +673,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px", flexWrap: "wrap", gap: "8px" }}>
                 <span style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
-                  Overall Checks Distribution ({checks.length} Total Verification Items)
+                  Overall Checks Distribution
                 </span>
                 <span style={{ fontSize: "12px", fontWeight: 600, color: passTotal === totalAll ? "#059669" : "#D97706" }}>
                   {passTotal} Passed ({passPct.toFixed(0)}%) • {revTotal + failTotal} Attention Items
