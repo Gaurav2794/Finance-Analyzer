@@ -376,6 +376,583 @@ function ErrorScreen({ message, onRetry }) {
 }
 
 /* ============================================================
+   GLOBAL SEARCH DROPDOWN COMPONENT
+   ============================================================ */
+
+function GlobalSearchDropdown({
+  searchQuery,
+  setSearchQuery,
+  analysisResult,
+  extractionResult,
+  onSelectFinding,
+  onSelectCheck,
+  onSelectMetric,
+  onNavigate,
+  onOpenAI,
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const q = (searchQuery || "").trim().toLowerCase();
+
+  // 1. Findings Matches
+  const findings = analysisResult?.findings || [];
+  const matchedFindings = q
+    ? findings.filter((f) => {
+        return (
+          (f.title || "").toLowerCase().includes(q) ||
+          (f.category || "").toLowerCase().includes(q) ||
+          (f.description || "").toLowerCase().includes(q) ||
+          (f.id || "").toLowerCase().includes(q) ||
+          (f.finding_id || "").toLowerCase().includes(q) ||
+          (f.severity || "").toLowerCase().includes(q) ||
+          (f.explanation || "").toLowerCase().includes(q)
+        );
+      })
+    : [];
+
+  // 2. WP-514 Checks Matches
+  const wp514Checks = analysisResult?.wp514?.checks || [];
+  const matchedChecks = q
+    ? wp514Checks.filter((c) => {
+        return (
+          (c.check || "").toLowerCase().includes(q) ||
+          (c.id || "").toLowerCase().includes(q) ||
+          (c.category || "").toLowerCase().includes(q) ||
+          (c.status || "").toLowerCase().includes(q) ||
+          (c.evidence || "").toLowerCase().includes(q) ||
+          (c.actual_value || "").toLowerCase().includes(q) ||
+          (c.expected_value || "").toLowerCase().includes(q)
+        );
+      })
+    : [];
+
+  // 3. Financial Metrics & Accounts
+  const fm = analysisResult?.financial_metrics || {};
+  const metricsList = [
+    { key: "revenue", label: "Total Revenue", value: fm.revenue?.current != null ? `₹${fmt(fm.revenue.current)}` : null, growth: fm.revenue?.growth_pct, icon: Wallet },
+    { key: "expenses", label: "Operating Expenses", value: fm.expenses?.current != null ? `₹${fmt(fm.expenses.current)}` : null, growth: fm.expenses?.growth_pct, icon: ArrowDownRight },
+    { key: "net_profit", label: "Net Profit", value: fm.net_profit?.current != null ? `₹${fmt(fm.net_profit.current)}` : null, growth: fm.net_profit?.growth_pct, icon: TrendingUp },
+    { key: "operating_profit", label: "Operating Profit", value: fm.operating_profit?.current != null ? `₹${fmt(fm.operating_profit.current)}` : null, growth: fm.operating_profit?.growth_pct, icon: Activity },
+    { key: "current_ratio", label: "Current Ratio", value: "1.15", sub: "Needs Review", icon: Scale },
+    { key: "debt_to_equity", label: "Debt to Equity", value: "0.90", sub: "Healthy", icon: Scale },
+    { key: "net_margin", label: "Net Margin", value: "26.47%", sub: "Profitability", icon: Percent },
+    { key: "roe", label: "Return on Equity (ROE)", value: "33.50%", sub: "Efficiency", icon: Percent },
+  ];
+
+  const matchedMetrics = q
+    ? metricsList.filter((m) => m.label.toLowerCase().includes(q) || m.key.toLowerCase().includes(q))
+    : [];
+
+  // 4. Quick Navigation Matches
+  const navItems = [
+    { label: "WP-514 Financial Statement Review", hash: "#wp514", icon: FileCheck2, desc: "Standardized audit review matrix & continuous assurance" },
+    { label: "Audit Report", hash: "#report", icon: FileText, desc: "Comprehensive audit report & findings breakdown" },
+    { label: "Ledger & Sub-Ledger View", hash: "#ledger", icon: Layers, desc: "General ledger transactions & account balances" },
+    { label: "Integrity Checks & Controls", hash: "#integrity", icon: ShieldCheck, desc: "Automated integrity & reconciliation controls" },
+    { label: "Ask AI Assistant", isAI: true, icon: Sparkles, desc: "Grounded Q&A on findings & financial data" },
+  ];
+
+  const matchedNav = q
+    ? navItems.filter((n) => n.label.toLowerCase().includes(q) || n.desc.toLowerCase().includes(q))
+    : [];
+
+  const totalMatches = matchedFindings.length + matchedChecks.length + matchedMetrics.length + matchedNav.length;
+
+  const quickSearches = [
+    { label: "Critical Findings", query: "critical" },
+    { label: "Revenue", query: "revenue" },
+    { label: "Cash Flow", query: "cash flow" },
+    { label: "Prior-Year Tie-Out", query: "tie-out" },
+    { label: "Mathematical Accuracy", query: "mathematical" },
+    { label: "Review Required", query: "review" },
+    { label: "Financial Ratios", query: "ratio" },
+  ];
+
+  const handleSelectQuickSearch = (query) => {
+    setSearchQuery(query);
+    setIsOpen(true);
+  };
+
+  return (
+    <div ref={dropdownRef} style={{ position: "relative" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "8px",
+          background: "var(--bg-card)",
+          borderRadius: "24px",
+          padding: "8px 14px",
+          width: isOpen || searchQuery ? "300px" : "260px",
+          boxShadow: isOpen ? "0 4px 14px rgba(16, 185, 129, 0.15)" : "0 2px 4px rgba(0,0,0,0.02)",
+          border: isOpen || searchQuery ? "1.5px solid var(--color-primary)" : "1px solid var(--border-light)",
+          transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
+        <Search size={15} color={searchQuery ? "var(--color-primary)" : "var(--text-muted)"} />
+        <input
+          ref={inputRef}
+          type="text"
+          placeholder="Search findings, checks, accounts..."
+          value={searchQuery}
+          onFocus={() => setIsOpen(true)}
+          onChange={(e) => {
+            setSearchQuery(e.target.value);
+            if (!isOpen) setIsOpen(true);
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setIsOpen(false);
+              setSearchQuery("");
+            }
+          }}
+          style={{
+            border: "none",
+            outline: "none",
+            fontSize: "13px",
+            color: "var(--text-primary)",
+            width: "100%",
+            background: "transparent",
+          }}
+        />
+        {searchQuery && (
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span
+              style={{
+                fontSize: "10px",
+                fontWeight: 700,
+                color: "var(--color-primary)",
+                background: "var(--color-primary-soft)",
+                padding: "2px 6px",
+                borderRadius: "10px",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {totalMatches}
+            </span>
+            <button
+              onClick={() => {
+                setSearchQuery("");
+                inputRef.current?.focus();
+              }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "2px",
+                color: "var(--text-muted)",
+              }}
+              title="Clear search"
+            >
+              <X size={14} />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* DROPDOWN OVERLAY */}
+      {isOpen && (
+        <div className="global-search-dropdown animate-fade-in">
+          {/* Active Query Header */}
+          {q.length > 0 ? (
+            <div>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "6px 16px 10px",
+                  borderBottom: "1px solid var(--border-light)",
+                  fontSize: "11px",
+                  color: "var(--text-secondary)",
+                }}
+              >
+                <span>
+                  Found <strong>{totalMatches}</strong> match{totalMatches === 1 ? "" : "es"} for "
+                  <span style={{ color: "var(--color-primary)", fontWeight: 700 }}>{searchQuery}</span>"
+                </span>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    fontSize: "11px",
+                    color: "var(--color-primary)",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                  }}
+                >
+                  Clear
+                </button>
+              </div>
+
+              {totalMatches === 0 ? (
+                <div style={{ padding: "28px 20px", textAlign: "center" }}>
+                  <AlertCircle size={28} color="var(--text-muted)" style={{ margin: "0 auto 8px", opacity: 0.6 }} />
+                  <div style={{ fontSize: "13px", fontWeight: 600, color: "var(--text-primary)" }}>
+                    No exact results found
+                  </div>
+                  <div style={{ fontSize: "11px", color: "var(--text-muted)", marginTop: "4px" }}>
+                    Try searching for terms like:
+                  </div>
+                  <div style={{ display: "flex", gap: "6px", justifyContent: "center", flexWrap: "wrap", marginTop: "10px" }}>
+                    {quickSearches.slice(0, 4).map((s) => (
+                      <button
+                        key={s.query}
+                        onClick={() => handleSelectQuickSearch(s.query)}
+                        className="search-chip"
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: "6px", paddingTop: "4px" }}>
+                  {/* FINDINGS MATCHES */}
+                  {matchedFindings.length > 0 && (
+                    <div>
+                      <div className="search-section-header">
+                        <span>Findings ({matchedFindings.length})</span>
+                        <span style={{ fontSize: "10px", fontWeight: 500, textTransform: "none" }}>Click to open evidence</span>
+                      </div>
+                      {matchedFindings.slice(0, 5).map((f) => {
+                        const sevConfig = sev[f.severity] || sev.REVIEW;
+                        const SevIcon = sevConfig.Icon;
+                        return (
+                          <div
+                            key={f.id}
+                            onClick={() => {
+                              onSelectFinding(f);
+                              setIsOpen(false);
+                            }}
+                            className="search-result-item"
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                              <div
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "6px",
+                                  background: sevConfig.bg,
+                                  color: sevConfig.color,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <SevIcon size={13} />
+                              </div>
+                              <div style={{ minWidth: 0 }}>
+                                <div
+                                  style={{
+                                    fontSize: "12px",
+                                    fontWeight: 700,
+                                    color: "var(--text-primary)",
+                                    whiteSpace: "nowrap",
+                                    overflow: "hidden",
+                                    textOverflow: "ellipsis",
+                                  }}
+                                >
+                                  {f.title}
+                                </div>
+                                <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "1px" }}>
+                                  {(f.category || "").replace(/_/g, " ")} • {f.id}
+                                </div>
+                              </div>
+                            </div>
+                            <span
+                              style={{
+                                fontSize: "10px",
+                                fontWeight: 700,
+                                padding: "2px 6px",
+                                borderRadius: "4px",
+                                background: sevConfig.bg,
+                                color: sevConfig.color,
+                                whiteSpace: "nowrap",
+                              }}
+                            >
+                              {f.severity}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* WP-514 CHECKS MATCHES */}
+                  {matchedChecks.length > 0 && (
+                    <div>
+                      <div className="search-section-header">
+                        <span>WP-514 Audit Checks ({matchedChecks.length})</span>
+                        <span style={{ fontSize: "10px", fontWeight: 500, textTransform: "none" }}>Click to view procedure</span>
+                      </div>
+                      {matchedChecks.slice(0, 5).map((c) => (
+                        <div
+                          key={c.id}
+                          onClick={() => {
+                            onSelectCheck(c);
+                            setIsOpen(false);
+                          }}
+                          className="search-result-item"
+                        >
+                          <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: 0, flex: 1 }}>
+                            <div
+                              style={{
+                                width: "24px",
+                                height: "24px",
+                                borderRadius: "6px",
+                                background: "rgba(16, 185, 129, 0.1)",
+                                color: "var(--color-primary)",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                flexShrink: 0,
+                              }}
+                            >
+                              <FileCheck2 size={13} color="var(--color-primary)" />
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <div
+                                style={{
+                                  fontSize: "12px",
+                                  fontWeight: 600,
+                                  color: "var(--text-primary)",
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                }}
+                              >
+                                {c.check}
+                              </div>
+                              <div style={{ fontSize: "10px", color: "var(--text-muted)", marginTop: "1px" }}>
+                                {c.id} • {c.difference || c.difference_percent ? `Diff: ${c.difference || c.difference_percent}` : "Standard Procedure"}
+                              </div>
+                            </div>
+                          </div>
+                          <span
+                            style={{
+                              fontSize: "10px",
+                              fontWeight: 700,
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              background:
+                                c.status === "PASSED"
+                                  ? "rgba(16, 185, 129, 0.12)"
+                                  : c.status === "REVIEW" || c.status === "WARNING"
+                                  ? "rgba(245, 158, 11, 0.12)"
+                                  : c.status === "FAILED"
+                                  ? "rgba(239, 68, 68, 0.12)"
+                                  : "rgba(100, 116, 139, 0.08)",
+                              color:
+                                c.status === "PASSED"
+                                  ? "#059669"
+                                  : c.status === "REVIEW" || c.status === "WARNING"
+                                  ? "#D97706"
+                                  : c.status === "FAILED"
+                                  ? "#DC2626"
+                                  : "#64748B",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {c.status}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* FINANCIAL METRICS MATCHES */}
+                  {matchedMetrics.length > 0 && (
+                    <div>
+                      <div className="search-section-header">
+                        <span>Financial Metrics ({matchedMetrics.length})</span>
+                        <span style={{ fontSize: "10px", fontWeight: 500, textTransform: "none" }}>Click to highlight chart</span>
+                      </div>
+                      {matchedMetrics.map((m) => {
+                        const MIcon = m.icon;
+                        return (
+                          <div
+                            key={m.key}
+                            onClick={() => {
+                              onSelectMetric(m.key);
+                              setIsOpen(false);
+                            }}
+                            className="search-result-item"
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <div
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "6px",
+                                  background: "var(--bg-secondary)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <MIcon size={13} color="var(--text-secondary)" />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+                                  {m.label}
+                                </div>
+                                <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+                                  {m.growth != null ? `${pct(m.growth)} vs prior` : (m.sub || "Report Metric")}
+                                </div>
+                              </div>
+                            </div>
+                            {m.value && (
+                              <div style={{ fontSize: "12px", fontWeight: 800, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                {m.value}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* QUICK NAVIGATION MATCHES */}
+                  {matchedNav.length > 0 && (
+                    <div>
+                      <div className="search-section-header">
+                        <span>Views & Actions ({matchedNav.length})</span>
+                      </div>
+                      {matchedNav.map((n) => {
+                        const NIcon = n.icon;
+                        return (
+                          <div
+                            key={n.label}
+                            onClick={() => {
+                              if (n.isAI) {
+                                onOpenAI();
+                              } else {
+                                onNavigate(n.hash);
+                              }
+                              setIsOpen(false);
+                            }}
+                            className="search-result-item"
+                          >
+                            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                              <div
+                                style={{
+                                  width: "24px",
+                                  height: "24px",
+                                  borderRadius: "6px",
+                                  background: n.isAI ? "var(--color-primary-soft)" : "var(--bg-secondary)",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <NIcon size={13} color={n.isAI ? "var(--color-primary)" : "var(--text-secondary)"} />
+                              </div>
+                              <div>
+                                <div style={{ fontSize: "12px", fontWeight: 700, color: "var(--text-primary)" }}>
+                                  {n.label}
+                                </div>
+                                <div style={{ fontSize: "10px", color: "var(--text-muted)" }}>
+                                  {n.desc}
+                                </div>
+                              </div>
+                            </div>
+                            <ArrowUpRight size={13} color="var(--text-muted)" />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          ) : (
+            /* EMPTY QUERY / FOCUS STATE - QUICK AUDIT SEARCH SUGGESTIONS */
+            <div style={{ padding: "8px 12px" }}>
+              <div style={{ padding: "4px 8px 8px", fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                Quick Audit Searches
+              </div>
+              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", padding: "0 8px 12px" }}>
+                {quickSearches.map((s) => (
+                  <button
+                    key={s.query}
+                    onClick={() => handleSelectQuickSearch(s.query)}
+                    className="search-chip"
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
+
+              <div style={{ height: "1px", background: "var(--border-light)", margin: "4px 8px 8px" }} />
+
+              <div style={{ padding: "4px 8px 8px", fontSize: "11px", fontWeight: 700, color: "var(--text-secondary)", textTransform: "uppercase" }}>
+                Direct View Navigation
+              </div>
+              {navItems.map((n) => {
+                const NIcon = n.icon;
+                return (
+                  <div
+                    key={n.label}
+                    onClick={() => {
+                      if (n.isAI) {
+                        onOpenAI();
+                      } else {
+                        onNavigate(n.hash);
+                      }
+                      setIsOpen(false);
+                    }}
+                    className="search-result-item"
+                    style={{ borderRadius: "8px" }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                      <div
+                        style={{
+                          width: "24px",
+                          height: "24px",
+                          borderRadius: "6px",
+                          background: n.isAI ? "var(--color-primary-soft)" : "var(--bg-secondary)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <NIcon size={13} color={n.isAI ? "var(--color-primary)" : "var(--text-secondary)"} />
+                      </div>
+                      <span style={{ fontSize: "12px", fontWeight: 600, color: "var(--text-primary)" }}>
+                        {n.label}
+                      </span>
+                    </div>
+                    <ChevronRight size={13} color="var(--text-muted)" />
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ============================================================
    MAIN DASHBOARD
    ============================================================ */
 
@@ -624,26 +1201,33 @@ export default function FinancialAuditDashboard() {
             </div>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", background: "var(--bg-card)", borderRadius: "24px", padding: "8px 14px", width: "260px", boxShadow: "0 2px 4px rgba(0,0,0,0.02)", border: searchQuery ? "1px solid var(--color-primary)" : "1px solid var(--border-light)", transition: "border 0.2s ease" }}>
-              <Search size={15} color={searchQuery ? "var(--color-primary)" : "var(--text-muted)"} />
-              <input
-                type="text"
-                placeholder="Search findings, checks, accounts..."
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                onKeyDown={e => { if (e.key === "Escape") setSearchQuery(""); }}
-                style={{ border: "none", outline: "none", fontSize: "13px", color: "var(--text-primary)", width: "100%", background: "transparent" }}
-              />
-              {searchQuery && (
-                <button
-                  onClick={() => setSearchQuery("")}
-                  style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", padding: "2px", color: "var(--text-muted)" }}
-                  title="Clear search"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
+            <GlobalSearchDropdown
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              analysisResult={analysisResult}
+              extractionResult={extractionResult}
+              onSelectFinding={(f) => setSelectedFindingForEvidence(f)}
+              onSelectCheck={(c) => {
+                if (c.finding_id) {
+                  const found = (analysisResult.findings || []).find((f) => f.id === c.finding_id || f.finding_id === c.finding_id);
+                  if (found) {
+                    setSelectedFindingForEvidence(found);
+                    return;
+                  }
+                }
+                setSearchQuery(c.check || c.id);
+                window.location.hash = "#wp514";
+              }}
+              onSelectMetric={(key) => {
+                if (["revenue", "expenses", "net_profit", "operating_profit"].includes(key)) {
+                  setChartMetric(key);
+                }
+              }}
+              onNavigate={(h) => {
+                window.location.hash = h;
+              }}
+              onOpenAI={() => setShowGlobalAI(true)}
+            />
             <button
               onClick={() => setShowGlobalAI(true)}
               className="fd-btn"
@@ -671,6 +1255,46 @@ export default function FinancialAuditDashboard() {
             </div>
           </div>
         </header>
+
+        {/* ACTIVE SEARCH NOTIFICATION BANNER */}
+        {searchQuery && (
+          <div
+            className="animate-fade-in"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              background: "linear-gradient(135deg, rgba(236, 253, 245, 0.9) 0%, rgba(240, 253, 244, 0.9) 100%)",
+              border: "1px solid rgba(16, 185, 129, 0.3)",
+              borderRadius: "10px",
+              padding: "10px 16px",
+              marginBottom: "20px",
+              fontSize: "12px",
+              boxShadow: "0 2px 6px rgba(16, 185, 129, 0.08)",
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <Search size={14} color="var(--color-primary)" />
+              <span>
+                Filtering dashboard for: <strong style={{ color: "var(--color-primary)" }}>"{searchQuery}"</strong> • Showing {filteredFindings.length} matching findings & filtered checks below
+              </span>
+            </div>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="fd-btn fd-btn-outline"
+              style={{
+                padding: "3px 10px",
+                fontSize: "11px",
+                height: "auto",
+                borderColor: "rgba(16, 185, 129, 0.4)",
+                color: "var(--color-primary)",
+                background: "#FFFFFF",
+              }}
+            >
+              Clear Search
+            </button>
+          </div>
+        )}
 
         {/* STAT CARDS */}
         <section className="fd-stat-grid">
