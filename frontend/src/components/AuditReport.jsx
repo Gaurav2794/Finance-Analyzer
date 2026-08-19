@@ -253,27 +253,20 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
     >
       <style>{`
         @media print {
-          /* Zero out the @page top/bottom margins so the browser has no space
-             to render its default header (date/time) and footer (URL/page num).
-             Left/right margins are kept for a clean gutter. */
           @page {
             size: A4 portrait;
-            margin: 0mm 14mm;
+            margin: 8mm 12mm;
           }
           body {
             background: #FFFFFF !important;
             color: #0F172A !important;
-            font-size: 10pt !important;
+            font-size: 9.5pt !important;
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
           }
           .audit-report-container {
             background: #FFFFFF !important;
-            /* Restore breathing room that @page margin-top:0 removed */
-            padding-top: 10mm !important;
-            padding-bottom: 10mm !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
+            padding: 0 !important;
             max-width: 100% !important;
             margin: 0 !important;
           }
@@ -283,18 +276,30 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
           .fd-card {
             box-shadow: none !important;
             border: 1px solid #CBD5E1 !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            margin-bottom: 16px !important;
-            padding: 16px 20px !important;
+            margin-bottom: 14px !important;
+            padding: 14px 18px !important;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
           }
-          table, tr, td, th {
+          h1, h2, h3, h4 {
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          tr, .ratio-tile, .stat-card {
             page-break-inside: avoid !important;
             break-inside: avoid !important;
+          }
+          thead {
+            display: table-header-group !important;
+          }
+          table {
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+            width: 100% !important;
           }
           .report-section-break {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
+            page-break-inside: auto !important;
+            break-inside: auto !important;
           }
         }
       `}</style>

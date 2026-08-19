@@ -142,14 +142,21 @@ class WP514Service:
             return None
         sym = "₹" if currency == "INR" else ("$" if currency == "USD" else (f"{currency} " if currency else ""))
         scale_str = f" {scale}" if scale else ""
-        if is_delta:
-            try:
-                fval = float(val)
-                sign = "+" if fval > 0 else ("-" if fval < 0 else "")
-                return f"{sign}{sym}{abs(fval)}{scale_str}"
-            except (ValueError, TypeError):
-                pass
-        return f"{sym}{val}{scale_str}"
+        try:
+            fval = float(val)
+            sign = "+" if fval > 0 else ("-" if fval < 0 else "")
+            abs_v = abs(fval)
+            if abs_v == int(abs_v):
+                formatted_num = f"{int(abs_v):,}"
+            else:
+                formatted_num = f"{abs_v:,.2f}"
+            if is_delta:
+                return f"{sign}{sym}{formatted_num}{scale_str}"
+            if fval < 0:
+                return f"-{sym}{formatted_num}{scale_str}"
+            return f"{sym}{formatted_num}{scale_str}"
+        except (ValueError, TypeError):
+            return f"{sym}{val}{scale_str}"
 
     # ─────────────────────────────────────────────────────────────────────────
     # Document Information Extractor (Dynamic & Non-assuming)
@@ -778,13 +785,17 @@ class WP514Service:
             elif sev == "NOT_AVAILABLE":
                 norm_status = "NOT_AVAILABLE"
 
+            is_margin = "Margin" in metric
+            exp_val = f"{float(prev):.2f}%" if is_margin and prev is not None else cls._fmt_val(prev, currency, scale)
+            act_val = f"{float(curr):.2f}%" if is_margin and curr is not None else cls._fmt_val(curr, currency, scale)
+
             checks.append({
                 "id": f"WP514-UF-{idx:02d}",
                 "category": "UNUSUAL_FLUCTUATION",
                 "check": f"YoY Fluctuation Scanner: {metric}",
                 "status": norm_status,
-                "expected_value": cls._fmt_val(prev, currency, scale),
-                "actual_value": cls._fmt_val(curr, currency, scale),
+                "expected_value": exp_val,
+                "actual_value": act_val,
                 "difference": f"{chg:+.2f}%" if chg is not None else None,
                 "difference_percent": f"{chg:+.2f}%" if chg is not None else None,
                 "threshold": f"±{th}%" if th is not None else None,
