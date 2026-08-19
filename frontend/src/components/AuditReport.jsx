@@ -66,8 +66,8 @@ const INTEGRITY_CONFIG = {
   related_disclosure: { name: "Related Party Disclosures", Icon: FileSearch, short: "Related Party" },
 };
 
-const fmt = (n) => (n === null || n === undefined ? "—" : n.toLocaleString("en-IN"));
-const pct = (n) => (n === null || n === undefined ? "—" : `${n > 0 ? "+" : ""}${Number(n).toFixed(2)}%`);
+const fmt = (n) => (n === null || n === undefined ? "" : n.toLocaleString("en-IN"));
+const pct = (n) => (n === null || n === undefined ? "" : `${n > 0 ? "+" : ""}${Number(n).toFixed(2)}%`);
 
 // Sanitizer helper for string leaks (None%, None Cr, None pp, None)
 const cleanText = (str) => {
@@ -83,9 +83,9 @@ const cleanText = (str) => {
 
 // Safe growth formatter
 const fmtGrowth = (data) => {
-  if (data?.growth_pct === null || data?.growth_pct === undefined) return "—";
+  if (data?.growth_pct === null || data?.growth_pct === undefined) return "";
   const num = Number(data.growth_pct);
-  if (isNaN(num)) return "—";
+  if (isNaN(num)) return "";
   if (data.previous !== null && data.previous !== undefined && Math.abs(data.previous) < 1 && Math.abs(data.current || 0) > 1000) {
     return "> +999% (Base Near Zero)";
   }
@@ -670,10 +670,10 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
                       {key.replace(/_/g, " ")}
                     </td>
                     <td style={{ padding: "8px 12px", textAlign: "right", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                      {isPrevMissing ? "—" : fmt(data.previous)}
+                      {isPrevMissing ? "" : fmt(data.previous)}
                     </td>
                     <td style={{ padding: "8px 12px", textAlign: "right", color: isCurrMissing ? "var(--text-secondary)" : "var(--text-primary)", fontWeight: isCurrMissing ? 400 : 700, fontVariantNumeric: "tabular-nums" }}>
-                      {isCurrMissing ? "—" : fmt(data.current)}
+                      {isCurrMissing ? "" : fmt(data.current)}
                     </td>
                     <td style={{ padding: "8px 12px", textAlign: "right", fontWeight: 600, color: data.growth_pct === null ? "var(--text-muted)" : data.growth_pct < 0 ? "var(--color-danger)" : "var(--color-success)" }}>
                       {fmtGrowth(data)}

@@ -30,7 +30,7 @@ export default function LedgerView({ extractionResult, analysisResult, onBack })
   const unit = extractionResult?.unit || "";
 
   const fmt = (v) => {
-    if (v === null || v === undefined) return "—";
+    if (v === null || v === undefined) return "";
     if (typeof v === "number") {
       return `${currency}${v.toLocaleString("en-IN", { maximumFractionDigits: 2 })} ${unit}`.trim();
     }
@@ -324,10 +324,10 @@ export default function LedgerView({ extractionResult, analysisResult, onBack })
                         </span>
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "right", fontVariantNumeric: "tabular-nums", color: "var(--text-secondary)" }}>
-                        {item.previousValue !== null ? (isRatio ? item.previousValue.toFixed(2) : fmt(item.previousValue)) : "—"}
+                        {item.previousValue !== null ? (isRatio ? item.previousValue.toFixed(2) : fmt(item.previousValue)) : ""}
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "right", fontVariantNumeric: "tabular-nums", fontWeight: 700, color: "var(--text-primary)" }}>
-                        {item.currentValue !== null ? (isRatio ? item.currentValue.toFixed(2) : fmt(item.currentValue)) : "—"}
+                        {item.currentValue !== null ? (isRatio ? item.currentValue.toFixed(2) : fmt(item.currentValue)) : ""}
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
                         {item.variancePct !== null ? (
@@ -344,9 +344,7 @@ export default function LedgerView({ extractionResult, analysisResult, onBack })
                             {isPos ? <ArrowUpRight size={14} /> : isNeg ? <ArrowDownRight size={14} /> : null}
                             {isPos ? "+" : ""}{item.variancePct.toFixed(2)}%
                           </span>
-                        ) : (
-                          <span style={{ color: "var(--text-muted)" }}>—</span>
-                        )}
+                        ) : null}
                       </td>
                       <td style={{ padding: "12px 16px", textAlign: "center" }}>
                         {item.noteRef ? (

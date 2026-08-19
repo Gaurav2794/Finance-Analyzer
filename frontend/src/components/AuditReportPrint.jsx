@@ -18,8 +18,8 @@ const RATIO_NIF_REASONS = {
   roe_pct: "Shareholder equity reconciliation not fully available",
 };
 
-const fmt = (n) => (n === null || n === undefined ? "—" : n.toLocaleString("en-IN"));
-const pct = (n) => (n === null || n === undefined ? "—" : `${n > 0 ? "+" : ""}${Number(n).toFixed(2)}%`);
+const fmt = (n) => (n === null || n === undefined ? "" : n.toLocaleString("en-IN"));
+const pct = (n) => (n === null || n === undefined ? "" : `${n > 0 ? "+" : ""}${Number(n).toFixed(2)}%`);
 
 const formatDateTime = (date = new Date()) => {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -620,8 +620,8 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                           {chk.status}
                         </span>
                       </td>
-                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || "—"}</td>
-                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || "—"}</td>
+                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>
+                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || ""}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -787,8 +787,8 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                     {chk.status}
                   </span>
                 </td>
-                <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || "—"}</td>
-                <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || "—"}</td>
+                <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>
+                <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || ""}</td>
               </tr>
             ))}
           </tbody>

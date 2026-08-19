@@ -903,16 +903,16 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                                       <StatusBadge status={chk.status} />
                                     </td>
                                     <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.expected_value || <span style={{ color: "var(--text-muted)" }}>—</span>}
+                                      {chk.expected_value || ""}
                                     </td>
                                     <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.actual_value || <span style={{ color: "var(--text-muted)" }}>—</span>}
+                                      {chk.actual_value || ""}
                                     </td>
                                     <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.difference || chk.difference_percent || <span style={{ color: "var(--text-muted)" }}>—</span>}
+                                      {chk.difference || chk.difference_percent || ""}
                                     </td>
                                     <td style={{ padding: "6px 10px", fontSize: "10px", color: "var(--text-muted)" }}>
-                                      {chk.threshold || "—"}
+                                      {chk.threshold || ""}
                                     </td>
                                     <td style={{ padding: "6px 10px", textAlign: "right" }}>
                                       {chk.finding_id ? (
