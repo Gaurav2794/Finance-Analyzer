@@ -5,6 +5,7 @@ import {
   AlertOctagon,
   HelpCircle,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   ExternalLink,
   Filter,
@@ -130,6 +131,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
   const [statusFilter, setStatusFilter] = useState("ALL");
   // Default all collapsed for clean, summarized-first executive view
   const [expandedCategories, setExpandedCategories] = useState({});
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   const toggleCategory = (catId) => {
     setExpandedCategories((prev) => ({
@@ -363,10 +365,10 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
       </div>
 
       {/* ────────────────────────────────────────────────────────────
-          3. CATEGORIES OVERVIEW GRID WITH VISUAL ICONS & BARS
+          3. CATEGORIES OVERVIEW GRID WITH SHOW MORE / LESS OPTION
           ──────────────────────────────────────────────────────────── */}
       <div>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
           <div>
             <h3 style={{ fontSize: "16px", fontWeight: 700, color: "var(--text-primary)", margin: 0 }}>
               WP-514 Audit Review Categories ({categories.length})
@@ -375,6 +377,32 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               Click any category card to filter and highlight check details below.
             </p>
           </div>
+          <button
+            onClick={() => setShowAllCategories((prev) => !prev)}
+            className="fd-btn fd-btn-outline hover-scale"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              padding: "6px 14px",
+              fontSize: "12px",
+              fontWeight: 600,
+              borderRadius: "8px",
+              color: "var(--color-primary)",
+              borderColor: "var(--color-primary)",
+              background: showAllCategories ? "var(--color-primary-soft)" : "transparent",
+            }}
+          >
+            {showAllCategories ? (
+              <>
+                Show Less <ChevronUp size={15} />
+              </>
+            ) : (
+              <>
+                Show More Categories ({categories.length}) <ChevronDown size={15} />
+              </>
+            )}
+          </button>
         </div>
 
         <div
@@ -384,7 +412,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
             gap: "14px",
           }}
         >
-          {categories.map((cat) => {
+          {(showAllCategories ? categories : categories.slice(0, 3)).map((cat) => {
             const isSelected = selectedCatId === cat.id;
             const CatIcon = getCategoryIcon(cat.id, cat.name);
             const catScore = cat.score ?? 100;
@@ -394,7 +422,7 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               <div
                 key={cat.id}
                 onClick={() => setSelectedCatId((prev) => (prev === cat.id ? "ALL" : cat.id))}
-                className="fd-card interactive-card"
+                className="fd-card interactive-card animate-fade-in"
                 style={{
                   padding: "16px",
                   cursor: "pointer",
@@ -470,6 +498,48 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
               </div>
             );
           })}
+
+          {/* Quick "Show More" expansion card when collapsed */}
+          {!showAllCategories && categories.length > 3 && (
+            <div
+              onClick={() => setShowAllCategories(true)}
+              className="fd-card interactive-card hover-scale animate-fade-in"
+              style={{
+                padding: "20px 16px",
+                cursor: "pointer",
+                border: "2px dashed var(--border-subtle)",
+                background: "rgba(248, 250, 252, 0.7)",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                justifyContent: "center",
+                textAlign: "center",
+                gap: "8px",
+                minHeight: "120px",
+              }}
+            >
+              <div
+                style={{
+                  width: "36px",
+                  height: "36px",
+                  borderRadius: "50%",
+                  background: "var(--color-primary-soft)",
+                  color: "var(--color-primary)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ChevronDown size={20} />
+              </div>
+              <div style={{ fontSize: "13px", fontWeight: 700, color: "var(--text-primary)" }}>
+                +{categories.length - 3} More Categories
+              </div>
+              <div style={{ fontSize: "11px", color: "var(--text-muted)" }}>
+                Click to view all {categories.length} review procedures
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
