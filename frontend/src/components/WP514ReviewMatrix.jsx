@@ -857,97 +857,112 @@ export default function WP514ReviewMatrix({ wp514Data, searchQuery = "", onOpenE
                       </div>
 
                       {/* Detailed Checks Sub-table when expanded */}
-                      {isExpanded && (
-                        <div
-                          className="animate-slide-down"
-                          style={{
-                            overflowX: "auto",
-                          }}
-                        >
-                          <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
-                            <thead>
-                              <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "55px" }}>ID</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "90px" }}>Status</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>
-                                <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {catChecks.map((chk, i) => {
-                                const isEven = i % 2 === 0;
-                                return (
-                                  <tr
-                                    key={chk.id}
-                                    style={{
-                                      background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
-                                      borderBottom: "1px solid var(--border-subtle)",
-                                    }}
-                                  >
-                                    <td style={{ padding: "6px 10px", fontFamily: "monospace", fontSize: "10px", color: "var(--text-muted)" }}>
-                                      {chk.id}
-                                    </td>
-                                    <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)" }}>
-                                      <div>{chk.check}</div>
-                                      {chk.evidence && (
-                                        <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
-                                          {chk.evidence}
-                                        </div>
+                      {isExpanded && (() => {
+                        const hasExpected = catChecks.some((chk) => chk.expected_value != null && String(chk.expected_value).trim() !== "");
+                        const hasActual = catChecks.some((chk) => chk.actual_value != null && String(chk.actual_value).trim() !== "");
+                        const hasDiff = catChecks.some((chk) => (chk.difference != null && String(chk.difference).trim() !== "") || (chk.difference_percent != null && String(chk.difference_percent).trim() !== ""));
+                        const hasThreshold = catChecks.some((chk) => chk.threshold != null && String(chk.threshold).trim() !== "");
+
+                        return (
+                          <div
+                            className="animate-slide-down"
+                            style={{
+                              overflowX: "auto",
+                            }}
+                          >
+                            <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "11px" }}>
+                              <thead>
+                                <tr style={{ background: "rgba(0, 0, 0, 0.02)", textAlign: "left" }}>
+                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "55px" }}>ID</th>
+                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Check Name</th>
+                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", width: "90px" }}>Status</th>
+                                  {hasExpected && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Expected / Prior</th>}
+                                  {hasActual && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Actual / Current</th>}
+                                  {hasDiff && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Variance / Diff</th>}
+                                  {hasThreshold && <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)" }}>Threshold</th>}
+                                  <th style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-secondary)", textAlign: "right" }}>Evidence / Finding</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {catChecks.map((chk, i) => {
+                                  const isEven = i % 2 === 0;
+                                  return (
+                                    <tr
+                                      key={chk.id}
+                                      style={{
+                                        background: isEven ? "transparent" : "rgba(0, 0, 0, 0.015)",
+                                        borderBottom: "1px solid var(--border-subtle)",
+                                      }}
+                                    >
+                                      <td style={{ padding: "6px 10px", fontFamily: "monospace", fontSize: "10px", color: "var(--text-muted)" }}>
+                                        {chk.id}
+                                      </td>
+                                      <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)" }}>
+                                        <div>{chk.check}</div>
+                                        {chk.evidence && (
+                                          <div style={{ fontSize: "10px", fontWeight: 400, color: "var(--text-muted)", marginTop: "2px" }}>
+                                            {chk.evidence}
+                                          </div>
+                                        )}
+                                      </td>
+                                      <td style={{ padding: "6px 10px" }}>
+                                        <StatusBadge status={chk.status} />
+                                      </td>
+                                      {hasExpected && (
+                                        <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                          {chk.expected_value || ""}
+                                        </td>
                                       )}
-                                    </td>
-                                    <td style={{ padding: "6px 10px" }}>
-                                      <StatusBadge status={chk.status} />
-                                    </td>
-                                    <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.expected_value || ""}
-                                    </td>
-                                    <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.actual_value || ""}
-                                    </td>
-                                    <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
-                                      {chk.difference || chk.difference_percent || ""}
-                                    </td>
-                                    <td style={{ padding: "6px 10px", fontSize: "10px", color: "var(--text-muted)" }}>
-                                      {chk.threshold || ""}
-                                    </td>
-                                    <td style={{ padding: "6px 10px", textAlign: "right" }}>
-                                      {chk.finding_id ? (
-                                        <button
-                                          onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
-                                          style={{
-                                            display: "inline-flex",
-                                            alignItems: "center",
-                                            gap: "3px",
-                                            padding: "2px 6px",
-                                            borderRadius: "4px",
-                                            fontSize: "10px",
-                                            fontWeight: 600,
-                                            background: "rgba(16, 185, 129, 0.1)",
-                                            color: "var(--color-primary)",
-                                            border: "1px solid rgba(16, 185, 129, 0.3)",
-                                            cursor: "pointer",
-                                          }}
-                                        >
-                                          <ExternalLink size={11} />
-                                          {chk.finding_id}
-                                        </button>
-                                      ) : (
-                                        <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600 }}>
-                                          Verified
-                                        </span>
+                                      {hasActual && (
+                                        <td style={{ padding: "6px 10px", fontWeight: 600, color: "var(--text-primary)", fontVariantNumeric: "tabular-nums" }}>
+                                          {chk.actual_value || ""}
+                                        </td>
                                       )}
-                                    </td>
-                                  </tr>
-                                );
-                              })}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
+                                      {hasDiff && (
+                                        <td style={{ padding: "6px 10px", color: "var(--text-secondary)", fontVariantNumeric: "tabular-nums" }}>
+                                          {chk.difference || chk.difference_percent || ""}
+                                        </td>
+                                      )}
+                                      {hasThreshold && (
+                                        <td style={{ padding: "6px 10px", fontSize: "10px", color: "var(--text-muted)" }}>
+                                          {chk.threshold || ""}
+                                        </td>
+                                      )}
+                                      <td style={{ padding: "6px 10px", textAlign: "right" }}>
+                                        {chk.finding_id ? (
+                                          <button
+                                            onClick={() => onOpenEvidence && onOpenEvidence(chk.finding_id)}
+                                            style={{
+                                              display: "inline-flex",
+                                              alignItems: "center",
+                                              gap: "3px",
+                                              padding: "2px 6px",
+                                              borderRadius: "4px",
+                                              fontSize: "10px",
+                                              fontWeight: 600,
+                                              background: "rgba(16, 185, 129, 0.1)",
+                                              color: "var(--color-primary)",
+                                              border: "1px solid rgba(16, 185, 129, 0.3)",
+                                              cursor: "pointer",
+                                            }}
+                                          >
+                                            <ExternalLink size={11} />
+                                            {chk.finding_id}
+                                          </button>
+                                        ) : (
+                                          <span style={{ fontSize: "10px", color: "#059669", fontWeight: 600 }}>
+                                            Verified
+                                          </span>
+                                        )}
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        );
+                      })()}
                     </div>
                   );
                 })}

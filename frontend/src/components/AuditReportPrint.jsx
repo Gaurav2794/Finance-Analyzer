@@ -592,6 +592,7 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
         {/* Detailed Category Sub-sections */}
         {categories.map((cat, idx) => {
           const catChecks = allChecks.filter(c => c.category === cat.id);
+          const hasExp = catChecks.some(chk => chk.expected_value != null && String(chk.expected_value).trim() !== "");
           return (
             <div key={cat.id || idx} className="print-avoid-break" style={{ marginTop: 16 }}>
               <h3 className="print-subsec-heading" style={{ borderBottom: "1px solid #CBD5E1", paddingBottom: 2 }}>
@@ -601,10 +602,10 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                 <thead>
                   <tr>
                     <th style={{ width: "12%" }}>Check ID</th>
-                    <th style={{ width: "35%" }}>Audit Procedure</th>
+                    <th style={{ width: hasExp ? "38%" : "55%" }}>Audit Procedure</th>
                     <th style={{ width: "14%" }}>Status</th>
-                    <th style={{ textAlign: "right", width: "18%" }}>Expected / Prior</th>
-                    <th style={{ textAlign: "right", width: "18%" }}>Actual / Current</th>
+                    {hasExp && <th style={{ textAlign: "right", width: "18%" }}>Expected / Prior</th>}
+                    <th style={{ textAlign: "right", width: hasExp ? "18%" : "20%" }}>Actual / Current</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -620,7 +621,7 @@ export default function AuditReportPrint({ extractionResult, analysisResult }) {
                           {chk.status}
                         </span>
                       </td>
-                      <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>
+                      {hasExp && <td style={{ textAlign: "right", fontFamily: "Courier, monospace" }}>{chk.expected_value || ""}</td>}
                       <td style={{ textAlign: "right", fontFamily: "Courier, monospace", fontWeight: 600 }}>{chk.actual_value || ""}</td>
                     </tr>
                   ))}
