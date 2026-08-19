@@ -112,7 +112,19 @@ class TableExtractor:
 
             # Col 0 is typically line item label
             raw_label = str(row[0]).strip() if len(row) > 0 and row[0] is not None else ""
-            if not raw_label or raw_label.lower() in [
+            if not raw_label:
+                continue
+
+            # Stop extraction if row indicates start of detailed supporting schedules section
+            if any(term in raw_label.lower() for term in [
+                "detailed supporting schedule",
+                "supporting schedule",
+                "detailed cash flow supporting schedule",
+                "schedule of"
+            ]):
+                break
+
+            if raw_label.lower() in [
                 "particulars", "line item", "description", "assets", "liabilities", "equity",
                 "equity and liabilities", "non-current assets", "current assets", "revenue",
                 "expenses", "operating activities", "investing activities", "financing activities"
@@ -148,6 +160,14 @@ class TableExtractor:
                     values_dict[period_key] = None
 
             if has_numeric_val:
+                # Do not overwrite a populated primary statement item with an incomplete sub-item
+                if std_key in extracted_items:
+                    existing_vals = extracted_items[std_key].get("values", {})
+                    existing_count = sum(1 for v in existing_vals.values() if v is not None)
+                    new_count = sum(1 for v in values_dict.values() if v is not None)
+                    if existing_count >= new_count and existing_count > 0:
+                        continue
+
                 item_obj = {
                     "standard_label": raw_label,
                     "raw_labels": [raw_label],

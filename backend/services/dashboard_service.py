@@ -197,10 +197,15 @@ def _ratios(
         "interest_coverage_ratio": _extract_ratio("interest_coverage_ratio", "interest_coverage"),
         # Profitability
         "gross_profit_margin_pct": _extract_ratio("gross_profit_margin_pct", "gross_profit_margin", "gross_margin", is_percentage=True),
+        "gross_margin": _extract_ratio("gross_profit_margin_pct", "gross_profit_margin", "gross_margin", is_percentage=True),
         "operating_margin_pct": _extract_ratio("operating_margin_pct", "operating_margin", is_percentage=True),
+        "operating_margin": _extract_ratio("operating_margin_pct", "operating_margin", is_percentage=True),
         "net_margin_pct": _extract_ratio("net_profit_margin_pct", "net_profit_margin", "net_margin", is_percentage=True),
+        "net_margin": _extract_ratio("net_profit_margin_pct", "net_profit_margin", "net_margin", is_percentage=True),
         "return_on_assets_pct": _extract_ratio("return_on_assets_pct", "return_on_assets", "roa", is_percentage=True),
+        "roa": _extract_ratio("return_on_assets_pct", "return_on_assets", "roa", is_percentage=True),
         "roe_pct": _extract_ratio("return_on_equity_pct", "return_on_equity", "roe", is_percentage=True),
+        "roe": _extract_ratio("return_on_equity_pct", "return_on_equity", "roe", is_percentage=True),
         # Efficiency
         "asset_turnover_ratio": _extract_ratio("asset_turnover_ratio", "asset_turnover"),
         "receivables_turnover_ratio": _extract_ratio("receivables_turnover_ratio", "receivables_turnover"),
@@ -376,10 +381,21 @@ def build_dashboard(
         _val(is_statement, "total_expenses", "operating_expenses", "total_operating_expenses", period=curr)
         or _get_growth_metric_val(rr, "operating_expenses", "total_expenses", which="current_value")
     )
+    if exp_curr is None:
+        exp_items = [_val(is_statement, k, period=curr) for k in ["cost_of_materials_consumed", "employee_benefit_expenses", "employee_benefits_expense", "finance_costs", "depreciation_and_amortization", "depreciation_and_amortisation", "other_operating_expenses", "other_expenses"]]
+        v_exp = [x for x in exp_items if x is not None]
+        if v_exp:
+            exp_curr = sum(v_exp)
+
     exp_prev = (
         _val(is_statement, "total_expenses", "operating_expenses", "total_operating_expenses", period=prev)
         or _get_growth_metric_val(rr, "operating_expenses", "total_expenses", which="previous_value")
     )
+    if exp_prev is None:
+        exp_items_p = [_val(is_statement, k, period=prev) for k in ["cost_of_materials_consumed", "employee_benefit_expenses", "employee_benefits_expense", "finance_costs", "depreciation_and_amortization", "depreciation_and_amortisation", "other_operating_expenses", "other_expenses"]]
+        v_exp_p = [x for x in exp_items_p if x is not None]
+        if v_exp_p:
+            exp_prev = sum(v_exp_p)
 
     # 4. Operating Profit
     op_curr = _val(is_statement, "operating_profit", "operating_income", "ebit", period=curr) or _get_growth_metric_val(rr, "operating_profit", which="current_value")
@@ -411,6 +427,16 @@ def build_dashboard(
         except (KeyError, TypeError, ValueError):
             pass
     if np_curr is None:
+        pbt = _val(is_statement, "profit_before_tax", "profit_before_exceptional_items_and_tax", period=curr)
+        tax = _val(is_statement, "total_tax_expense", "tax_expense", period=curr)
+        if pbt is not None and tax is not None:
+            np_curr = pbt - tax
+    if np_curr is None and rev_curr is not None and exp_curr is not None:
+        oth_inc = _val(is_statement, "other_income", "other_operating_income", period=curr) or 0
+        exc_gain = _val(is_statement, "exceptional_gain", "exceptional_items", period=curr) or 0
+        tax = _val(is_statement, "total_tax_expense", "tax_expense", "current_tax", period=curr) or 0
+        np_curr = (rev_curr + oth_inc + exc_gain) - exp_curr - tax
+    if np_curr is None:
         raw_nm = _val(bs, "net_margin", "profit_for_the_period", period=curr)
         if raw_nm is not None and rev_curr is not None:
             if abs(raw_nm) <= 1.0:
@@ -419,6 +445,16 @@ def build_dashboard(
                 np_curr = round((raw_nm / 100.0) * rev_curr, 2)
 
     np_prev = _val(is_statement, "profit_for_the_period", "net_profit", "profit_after_tax", "net_income", period=prev) or _get_growth_metric_val(rr, "net_profit", which="previous_value")
+    if np_prev is None:
+        pbt_p = _val(is_statement, "profit_before_tax", "profit_before_exceptional_items_and_tax", period=prev)
+        tax_p = _val(is_statement, "total_tax_expense", "tax_expense", period=prev)
+        if pbt_p is not None and tax_p is not None:
+            np_prev = pbt_p - tax_p
+    if np_prev is None and rev_prev is not None and exp_prev is not None:
+        oth_inc_p = _val(is_statement, "other_income", "other_operating_income", period=prev) or 0
+        exc_gain_p = _val(is_statement, "exceptional_gain", "exceptional_items", period=prev) or 0
+        tax_p = _val(is_statement, "total_tax_expense", "tax_expense", "current_tax", period=prev) or 0
+        np_prev = (rev_prev + oth_inc_p + exc_gain_p) - exp_prev - tax_p
     if np_prev is None:
         raw_nm_p = _val(bs, "net_margin", "profit_for_the_period", period=prev)
         if raw_nm_p is not None and rev_prev is not None:
@@ -434,6 +470,14 @@ def build_dashboard(
         ca = _val(bs, "total_current_assets", "current_assets", "other_non_current_assets", period=curr)
         if nca is not None and ca is not None:
             ta_curr = nca + ca
+    if ta_curr is None:
+        ca_items = [_val(bs, k, period=curr) for k in ["inventories", "inventory", "trade_receivables", "receivables", "cash_and_cash_equivalents", "cash", "other_current_assets"]]
+        nca_items = [_val(bs, k, period=curr) for k in ["property_plant_equipment", "intangible_assets", "right_of_use_assets", "deferred_tax_assets_net", "other_non_current_assets"]]
+        v_ca = [x for x in ca_items if x is not None]
+        v_nca = [x for x in nca_items if x is not None]
+        if v_ca or v_nca:
+            ta_curr = sum(v_ca) + sum(v_nca)
+
     ta_prev = _val(bs, "total_assets", "assets", period=prev) or _get_growth_metric_val(rr, "assets", which="previous_value")
     if ta_prev is None:
         nca_p = _val(bs, "total_non_current_assets", "non_current_assets", period=prev)
@@ -500,6 +544,25 @@ def build_dashboard(
         if c is not None and p is not None and p != 0:
             return round(((c - p) / abs(p)) * 100.0, 2)
         return None
+
+    # Compute ratios with safe fallback derivations
+    computed_ratios = _ratios(rr, fd, curr)
+    if computed_ratios.get("current_ratio") is None:
+        ca = _val(bs, "total_current_assets", "current_assets", period=curr)
+        cl = _val(bs, "total_current_liabilities", "current_liabilities", period=curr)
+        if ca is not None and cl is not None and cl != 0:
+            computed_ratios["current_ratio"] = round(ca / cl, 4)
+    if computed_ratios.get("debt_to_equity") is None:
+        if debt_curr is not None and eq_curr is not None and eq_curr != 0:
+            computed_ratios["debt_to_equity"] = round(debt_curr / eq_curr, 4)
+    if computed_ratios.get("net_margin_pct") is None:
+        if np_curr is not None and rev_curr is not None and rev_curr != 0:
+            computed_ratios["net_margin_pct"] = round((np_curr / rev_curr) * 100.0, 2)
+            computed_ratios["net_margin"] = computed_ratios["net_margin_pct"]
+    if computed_ratios.get("roe_pct") is None:
+        if np_curr is not None and eq_curr is not None and eq_curr != 0:
+            computed_ratios["roe_pct"] = round((np_curr / eq_curr) * 100.0, 2)
+            computed_ratios["roe"] = computed_ratios["roe_pct"]
 
     # Build analysis result shape (Team 2 data)
     analysis_result = {
@@ -589,7 +652,7 @@ def build_dashboard(
         },
 
         # Ratios (from Team 2 + Team 1 fallback)
-        "ratios": _ratios(rr, fd, curr),
+        "ratios": computed_ratios,
 
         # Analytics (from Team 2)
         "growth_rates": _growth_rates(rr, fd, curr),

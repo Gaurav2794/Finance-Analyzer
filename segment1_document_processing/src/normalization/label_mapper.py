@@ -43,6 +43,9 @@ class LabelMapper:
         "total non current assets": "total_non_current_assets",
 
         # Current Assets
+        "current assets": "total_current_assets",
+        "non-current assets": "total_non_current_assets",
+        "non current assets": "total_non_current_assets",
         "inventories": "inventories",
         "inventory": "inventories",
         "stock in trade": "inventories",
@@ -65,6 +68,7 @@ class LabelMapper:
         "total assets": "total_assets",
 
         # Equity
+        "equity": "total_equity",
         "equity share capital": "equity_share_capital",
         "share capital": "equity_share_capital",
         "common stock": "equity_share_capital",
@@ -80,6 +84,8 @@ class LabelMapper:
         "total equity": "total_equity",
 
         # Non-Current Liabilities
+        "non-current liabilities": "total_non_current_liabilities",
+        "non current liabilities": "total_non_current_liabilities",
         "long-term borrowings": "long_term_borrowings",
         "long term borrowings": "long_term_borrowings",
         "non-current borrowings": "long_term_borrowings",
@@ -94,6 +100,7 @@ class LabelMapper:
         "total non-current liabilities": "total_non_current_liabilities",
 
         # Current Liabilities
+        "current liabilities": "total_current_liabilities",
         "short-term borrowings": "short_term_borrowings",
         "short term borrowings": "short_term_borrowings",
         "current borrowings": "short_term_borrowings",
