@@ -46,11 +46,13 @@ class ExcelParser:
             # Detect statement type from sheet name first, then content
             statement_type = StatementDetector.detect_statement_type(sheet_name)
             if not statement_type:
+                # Check content only if sheet is not an auxiliary/test sheet
                 sheet_text = " ".join([str(cell) for row in rows[:5] for cell in row])
                 statement_type = StatementDetector.detect_statement_type(sheet_text)
 
-            if not statement_type:
-                statement_type = "balance_sheet"  # Default if single sheet
+            # Only default if workbook has a single sheet with no explicit title
+            if not statement_type and len(sheet_names) == 1:
+                statement_type = "balance_sheet"
 
             # Check currency/scale in header
             header_sample = " ".join([str(c) for r in rows[:8] for c in r])

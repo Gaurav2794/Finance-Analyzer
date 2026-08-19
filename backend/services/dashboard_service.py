@@ -320,8 +320,10 @@ def build_dashboard(
     extraction_result = {
         "document_id": meta.get("document_id"),
         "file_name": meta.get("source_file", "Unknown"),
+        "company_name": company.get("name"),
         "currency": company.get("currency", "INR"),
         "unit": company.get("scale", "Crores"),
+        "scale": company.get("scale", "Crores"),
         "period": {
             "current": curr,
             "previous": prev,
@@ -339,6 +341,7 @@ def build_dashboard(
         "balance_sheet": bs,
         "income_statement": is_statement,
         "cash_flow_statement": fd.get("cash_flow_statement", {}),
+        "cash_flow": fd.get("cash_flow_statement", {}),
         "extracted_notes": fd.get("extracted_notes_and_disclosures", []),
         "team1_metrics": fd.get("team1_metrics", {}),
     }

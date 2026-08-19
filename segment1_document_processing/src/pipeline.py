@@ -5,6 +5,7 @@ Generates standardized financial JSON with frozen Team 1 Quality, Extraction, an
 """
 
 import os
+import re
 import json
 import glob
 from datetime import datetime, timezone
@@ -226,7 +227,18 @@ class DocumentProcessingPipeline:
             periods=period_list
         )
 
-        inferred_company = company_name or file_name.split(".")[0].replace("_", " ").title()
+        inferred_company = company_name
+        if not inferred_company and notes_items:
+            for n in notes_items:
+                t = n.get("text", "")
+                m = re.search(r"\b([A-Z][A-Za-z0-9\s,\.&'-]+?\s+(?:Ltd\.?|Limited|Inc\.?|Corp\.?|LLC|Pvt\.?\s*Ltd\.?))\b", t)
+                if m:
+                    inferred_company = m.group(1).strip()
+                    break
+        if not inferred_company:
+            cleaned_name = file_name.split(".")[0]
+            cleaned_name = re.sub(r"_(ALL_PASS|Test|Test_Suite|Clean_Test_Dataset|Finance_Analyzer|Huge_Test_Data).*", "", cleaned_name, flags=re.IGNORECASE)
+            inferred_company = cleaned_name.replace("_", " ").title()
 
         return {
             "metadata": {

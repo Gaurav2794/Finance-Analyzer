@@ -18,16 +18,19 @@ class TableExtractor:
     @classmethod
     def identify_period_columns(cls, header_row: List[str]) -> Dict[int, str]:
         """
-        Identifies column indexes corresponding to fiscal periods like FY2024, FY2023, 2024, 2023.
-        Returns map: {col_index: 'FY2024'}
+        Identifies column indexes corresponding to fiscal periods like FY2025, FY2024, FY2023, 2024, 2023.
+        Returns map: {col_index: 'FY2025'}
         """
         period_map = {}
         for idx, col in enumerate(header_row):
             if not col:
                 continue
             col_str = str(col).strip()
-            
-            # Check FY format: FY2024 or FY24
+            # If the cell is long or contains title words like 'vs', '|', 'ltd', 'sheet', skip it
+            if len(col_str) > 20 and any(w in col_str.lower() for w in ["vs", "|", "ltd", "statement", "sheet", "annual", "report", "company"]):
+                continue
+
+            # Check FY format: FY2025 or FY25
             fy_match = cls.FY_PATTERN.search(col_str)
             if fy_match:
                 raw_fy = fy_match.group(1).replace(" ", "").upper()
@@ -36,15 +39,45 @@ class TableExtractor:
                 period_map[idx] = raw_fy
                 continue
 
-            # Check 4-digit Year format: 2024, 2023
+            # Check 4-digit Year format: 2025, 2024
             yr_match = cls.YEAR_PATTERN.search(col_str)
             if yr_match:
                 yr = yr_match.group(1)
                 period_map[idx] = f"FY{yr}"
                 continue
 
-        # If only 2 numeric data columns were found without explicit year in headers, assign default FY2024 & FY2023
         return period_map
+
+    @classmethod
+    def find_best_header_row(cls, rows: List[List[Any]]) -> Tuple[int, Dict[int, str]]:
+        """
+        Searches the first 10 rows of a table to identify the true column header row.
+        Prefers rows with >= 2 period columns at index >= 1, and rows containing 'particulars'/'description'.
+        """
+        best_idx = -1
+        best_map: Dict[int, str] = {}
+        best_score = -1
+
+        for i, row in enumerate(rows[:10]):
+            cols = [str(cell) for cell in row]
+            detected_periods = cls.identify_period_columns(cols)
+            if not detected_periods:
+                continue
+
+            score = len(detected_periods) * 10
+            # Bonus if period columns are not at column 0 (column 0 is usually line item label)
+            if 0 not in detected_periods:
+                score += 25
+            # Bonus if column 0 contains label header keywords
+            if cols and any(w in cols[0].lower() for w in ["particular", "account", "description", "metric", "item", "line", "asset", "liabilit"]):
+                score += 35
+
+            if score > best_score:
+                best_score = score
+                best_idx = i
+                best_map = detected_periods
+
+        return best_idx, best_map
 
     @classmethod
     def parse_table_rows(
@@ -60,17 +93,8 @@ class TableExtractor:
         if not rows:
             return {}
 
-        # 1. Find Header Row
-        header_idx = -1
-        period_cols: Dict[int, str] = {}
-
-        for i, row in enumerate(rows[:5]):
-            cols = [str(cell) for cell in row]
-            detected_periods = cls.identify_period_columns(cols)
-            if len(detected_periods) >= 1:
-                header_idx = i
-                period_cols = detected_periods
-                break
+        # 1. Find the best Header Row
+        header_idx, period_cols = cls.find_best_header_row(rows)
 
         # Fallback if header row not identified
         if not period_cols:
@@ -88,13 +112,21 @@ class TableExtractor:
 
             # Col 0 is typically line item label
             raw_label = str(row[0]).strip() if len(row) > 0 and row[0] is not None else ""
-            if not raw_label or raw_label.lower() in ["particulars", "line item", "description", "assets", "liabilities"]:
+            if not raw_label or raw_label.lower() in [
+                "particulars", "line item", "description", "assets", "liabilities", "equity",
+                "equity and liabilities", "non-current assets", "current assets", "revenue",
+                "expenses", "operating activities", "investing activities", "financing activities"
+            ]:
                 continue
 
-            # Check if col 1 is a Note column
+            # Check if any column is a Note column (e.g. "Note 15" or column 1/3)
             note_ref = None
-            if len(row) > 1 and str(row[1]).strip().isdigit():
-                note_ref = f"Note {str(row[1]).strip()}"
+            for c_idx, cell in enumerate(row):
+                if c_idx not in period_cols:
+                    c_str = str(cell).strip()
+                    if c_str.lower().startswith("note ") or (c_str.isdigit() and int(c_str) < 100):
+                        note_ref = c_str if c_str.lower().startswith("note ") else f"Note {c_str}"
+                        break
 
             # Map label to standard key
             std_key, cleaned_label = LabelMapper.map_label(raw_label, section=section_name)
@@ -122,6 +154,7 @@ class TableExtractor:
                     "values": values_dict,
                     "source": {
                         "file": source_info.get("file", "unknown"),
+                        "sheet": source_info.get("sheet"),
                         "page": source_info.get("page", 1),
                         "table_index": source_info.get("table_index", 0),
                         "note_ref": note_ref

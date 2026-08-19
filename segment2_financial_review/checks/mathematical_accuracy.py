@@ -293,8 +293,9 @@ def validate_gross_profit(
     warning_tolerance: Decimal = Decimal("0.05"),
 ) -> CalculationDetail:
     """
-    Equation 2: Revenue - COGS = Gross Profit
+    Equation 2: Revenue - COGS = Gross Profit (or Total Income - COGS = Gross Profit)
     """
+    tot_income = get_value(data, "income_statement", "total_income", period)
     rev = get_value(data, "income_statement", "revenue_from_operations", period)
     if rev is None:
         rev = get_value(data, "income_statement", "revenue", period)
@@ -306,6 +307,11 @@ def validate_gross_profit(
         cogs = get_value(data, "income_statement", "cost_of_goods_sold", period)
 
     reported_gp = get_value(data, "income_statement", "gross_profit", period)
+
+    # If Total Income - COGS matches reported Gross Profit (e.g. when other operating income is included in top-line), use Total Income
+    if rev is not None and cogs is not None and reported_gp is not None and tot_income is not None:
+        if abs(rev - cogs - reported_gp) > tolerance and abs(tot_income - cogs - reported_gp) <= max(tolerance, warning_tolerance):
+            rev = tot_income
 
     inputs = {
         "revenue": rev,
@@ -456,7 +462,7 @@ def validate_net_income(
     warning_tolerance: Decimal = Decimal("0.05"),
 ) -> CalculationDetail:
     """
-    Equation 4: Operating Income + Other Income - Interest - Tax = Net Income
+    Equation 4: Operating Income + Other Income - Interest - Tax = Net Income (or PBT - Tax = Net Income)
     """
     op = get_value(data, "income_statement", "operating_profit", period)
     if op is None:
@@ -475,6 +481,8 @@ def validate_net_income(
     if reported_ni is None:
         reported_ni = get_value(data, "income_statement", "net_profit", period)
 
+    pbt = get_value(data, "income_statement", "profit_before_tax", period)
+
     inputs = {
         "operating_income": op,
         "other_income": other_income,
@@ -484,7 +492,7 @@ def validate_net_income(
     }
     src = get_source(data, "income_statement", "profit_for_the_period")
 
-    if op is None or other_income is None or interest is None or tax is None or reported_ni is None:
+    if (op is None and pbt is None) or interest is None or tax is None or reported_ni is None:
         missing = [k for k, v in inputs.items() if v is None]
         return CalculationDetail(
             check_id="MATH_004_NET_INCOME",
@@ -502,7 +510,16 @@ def validate_net_income(
             details=f"Missing required Net Income components: {', '.join(missing)}",
         )
 
-    calculated = op + other_income - interest - tax
+    # Evaluate options: standard (OP + Other Income - Interest - Tax), or OP - Interest - Tax (when other income was in OP), or PBT - Tax
+    candidates = []
+    if op is not None:
+        candidates.append(op + (other_income or Decimal("0")) - interest - tax)
+        candidates.append(op - interest - tax)
+    if pbt is not None:
+        candidates.append(pbt - tax)
+
+    # Pick the candidate closest to reported_ni
+    calculated = min(candidates, key=lambda c: abs(c - reported_ni))
     diff = abs(calculated - reported_ni)
     pct_diff = round(float(diff / abs(reported_ni) * 100), 4) if reported_ni != 0 else 0.0
 

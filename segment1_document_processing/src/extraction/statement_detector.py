@@ -44,10 +44,19 @@ class StatementDetector:
 
     NOTES_KEYWORDS = [
         r"notes\s*to\s*(the\s*)?financial\s*statements",
+        r"notes\s*(&|and)?\s*disclosures?",
         r"significant\s*accounting\s*policies",
         r"contingent\s*liabilities",
         r"related\s*party\s*transactions",
-        r"note\s*\d+"
+        r"notes?\s*to\s*accounts?",
+        r"notes?",
+        r"disclosures?"
+    ]
+
+    AUXILIARY_SHEET_NAMES = [
+        "test guide", "readme", "instructions", "trial balance",
+        "ratio & analytics", "ratios & analytics", "prior year tie-out",
+        "document quality", "control sheet", "tie-out"
     ]
 
     @classmethod
@@ -62,7 +71,11 @@ class StatementDetector:
         if isinstance(text_or_lines, list):
             sample_text = " ".join(str(x) for x in text_or_lines[:30]).lower()
         else:
-            sample_text = str(text_or_lines).lower()
+            sample_text = str(text_or_lines).lower().strip()
+
+        # If it's explicitly an auxiliary/test sheet by name, don't misclassify as a core statement
+        if sample_text in cls.AUXILIARY_SHEET_NAMES:
+            return None
 
         scores = {
             "cash_flow_statement": 0,
@@ -71,13 +84,15 @@ class StatementDetector:
             "notes": 0
         }
 
-        # Check explicit titles first
+        # Check explicit sheet/section titles first
         if "cash flow" in sample_text or "statement of cash flows" in sample_text:
             scores["cash_flow_statement"] += 5
         if "balance sheet" in sample_text or "statement of financial position" in sample_text:
             scores["balance_sheet"] += 5
         if "profit and loss" in sample_text or "income statement" in sample_text or "statement of profit" in sample_text:
             scores["income_statement"] += 5
+        if "notes & disclosures" in sample_text or "notes and disclosures" in sample_text or "notes to accounts" in sample_text or sample_text == "notes":
+            scores["notes"] += 5
 
         # Check keyword matches
         for pat in cls.CASH_FLOW_KEYWORDS:

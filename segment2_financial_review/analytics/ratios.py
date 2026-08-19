@@ -289,6 +289,25 @@ class FinancialRatiosEngine:
             is_percentage=False,
         )
 
+        # 3. Cash Ratio = Cash & Cash Equivalents / TCL
+        cash_val = get_value(data, "balance_sheet", "cash_and_cash_equivalents", curr)
+        if cash_val is None:
+            cash_val = get_value(data, "balance_sheet", "cash", curr)
+        src_cash = get_source(data, "balance_sheet", "cash_and_cash_equivalents")
+        liquidity["cash_ratio"] = cls._calc_ratio(
+            ratio_name="Cash Ratio",
+            canonical_key="cash_ratio",
+            category="Liquidity",
+            formula="Cash & Cash Equivalents / Total Current Liabilities",
+            numerator=cash_val,
+            denominator=tcl,
+            numerator_label="Cash & Cash Equivalents",
+            denominator_label="Total Current Liabilities",
+            period=curr,
+            source=src_cash,
+            is_percentage=False,
+        )
+
         # ------------------------------------------------------------------
         # B. LEVERAGE RATIOS
         # ------------------------------------------------------------------
@@ -319,6 +338,25 @@ class FinancialRatiosEngine:
             denominator_label="Total Assets",
             period=curr,
             source=src_ta,
+            is_percentage=False,
+        )
+
+        # 3. Interest Coverage Ratio = Operating Profit / Finance Costs
+        finance_costs = get_value(data, "income_statement", "finance_costs", curr)
+        if finance_costs is None:
+            finance_costs = get_value(data, "income_statement", "interest_expense", curr)
+        src_fc = get_source(data, "income_statement", "finance_costs")
+        leverage["interest_coverage_ratio"] = cls._calc_ratio(
+            ratio_name="Interest Coverage Ratio",
+            canonical_key="interest_coverage_ratio",
+            category="Leverage",
+            formula="Operating Profit / Finance Costs",
+            numerator=op,
+            denominator=finance_costs,
+            numerator_label="Operating Profit",
+            denominator_label="Finance Costs",
+            period=curr,
+            source=src_fc,
             is_percentage=False,
         )
 
@@ -443,6 +481,22 @@ class FinancialRatiosEngine:
             denominator=avg_tr,
             numerator_label="Revenue from Operations",
             denominator_label="Average Trade Receivables" if tr_prev is not None else "Trade Receivables",
+            period=curr,
+            source=src_rev,
+            is_percentage=False,
+        )
+
+        # 4. Days Sales Outstanding (DSO) = (Average Trade Receivables * 365) / Revenue
+        dso_num = (avg_tr * Decimal("365")) if avg_tr is not None else None
+        efficiency["days_sales_outstanding"] = cls._calc_ratio(
+            ratio_name="Days Sales Outstanding",
+            canonical_key="days_sales_outstanding",
+            category="Efficiency",
+            formula="(Average Trade Receivables * 365) / Revenue",
+            numerator=dso_num,
+            denominator=rev,
+            numerator_label="Average Trade Receivables * 365",
+            denominator_label="Revenue from Operations",
             period=curr,
             source=src_rev,
             is_percentage=False,

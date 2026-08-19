@@ -239,15 +239,22 @@ class WP514Service:
         tolerance = checks_data.get("tolerance")
         th_str = f"{tolerance} {scale}".strip() if tolerance is not None else None
 
-        eqs = checks_data.get("equations", [])
+        raw_calcs = checks_data.get("calculations")
+        if isinstance(raw_calcs, dict):
+            eqs = list(raw_calcs.values())
+        elif isinstance(raw_calcs, list):
+            eqs = raw_calcs
+        else:
+            eqs = checks_data.get("equations", [])
+
         checks: List[Dict[str, Any]] = []
 
         for idx, eq in enumerate(eqs, start=1):
-            name = eq.get("name", f"Equation {idx}")
+            name = eq.get("check_name") or eq.get("name", f"Equation {idx}")
             eq_status = eq.get("status", "NOT_AVAILABLE")
-            diff = eq.get("difference")
-            expected = eq.get("expected_value") or eq.get("rhs")
-            actual = eq.get("actual_value") or eq.get("lhs")
+            diff = eq.get("absolute_difference") or eq.get("difference")
+            expected = eq.get("reported_value") or eq.get("expected_value") or eq.get("rhs")
+            actual = eq.get("calculated_value") or eq.get("actual_value") or eq.get("lhs")
             src = eq.get("source")
 
             checks.append({
@@ -308,7 +315,8 @@ class WP514Service:
         checks: List[Dict[str, Any]] = []
 
         # Check 1: Operating Cash Flow
-        cfo = cf_data.get("cfo_operating")
+        cfo = cf_data.get("operating_cash_flow") or cf_data.get("cfo_operating")
+        cfo_src = (cf_data.get("sources", {}).get("operating_cash_flow") if isinstance(cf_data.get("sources"), dict) else None) or cf_data.get("cfo_source")
         checks.append({
             "id": "WP514-CF-01",
             "category": "CASH_FLOW",
@@ -319,13 +327,14 @@ class WP514Service:
             "difference": None,
             "difference_percent": None,
             "threshold": None,
-            "source": cf_data.get("cfo_source"),
+            "source": cfo_src,
             "evidence": "Cash generated from operating activities" if cfo is not None else None,
             "finding_id": None,
         })
 
         # Check 2: Investing Cash Flow
-        cfi = cf_data.get("cfi_investing")
+        cfi = cf_data.get("investing_cash_flow") or cf_data.get("cfi_investing")
+        cfi_src = (cf_data.get("sources", {}).get("investing_cash_flow") if isinstance(cf_data.get("sources"), dict) else None) or cf_data.get("cfi_source")
         checks.append({
             "id": "WP514-CF-02",
             "category": "CASH_FLOW",
@@ -336,13 +345,14 @@ class WP514Service:
             "difference": None,
             "difference_percent": None,
             "threshold": None,
-            "source": cf_data.get("cfi_source"),
+            "source": cfi_src,
             "evidence": "Cash used in / from investing activities" if cfi is not None else None,
             "finding_id": None,
         })
 
         # Check 3: Financing Cash Flow
-        cff = cf_data.get("cff_financing")
+        cff = cf_data.get("financing_cash_flow") or cf_data.get("cff_financing")
+        cff_src = (cf_data.get("sources", {}).get("financing_cash_flow") if isinstance(cf_data.get("sources"), dict) else None) or cf_data.get("cff_source")
         checks.append({
             "id": "WP514-CF-03",
             "category": "CASH_FLOW",
@@ -353,41 +363,48 @@ class WP514Service:
             "difference": None,
             "difference_percent": None,
             "threshold": None,
-            "source": cf_data.get("cff_source"),
+            "source": cff_src,
             "evidence": "Cash used in / from financing activities" if cff is not None else None,
             "finding_id": None,
         })
 
         # Check 4: Cash Flow Statement Arithmetic Reconciliation
-        cf_recon_status = cf_data.get("cfs_arithmetic_status", status)
+        raw_recon_status = cf_data.get("cash_reconciliation_status") or cf_data.get("cfs_arithmetic_status", status)
+        cf_recon_status = "PASSED" if raw_recon_status == "RECONCILED" else ("FAILED" if raw_recon_status == "MISMATCH" else raw_recon_status)
+        cf_diff = cf_data.get("cash_difference") or cf_data.get("reconciliation_difference")
+        closing_src = (cf_data.get("sources", {}).get("reported_closing_cash") if isinstance(cf_data.get("sources"), dict) else None) or cf_data.get("closing_cash_source") or cf_data.get("source")
         checks.append({
             "id": "WP514-CF-04",
             "category": "CASH_FLOW",
             "check": "Cash Flow Arithmetic Reconciliation (Opening + CFO + CFI + CFF = Closing)",
-            "status": cf_recon_status if cf_recon_status in ("PASSED", "FAILED") else status,
+            "status": cf_recon_status if cf_recon_status in ("PASSED", "FAILED", "REVIEW", "NOT_AVAILABLE") else status,
             "expected_value": cls._fmt_val(cf_data.get("expected_closing_cash"), currency, scale),
             "actual_value": cls._fmt_val(cf_data.get("reported_closing_cash"), currency, scale),
-            "difference": cls._fmt_val(cf_data.get("reconciliation_difference"), currency, scale, is_delta=True),
+            "difference": cls._fmt_val(cf_diff, currency, scale, is_delta=True),
             "difference_percent": None,
             "threshold": th_str,
-            "source": cf_data.get("closing_cash_source"),
+            "source": closing_src,
             "evidence": "Net increase in cash and opening balance summation",
             "finding_id": next((fid for fid, f in finding_map.items() if "Cash" in f.get("category", "")), None),
         })
 
         # Check 5: Cross-Statement CFS ↔ Balance Sheet Cash
-        bs_cf_status = cf_data.get("bs_cash_match_status", "PASSED")
+        raw_bs_status = cf_data.get("bs_cash_vs_cf_cash_status") or cf_data.get("bs_cash_match_status", "PASSED")
+        bs_cf_status = "PASSED" if raw_bs_status == "MATCHED" else ("FAILED" if raw_bs_status == "MISMATCH" else raw_bs_status)
+        bs_cash_diff = cf_data.get("balance_sheet_cash_difference") or cf_data.get("bs_cash_difference")
+        bs_cash_val = cf_data.get("balance_sheet_cash") or cf_data.get("bs_cash_value")
+        bs_cash_src = (cf_data.get("sources", {}).get("balance_sheet_cash") if isinstance(cf_data.get("sources"), dict) else None) or cf_data.get("bs_cash_source")
         checks.append({
             "id": "WP514-CF-05",
             "category": "CASH_FLOW",
             "check": "Cash Flow Statement ↔ Balance Sheet Cash Tie-Out",
             "status": bs_cf_status,
-            "expected_value": cls._fmt_val(cf_data.get("bs_cash_value"), currency, scale),
+            "expected_value": cls._fmt_val(bs_cash_val, currency, scale),
             "actual_value": cls._fmt_val(cf_data.get("reported_closing_cash"), currency, scale),
-            "difference": cls._fmt_val(cf_data.get("bs_cash_difference"), currency, scale, is_delta=True),
+            "difference": cls._fmt_val(bs_cash_diff, currency, scale, is_delta=True),
             "difference_percent": None,
             "threshold": th_str,
-            "source": cf_data.get("bs_cash_source"),
+            "source": bs_cash_src,
             "evidence": "Cross-statement verification between Balance Sheet and Cash Flow Statement",
             "finding_id": None,
         })
@@ -419,11 +436,11 @@ class WP514Service:
         checks: List[Dict[str, Any]] = []
 
         for idx, it in enumerate(items, start=1):
-            name = it.get("metric") or it.get("label") or f"Account {idx}"
-            it_status = it.get("status", "NOT_AVAILABLE")
-            diff = it.get("difference")
-            expected = it.get("prior_closing_value")
-            actual = it.get("current_opening_value")
+            name = it.get("line_item") or it.get("metric") or it.get("label") or f"Account {idx}"
+            it_status = it.get("tie_out_status") or it.get("status", "NOT_AVAILABLE")
+            diff = it.get("absolute_difference") or it.get("difference")
+            expected = it.get("previous_closing_balance") or it.get("prior_closing_value")
+            actual = it.get("opening_balance") or it.get("current_opening_value")
 
             checks.append({
                 "id": f"WP514-PY-{idx:02d}",
@@ -436,7 +453,7 @@ class WP514Service:
                 "difference_percent": None,
                 "threshold": th_str,
                 "source": it.get("source"),
-                "evidence": f"Prior period closing vs current opening balance tie-out",
+                "evidence": it.get("details") or "Prior period closing vs current opening balance tie-out",
                 "finding_id": next((fid for fid, f in finding_map.items() if "Prior" in f.get("category", "") and name in f.get("title", "")), None),
             })
 
@@ -479,28 +496,29 @@ class WP514Service:
         score = ic_data.get("score")
         tolerance = ic_data.get("tolerance")
         th_str = f"{tolerance} {scale}".strip() if tolerance is not None else None
-        rules = ic_data.get("rules", [])
+        rules = ic_data.get("comparisons") or ic_data.get("rules", [])
         checks: List[Dict[str, Any]] = []
 
         for idx, r in enumerate(rules, start=1):
-            name = r.get("rule_name") or r.get("description") or f"Consistency Rule {idx}"
+            name = r.get("metric") or r.get("rule_name") or r.get("description") or f"Consistency Rule {idx}"
             r_status = r.get("status", "NOT_AVAILABLE")
-            diff = r.get("difference")
+            diff = r.get("absolute_difference") or r.get("difference")
             expected = r.get("value_a")
             actual = r.get("value_b")
+            src = r.get("source_a_trace") or r.get("source_b_trace") or r.get("source_a") or r.get("source_b")
 
             checks.append({
                 "id": f"WP514-IC-{idx:02d}",
                 "category": "INTERNAL_CONSISTENCY",
                 "check": name,
-                "status": "PASSED" if r_status == "PASSED" else ("FAILED" if r_status == "FAILED" else "REVIEW"),
+                "status": "PASSED" if r_status in ("PASSED", "MATCHED") else ("FAILED" if r_status in ("FAILED", "MISMATCH") else ("REVIEW" if r_status == "WARNING" else "NOT_AVAILABLE")),
                 "expected_value": cls._fmt_val(expected, currency, scale),
                 "actual_value": cls._fmt_val(actual, currency, scale),
                 "difference": cls._fmt_val(diff, currency, scale, is_delta=True),
                 "difference_percent": None,
                 "threshold": th_str,
-                "source": r.get("source_a") or r.get("source_b"),
-                "evidence": f"Cross-statement match between {r.get('statement_a', 'Statement A')} and {r.get('statement_b', 'Statement B')}",
+                "source": src,
+                "evidence": r.get("details") or f"Cross-statement match between {r.get('source_a', 'Statement A')} and {r.get('source_b', 'Statement B')}",
                 "finding_id": next((fid for fid, f in finding_map.items() if "Consistency" in f.get("category", "") and name in f.get("title", "")), None),
             })
 
@@ -541,11 +559,11 @@ class WP514Service:
         )
         status = ac_data.get("status", "PASSED")
         score = ac_data.get("score") or 100.0
-        items = ac_data.get("items", [])
+        items = ac_data.get("items") or list(ac_data.get("metrics", {}).values())
         checks: List[Dict[str, Any]] = []
 
         for idx, it in enumerate(items, start=1):
-            metric = it.get("metric", f"Metric {idx}")
+            metric = it.get("metric_name") or it.get("metric", f"Metric {idx}")
             curr = it.get("current_value")
             prev = it.get("previous_value")
             abs_chg = it.get("absolute_change")

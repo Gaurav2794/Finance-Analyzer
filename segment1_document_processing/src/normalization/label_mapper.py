@@ -68,12 +68,15 @@ class LabelMapper:
         "equity share capital": "equity_share_capital",
         "share capital": "equity_share_capital",
         "common stock": "equity_share_capital",
+        "other equity / retained earnings": "other_equity",
         "other equity": "other_equity",
         "reserves and surplus": "other_equity",
         "reserves & surplus": "other_equity",
         "retained earnings": "other_equity",
         "non-controlling interests": "non_controlling_interests",
         "minority interest": "non_controlling_interests",
+        "total equity & liabilities": "total_equity_and_liabilities",
+        "total equity and liabilities": "total_equity_and_liabilities",
         "total equity": "total_equity",
 
         # Non-Current Liabilities
@@ -103,12 +106,13 @@ class LabelMapper:
         "other current financial liabilities": "other_current_financial_liabilities",
         "short-term provisions": "short_term_provisions",
         "short term provisions": "short_term_provisions",
+        "provisions": "short_term_provisions",
         "current tax liabilities (net)": "current_tax_liabilities_net",
         "provision for income tax": "current_tax_liabilities_net",
         "other current liabilities": "other_current_liabilities",
         "total current liabilities": "total_current_liabilities",
         "total liabilities": "total_liabilities",
-        "total equity and liabilities": "total_equity_and_liabilities"
+        "balance sheet difference": "balance_sheet_difference",
     }
 
     # Standard label mappings for Income Statement
@@ -127,8 +131,10 @@ class LabelMapper:
         "total revenue": "total_income",
 
         # Expenses
+        "cost of materials / cost of sales": "cost_of_materials_consumed",
         "cost of materials consumed": "cost_of_materials_consumed",
         "cost of goods sold": "cost_of_materials_consumed",
+        "cost of sales": "cost_of_materials_consumed",
         "cogs": "cost_of_materials_consumed",
         "raw materials consumed": "cost_of_materials_consumed",
         "employee benefit expenses": "employee_benefit_expenses",
@@ -142,7 +148,9 @@ class LabelMapper:
         "depreciation and amortization expense": "depreciation_and_amortization",
         "depreciation and amortisation expense": "depreciation_and_amortization",
         "depreciation & amortisation": "depreciation_and_amortization",
+        "depreciation and amortization": "depreciation_and_amortization",
         "depreciation": "depreciation_and_amortization",
+        "total operating expenses": "total_operating_expenses",
         "other expenses": "other_operating_expenses",
         "other operating expenses": "other_operating_expenses",
         "operating expenses": "other_operating_expenses",
@@ -150,6 +158,7 @@ class LabelMapper:
         "total expenses": "total_expenses",
 
         # Profit Lines
+        "operating profit / ebit": "operating_profit",
         "operating profit": "operating_profit",
         "operating income": "operating_profit",
         "ebit": "operating_profit",
@@ -162,12 +171,15 @@ class LabelMapper:
         "deferred tax": "deferred_tax",
         "total tax expense": "total_tax_expense",
         "tax expense": "total_tax_expense",
+        "profit for the period / net profit": "profit_for_the_period",
         "profit for the period": "profit_for_the_period",
         "profit for the year": "profit_for_the_period",
         "net profit": "profit_for_the_period",
         "net profit after tax": "profit_for_the_period",
         "pat": "profit_for_the_period",
         "net income": "profit_for_the_period",
+        "exceptional gain": "exceptional_gain",
+        "exceptional loss": "exceptional_loss",
         "basic earnings per share": "basic_eps",
         "basic eps": "basic_eps",
         "diluted earnings per share": "diluted_eps",
@@ -176,6 +188,13 @@ class LabelMapper:
 
     # Standard label mappings for Cash Flow
     CASH_FLOW_MAP: Dict[str, str] = {
+        "profit before tax": "profit_before_tax",
+        "depreciation & amortisation": "depreciation_and_amortization",
+        "depreciation and amortization": "depreciation_and_amortization",
+        "working capital movement": "working_capital_adjustments",
+        "working capital adjustments": "working_capital_adjustments",
+        "interest paid": "interest_paid",
+        "taxes paid": "taxes_paid",
         "operating profit before working capital changes": "operating_profit_before_working_capital_changes",
         "cash generated from operations": "cash_generated_from_operations",
         "net cash from operating activities": "net_cash_from_operating_activities",
@@ -193,7 +212,14 @@ class LabelMapper:
         "purchase of property, plant, equipment": "purchase_of_ppe_and_intangibles",
         "capital expenditure": "purchase_of_ppe_and_intangibles",
         "capex": "purchase_of_ppe_and_intangibles",
+        "acquisition / investment activities": "purchase_of_investments",
+        "asset disposal proceeds": "proceeds_from_sale_of_assets",
 
+        "new borrowings": "proceeds_from_borrowings",
+        "proceeds from borrowings": "proceeds_from_borrowings",
+        "repayment of borrowings": "repayment_of_borrowings",
+        "lease principal payments": "lease_principal_payments",
+        "dividends paid": "dividends_paid",
         "net cash from financing activities": "net_cash_from_financing_activities",
         "net cash flows from financing activities": "net_cash_from_financing_activities",
         "net cash used in financing activities": "net_cash_from_financing_activities",
@@ -211,7 +237,8 @@ class LabelMapper:
         "cash and cash equivalents at end of the year": "closing_cash_and_cash_equivalents",
         "cash and cash equivalents at the end of the year": "closing_cash_and_cash_equivalents",
         "closing cash balance": "closing_cash_and_cash_equivalents",
-        "closing cash": "closing_cash_and_cash_equivalents"
+        "closing cash": "closing_cash_and_cash_equivalents",
+        "cash flow reconciliation difference": "cash_flow_reconciliation_difference",
     }
 
     @classmethod
@@ -249,16 +276,21 @@ class LabelMapper:
             if cleaned in cls.CASH_FLOW_MAP:
                 return cls.CASH_FLOW_MAP[cleaned], cleaned
 
-        # Fallback cross-search across all dictionaries
+        # Fallback cross-search across all dictionaries (exact match first)
         for mapping in [cls.BALANCE_SHEET_MAP, cls.INCOME_STATEMENT_MAP, cls.CASH_FLOW_MAP]:
             if cleaned in mapping:
                 return mapping[cleaned], cleaned
 
-        # Fuzzy substring match
+        # Fuzzy substring match - prioritize longer patterns first
+        all_items = []
         for mapping in [cls.BALANCE_SHEET_MAP, cls.INCOME_STATEMENT_MAP, cls.CASH_FLOW_MAP]:
-            for pattern, key in mapping.items():
-                if len(pattern) > 5 and (pattern in cleaned or cleaned in pattern):
-                    return key, cleaned
+            all_items.extend(mapping.items())
+        # Sort by length of pattern descending
+        all_items.sort(key=lambda x: len(x[0]), reverse=True)
+
+        for pattern, key in all_items:
+            if len(pattern) > 5 and (pattern in cleaned or cleaned in pattern):
+                return key, cleaned
 
         # Fallback: create safe snake_case key
         safe_key = re.sub(r"[^a-z0-9]+", "_", cleaned).strip("_")
