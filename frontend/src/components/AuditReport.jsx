@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import ScoreSeal from "./ScoreSeal.jsx";
 import RatioTile from "./RatioTile.jsx";
 import WP514ReviewMatrix from "./WP514ReviewMatrix.jsx";
+import AuditReportPrint from "./AuditReportPrint.jsx";
 import {
   ResponsiveContainer,
   BarChart,
@@ -240,66 +241,19 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
   }, [findings]);
 
   return (
-    <div
-      className="audit-report-container"
-      style={{
-        background: "var(--bg-main, #F8FAFC)",
-        minHeight: "100vh",
-        color: "var(--text-primary, #0F172A)",
-        padding: "24px 36px",
-        maxWidth: 1140,
-        margin: "0 auto",
-      }}
-    >
-      <style>{`
-        @media print {
-          /* Zero out the @page top/bottom margins so the browser has no space
-             to render its default header (date/time) and footer (URL/page num).
-             Left/right margins are kept for a clean gutter. */
-          @page {
-            size: A4 portrait;
-            margin: 0mm 14mm;
-          }
-          body {
-            background: #FFFFFF !important;
-            color: #0F172A !important;
-            font-size: 10pt !important;
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-          }
-          .audit-report-container {
-            background: #FFFFFF !important;
-            /* Restore breathing room that @page margin-top:0 removed */
-            padding-top: 10mm !important;
-            padding-bottom: 10mm !important;
-            padding-left: 0 !important;
-            padding-right: 0 !important;
-            max-width: 100% !important;
-            margin: 0 !important;
-          }
-          .no-print {
-            display: none !important;
-          }
-          .fd-card {
-            box-shadow: none !important;
-            border: 1px solid #CBD5E1 !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            margin-bottom: 16px !important;
-            padding: 16px 20px !important;
-          }
-          table, tr, td, th {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .report-section-break {
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-        }
-      `}</style>
-
-      {/* ── Action Bar (Screen Only) ── */}
+    <>
+      <div
+        className="audit-report-container"
+        style={{
+          background: "var(--bg-main, #F8FAFC)",
+          minHeight: "100vh",
+          color: "var(--text-primary, #0F172A)",
+          padding: "24px 36px",
+          maxWidth: 1140,
+          margin: "0 auto",
+        }}
+      >
+        {/* ── Action Bar (Screen Only) ── */}
       <div
         className="no-print"
         style={{
@@ -991,6 +945,9 @@ export default function AuditReport({ extractionResult, analysisResult, onBack }
           <WP514ReviewMatrix wp514Data={analysisResult.wp514} appendixMode={true} />
         </div>
       )}
-    </div>
+      </div>
+
+      <AuditReportPrint extractionResult={extractionResult} analysisResult={analysisResult} />
+    </>
   );
 }
