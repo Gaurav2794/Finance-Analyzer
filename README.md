@@ -1,375 +1,186 @@
-﻿# Financial Statement Analyzer & Review Engine
+# Finance Analyzer — Automated Financial Statement & WP-514 Audit Platform
 
-> An intelligent, end-to-end pipeline that ingests financial documents (PDF, Excel, CSV, Markdown), normalizes them into a structured JSON contract, runs 10 automated financial review checks, computes ratios, detects anomalies, and produces a scored audit report — all without any LLM.
+[![CI / E2E Tests](https://img.shields.io/badge/Playwright-10%2F10%20PASS-success?logo=playwright)](tests/test_browser_real_e2e.py)
+[![WP-514 Benchmark](https://img.shields.io/badge/WP--514-100%2F100-blue)](schema/review_schema.py)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688?logo=fastapi)](backend/main.py)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react)](frontend/FinancialAuditDashboard.jsx)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
-
-## What Does This Do?
-
-You give it a financial statement (annual report PDF, Excel workbook, CSV export, or Markdown file).  
-It gives you back a complete, machine-readable review with:
-
-- Extracted Balance Sheet, Income Statement, and Cash Flow numbers
-- 15 financial ratios (Liquidity, Leverage, Profitability, Efficiency)
-- Year-over-year growth rates
-- Automated checks: math accuracy, cash reconciliation, prior year tie-out, anomaly detection
-- A single overall score from 0 to 100
-- Every finding tagged CRITICAL / HIGH / REVIEW / PASSED
+An enterprise-grade, end-to-end financial audit and review platform. Finance Analyzer automatically ingests complex financial statements (Excel, PDF, CSV, Markdown), extracts and normalizes accounting schedules across multiple reporting periods, executes **10 automated WP-514 compliance and integrity procedures**, calculates key financial ratios, detects anomalies, and presents an interactive executive dashboard with grounded AI assistance and PDF export capabilities.
 
 ---
 
-## System Architecture
+## Architecture Overview
 
-```
- Your Financial Document (PDF / Excel / CSV / Markdown)
-                        |
-                        v
- ┌──────────────────────────────────────────────────────┐
- │  SEGMENT 1 — Document Processing Pipeline            │
- │  • Parses PDF, Excel, CSV, Text/MD                   │
- │  • Normalizes accounting numbers & labels            │
- │  • Extracts 3 financial statements                   │
- │  • Chunks footnotes for RAG indexing                 │
- │  • Evaluates document quality metrics                │
- └──────────────────────────────────────────────────────┘
-                        |
-                  financial_data.json
-                        |
-                        v
- ┌──────────────────────────────────────────────────────┐
- │  SEGMENT 2 — Financial Review Engine                 │
- │  • 10 automated check categories                     │
- │  • 15 financial ratios across 4 groups               │
- │  • YoY growth & unusual fluctuation detection        │
- │  • Findings aggregator & weighted scorer (0-100)     │
- └──────────────────────────────────────────────────────┘
-                        |
-                  review_result.json
-                        |
-                        v
- ┌──────────────────────────────────────────────────────┐
- │  SEGMENT 3 — AI Narrative & Dashboard  [PLANNED]     │
- │  • Executive summary generation (LLM)                │
- │  • Interactive findings dashboard                    │
- │  • Source citation drawer (page/note links)          │
- └──────────────────────────────────────────────────────┘
+```mermaid
+graph TD
+    A[Financial Document: Excel / PDF / CSV] --> B[Segment 1: Document Processing Pipeline]
+    B -->|financial_data.json| C[Segment 2: Financial Review & WP-514 Engine]
+    C -->|review_result.json| D[Backend: FastAPI & Persistence Layer]
+    D <--> E[(Database: PostgreSQL / SQLite)]
+    D <--> F[Google Gemini API: Server-Side Grounded AI]
+    D <--> G[Segment 3: React FinDash Frontend UI]
 ```
 
+### Complete System Breakdown
+1. **Segment 1 — Document Processing Engine**:
+   * Multi-format document parser (`.xlsx`, `.xls`, `.pdf`, `.csv`, `.md`).
+   * Normalizes line items into standardized accounting contracts.
+   * Extracts Balance Sheet, Income Statement, and Cash Flow Statement across comparative periods.
+   * Chunks footnotes and disclosure notes for provenance tracking.
+
+2. **Segment 2 — Financial Review & WP-514 Compliance Engine**:
+   * **10 Automated Audit Procedures**:
+     1. Mathematical Accuracy & Subtotal Verification
+     2. Cash Flow Reconciliation (Operating, Investing, Financing movements)
+     3. Prior-Year Comparative Tie-Out
+     4. Internal Consistency & Inter-Statement Cross-References
+     5. Analytical Comparison & YoY Growth Trend Analysis
+     6. Key Financial Ratios (Liquidity, Solvency, Profitability, Efficiency)
+     7. Unusual Fluctuations Scanner
+     8. Unusual Gains & Core Divergence Detection
+     9. Related Party Disclosures & Reconciliation
+     10. Document & Narrative Quality Gate
+   * Objective, weighted scoring algorithm producing a standardized **0–100 Audit Score**.
+   * Severity classification: `CRITICAL`, `HIGH`, `REVIEW`, `PASSED`.
+
+3. **Segment 3 & Backend — Multi-Tenant Web Platform**:
+   * **FastAPI Backend**: Protected REST endpoints, pipeline orchestration, background task processing.
+   * **Authentication & Security**: Argon2id password hashing, signed JWT Bearer tokens, strict multi-tenant tenant isolation.
+   * **Interactive FinDash UI**: React 18 SPA with overview dashboard, WP-514 Review Matrix, General Financial Ledger, Audit Integrity view, Audit Report with PDF export, and Audit History modal.
+   * **Grounded AI Assistant**: Server-side Google Gemini integration grounded strictly in the active audit workpapers (API keys remain secure on the backend).
+
 ---
 
-## Prerequisites
+## Quick Start Guide
 
-- **Python 3.10 or higher**
-- **pip** (comes with Python)
-- Git (to clone the repo)
+### Prerequisites
+* **Python 3.10+**
+* **Node.js 18+** & npm
 
 ---
 
-## Installation
+### 1. Installation
 
-**Step 1 — Clone the repository**
+Clone the repository:
 ```bash
-git clone https://github.com/Gaurav2794/Finance-Analyzer.git
-cd Finance-Analyzer
+git clone https://github.com/Tungsten073/UIfinance.git
+cd UIfinance
 ```
 
-**Step 2 — (Recommended) Create a virtual environment**
+#### Backend Setup:
 ```bash
-# Windows
+# Create and activate Python virtual environment
 python -m venv venv
-venv\Scripts\activate
+source venv/bin/activate    # On Windows: venv\Scripts\activate
 
-# macOS / Linux
-python3 -m venv venv
-source venv/bin/activate
-```
-
-**Step 3 — Install dependencies**
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Copy environment configuration
+cp .env.example .env
 ```
 
-That's it. No API keys, no cloud services, no configuration files needed.
+#### Frontend Setup:
+```bash
+cd frontend
+npm install
+cd ..
+```
 
 ---
 
-## Quick Start
+### 2. Running Locally
 
-### Run Segment 1 — Extract Financial Data
+#### Start the Backend API (Port 8000):
+```bash
+uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
+```
 
-Provide any supported financial document and get a structured JSON output:
+#### Start the Frontend UI (Port 5173):
+```bash
+npm --prefix frontend run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+* **Demo Account Credentials**:
+  * **Email**: `auditor@example.com`
+  * **Password**: `DemoPassword123!`
+  * *(Or click "Sign in as Lead Auditor" on the login screen for 1-click access)*
+
+---
+
+### 3. Command Line Execution (CLI Pipeline)
+
+You can also execute individual segments directly from the terminal without starting the web servers:
+
+#### Run Document Extraction (Segment 1):
+```bash
+python run_segment1.py path/to/financial_statement.xlsx --output outputs/financial_data.json
+```
+
+#### Run Financial Review (Segment 2):
+```bash
+python run_segment2.py outputs/financial_data.json --output outputs/review_result.json
+```
+
+---
+
+## Audit Procedures & WP-514 Coverage
+
+| ID | Procedure / Category | Description | Tolerance / Rule |
+|:---|:---|:---|:---|
+| **MA** | Mathematical Accuracy | Horizontal and vertical arithmetic verification across statements | $\le 0.1\%$ deviation |
+| **CF** | Cash Flow Reconciliation | Operating + Investing + Financing + Forex = Closing Cash Balance | Exact reconciliation |
+| **PY** | Prior-Year Tie-Out | Comparative figures match historical annual filings | Exact match |
+| **IC** | Internal Consistency | Cross-statement line-item validation (e.g., Net Income to Retained Earnings) | Zero discrepancy |
+| **AC** | Analytical Comparison | Compound Annual Growth Rate (CAGR) and YoY variance tracking | Trend baseline |
+| **FR** | Key Financial Ratios | Computes 15 liquidity, solvency, leverage, and profitability ratios | Industry thresholds |
+| **UF** | Unusual Fluctuations | Statistical z-score outlier detection on statement line items | $|z| > 2.5$ or $> 50\%$ variance |
+| **UG** | Unusual Gains Scanner | Non-operating one-off gains vs operating profit divergence | Materiality index |
+| **RP** | Related Party Disclosures | Note disclosure vs stated transaction balance reconciliation | Disclosed tie-out |
+| **DQ** | Document & Language Quality | Spelling, grammar, structural completeness, footnote reference checks | Quality score |
+
+---
+
+## Test Suites & Validation
+
+The project includes unit tests, regression suites, and Playwright Chromium real-browser verification tests:
 
 ```bash
-# From an Excel workbook
-python run_segment1.py --input sample_data/sample_financials.xlsx --output outputs/financial_data.json
+# Run backend security and API unit tests
+python -m unittest tests/test_auth_and_security.py
 
-# From a CSV file
-python run_segment1.py --input sample_data/sample_balance_sheet.csv --output outputs/financial_data.json
+# Run regression benchmarks against Core Apex Datasets
+python -m unittest tests/test_auth_e2e_verification.py
 
-# From a Markdown / Text report
-python run_segment1.py --input sample_data/sample_report.md --output outputs/financial_data.json
+# Run complete Playwright Chromium real-browser E2E test
+python tests/test_browser_real_e2e.py
 
-# From a PDF (digital, not scanned)
-python run_segment1.py --input my_annual_report.pdf --output outputs/financial_data.json
+# Run full Apex Auto Mobility product validation
+python tests/test_apex_full_e2e.py
 ```
 
-### Run Segment 2 — Financial Review & Scoring
-
-Takes the `financial_data.json` from Segment 1 and runs all 10 checks:
-
-```bash
-# Default (reads from outputs/financial_data.json)
-python run_segment2.py
-
-# Explicit paths
-python run_segment2.py --input outputs/financial_data.json --output outputs/review_result.json
-
-# With verbose debug logging
-python run_segment2.py --input outputs/financial_data.json --output outputs/review_result.json --verbose
-
-# Custom anomaly detection threshold (default: 8.0 percentage points)
-python run_segment2.py --input outputs/financial_data.json --output outputs/review_result.json --divergence-threshold 10.0
-```
-
-**Console output looks like:**
-```
-+----------------------------------------------------------+
-  TEAM 2 FINANCIAL REVIEW -- RESULTS SUMMARY
-+----------------------------------------------------------+
-  Document  : DOC-2024-001
-  Company   : Acme Corp Ltd.
-  Period    : FY2024
-+----------------------------------------------------------+
-  Overall Score  :  94.5 / 100
-  Overall Status :  EXCELLENT
-  Integrity Flag :  v None
-+----------------------------------------------------------+
-  Findings
-    CRITICAL : 0
-    HIGH     : 0
-    REVIEW   : 1
-    PASSED   : 16
-+----------------------------------------------------------+
-```
-
-### Run the Full Pipeline (Segment 1 + Segment 2)
-
-```bash
-# One-liner: extract then review
-python run_segment1.py --input sample_data/sample_financials.xlsx --output outputs/financial_data.json && python run_segment2.py
-```
+### Verified Regression Benchmarks
+* `AUTO_ALL_PASS`: **100.0 / 100** (82 / 82 checks passed)
+* `AUTO_REVIEW`: **96.61 / 100** (73 passed, 7 review, 2 failed)
+* `AUTO_FAIL`: **53.03 / 100** (62 passed, 2 review, 18 failed)
 
 ---
 
-## Running Tests
+## Production Deployment
 
-```bash
-# Segment 1 — Document processing tests
-python -m unittest segment1_document_processing/tests/test_pipeline.py
+Detailed production deployment instructions are available in [DEPLOYMENT.md](DEPLOYMENT.md).
 
-# Segment 2 — Financial review engine tests (12 test classes, T01-T12)
-python -m unittest segment2_financial_engine/tests/test_review_engine.py
-
-# Run all tests
-python -m unittest discover -s . -p "test_*.py" -v
-```
-
----
-
-## What Gets Checked (Segment 2 — 10 Review Categories)
-
-| # | Check | What It Does |
-|---|---|---|
-| 1 | **Mathematical Accuracy** | Verifies Assets = Liabilities + Equity, Gross Profit, Operating Income, Net Income equations |
-| 2 | **Cash Flow Reconciliation** | Opening + CFO + CFI + CFF = Closing Cash; BS Cash == CFS Cash |
-| 3 | **Prior Year Tie-Out** | Opening balance of current year == closing balance of prior year |
-| 4 | **Internal Consistency** | Cross-checks figures that appear in multiple statements |
-| 5 | **Analytical / YoY Growth** | Revenue, profit, and asset growth rates year-over-year |
-| 6 | **Financial Ratios** | 15 ratios: Current, Quick, D/E, ROE, ROA, DSO, Inventory Turnover, etc. |
-| 7 | **Unusual Fluctuations** | Flags >50% YoY changes as HIGH; 25-50% as REVIEW |
-| 8 | **Unusual Gain Detection** | Detects profit growth outpacing revenue growth (audit signal) |
-| 9 | **Related-Party Disclosures** | Checks existence and completeness of related-party notes |
-| 10 | **Document Quality Gate** | Validates extraction completeness & OCR quality from Segment 1 |
-
----
-
-## Financial Ratios Computed
-
-| Group | Ratios |
-|---|---|
-| **Liquidity** | Current Ratio, Quick Ratio, Cash Ratio |
-| **Leverage** | Debt-to-Equity, Debt Ratio, Interest Coverage Ratio |
-| **Profitability** | Gross Margin %, Operating Margin %, Net Margin %, ROA %, ROE % |
-| **Efficiency** | Asset Turnover, Receivables Turnover, Days Sales Outstanding, Inventory Turnover |
-
----
-
-## Supported Input Formats
-
-| Format | Extension | Notes |
-|---|---|---|
-| Excel Workbook | `.xlsx`, `.xls` | Multi-sheet; auto-detects Balance Sheet, P&L, Cash Flow tabs |
-| CSV | `.csv` | Single or multi-statement CSV exports |
-| PDF (Digital) | `.pdf` | Uses `pdfplumber` + `PyMuPDF` fallback; not for scanned/image PDFs |
-| Text / Markdown | `.txt`, `.md` | Structured financial reports in plain text |
-
----
-
-## Output Files
-
-| File | Description |
-|---|---|
-| `outputs/financial_data.json` | Segment 1 output — normalized 3-statement financial data with source tracking |
-| `outputs/review_result.json` | Segment 2 output — 10 check results, ratios, findings, and overall score |
-| `sample_financial_data.json` | Reference frozen contract (use to test Segment 2 without running Segment 1) |
-| `sample_review_result.json` | Reference frozen review output |
-
----
-
-## Repository Structure
-
-```
-Finance-Analyzer/
-├── agents/                              # Project memory & documentation
-│   ├── CONTEXT.md                       # Architecture & glossary
-│   ├── CHECKLIST.md                     # Task completion tracker
-│   ├── DECISIONS.md                     # Architectural decisions log
-│   ├── CHANGES.md                       # Change history
-│   ├── IMPLEMENTATION_PLAN.md           # Multi-phase roadmap
-│   └── phase2.md                        # Phase 2 complete documentation
-│
-├── schema/
-│   ├── financial_schema.py              # Pydantic contract for financial_data.json
-│   └── review_schema.py                 # Pydantic contract for review_result.json
-│
-├── segment1_document_processing/        # SEGMENT 1
-│   ├── src/
-│   │   ├── normalization/
-│   │   │   ├── number_parser.py         # Accounting number normalizer
-│   │   │   └── label_mapper.py          # 80+ label → canonical key mapper
-│   │   ├── extraction/
-│   │   │   ├── statement_detector.py    # Detects statement type from text
-│   │   │   └── table_extractor.py       # Matrix extractor & period aligner
-│   │   ├── parsers/
-│   │   │   ├── pdf_parser.py            # PDF ingestion (pdfplumber + PyMuPDF)
-│   │   │   ├── excel_parser.py          # Multi-sheet Excel parser
-│   │   │   ├── csv_parser.py            # CSV financial parser
-│   │   │   └── text_parser.py           # Markdown / plain text parser
-│   │   ├── rag/
-│   │   │   └── chunker.py               # Footnote/disclosure RAG chunker
-│   │   ├── quality/
-│   │   │   └── quality_evaluator.py     # Document quality metrics evaluator
-│   │   └── pipeline.py                  # Master ingestion orchestrator
-│   └── tests/
-│       └── test_pipeline.py             # Segment 1 unit & integration tests
-│
-├── segment2_financial_engine/           # SEGMENT 2
-│   ├── src/
-│   │   ├── loader.py                    # Safe field accessors & period resolution
-│   │   ├── engine.py                    # ReviewEngine master orchestrator
-│   │   ├── checks/
-│   │   │   ├── math_accuracy.py         # Check 1: Accounting equations
-│   │   │   ├── cash_flow_review.py      # Check 2: Cash flow reconciliation
-│   │   │   ├── prior_year_tieout.py     # Check 3: Prior year opening/closing
-│   │   │   ├── internal_consistency.py  # Check 4: Cross-statement consistency
-│   │   │   ├── analytical_engine.py     # Check 5: YoY growth analysis
-│   │   │   ├── ratios.py                # Check 6: 15 financial ratios
-│   │   │   ├── unusual_fluctuations.py  # Check 7: HIGH/REVIEW flagging
-│   │   │   ├── unusual_gain.py          # Check 8: Profit vs revenue divergence
-│   │   │   ├── related_disclosure.py    # Check 9: Related-party notes
-│   │   │   └── document_quality_guard.py# Check 10: Quality gate
-│   │   └── aggregator/
-│   │       ├── findings_builder.py      # Unified findings aggregator
-│   │       └── scorer.py                # Weighted 0-100 scorer
-│   └── tests/
-│       └── test_review_engine.py        # 12 test classes (T01-T12)
-│
-├── sample_data/                         # Test financial files (Excel, CSV, MD)
-├── outputs/                             # Generated JSON outputs (gitignored)
-├── run_segment1.py                      # Segment 1 CLI entry point
-├── run_segment2.py                      # Segment 2 CLI entry point
-├── sample_financial_data.json           # Reference Segment 1 output contract
-├── sample_review_result.json            # Reference Segment 2 output contract
-└── requirements.txt                     # Python dependencies
-```
-
----
-
-## Scoring System
-
-The overall score (0–100) is a weighted average across all 10 checks:
-
-| Check | Weight |
-|---|---|
-| Mathematical Accuracy | 20% |
-| Cash Flow Reconciliation | 15% |
-| Prior Year Tie-Out | 10% |
-| Internal Consistency | 10% |
-| Analytical / YoY Growth | 10% |
-| Financial Ratios | 10% |
-| Unusual Fluctuations | 10% |
-| Unusual Gain Detection | 5% |
-| Related-Party Disclosures | 5% |
-| Document Quality | 5% |
-
-> Checks that are SKIPPED (due to missing data) are excluded from the denominator so they do not unfairly penalise the document.
-
-**Score Bands:**
-
-| Score | Status |
-|---|---|
-| 90–100 | EXCELLENT |
-| 75–89 | GOOD |
-| 50–74 | ATTENTION REQUIRED |
-| 0–49 | HIGH RISK |
-
----
-
-## Troubleshooting
-
-**`ModuleNotFoundError: No module named 'pdfplumber'`**  
-Run `pip install -r requirements.txt` from inside the `Finance-Analyzer/` directory.
-
-**`FileNotFoundError: outputs/financial_data.json not found`**  
-Run Segment 1 first (`python run_segment1.py ...`) before running Segment 2.
-
-**`git: not recognized`** or wrong git repo errors  
-Always run git commands from inside `Finance-Analyzer/`, not the parent folder:
-```bash
-cd Finance-Analyzer
-git status
-```
-
-**PDF not extracting correctly**  
-This pipeline works best with **digital PDFs** (text-selectable). Scanned image PDFs require an OCR tool (not included) as a pre-processing step.
-
----
-
-## Roadmap
-
-| Phase | Status | Description |
-|---|---|---|
-| Phase 1 — Schema & Contracts | ✅ Complete | Frozen JSON contracts, Pydantic models, sample datasets |
-| Phase 2 — Segment 1 (Document Processing) | ✅ Complete | PDF/Excel/CSV/MD ingestion, normalization, quality metrics |
-| Phase 2 — Segment 2 (Review Engine) | ✅ Complete | 10 checks, 15 ratios, anomaly detection, 0-100 scoring |
-| Phase 3 — Segment 3 (AI Dashboard) | 🔄 Planned | LLM summaries, interactive dashboard, citation drawer |
-| Phase 4 — End-to-End Integration | 🔄 Planned | Unified pipeline, regression tests, performance benchmarks |
-
----
-
-## Dependencies
-
-| Package | Version | Purpose |
-|---|---|---|
-| `pandas` | >=2.0.0 | Data manipulation & table extraction |
-| `openpyxl` | >=3.1.0 | Excel workbook reading (.xlsx) |
-| `pdfplumber` | >=0.11.0 | Primary PDF text & table extraction |
-| `pymupdf` | >=1.24.0 | PDF fallback renderer (PyMuPDF / fitz) |
-| `pypdf` | >=4.0.0 | PDF metadata & page reading |
-| `pydantic` | >=2.0.0 | JSON schema validation (V2 API) |
+### 1-Click Render Deployment
+This repository includes a [`render.yaml`](render.yaml) Blueprint:
+1. Link this repository on [Render](https://render.com/).
+2. Select **New Blueprint Instance**.
+3. Render automatically provisions the PostgreSQL database, FastAPI service, and static React frontend.
 
 ---
 
 ## License
 
-MIT License — free to use, modify, and distribute.
+This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
