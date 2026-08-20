@@ -7,17 +7,22 @@
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || false;
 
+const ENV_API_URL = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE;
+
 function resolveDefaultApiBase() {
+  if (ENV_API_URL) {
+    return ENV_API_URL;
+  }
   if (typeof window !== "undefined" && window.location) {
     const host = window.location.hostname;
-    if (host === "localhost" || host === "127.0.0.1") {
+    if (host === "localhost" || host === "127.0.0.1" || host === "0.0.0.0" || host.startsWith("192.168.") || host.startsWith("10.")) {
       return `http://${host}:8000/api`;
     }
   }
-  return "http://localhost:8000/api";
+  return "https://finance-analyzer-ghuq.onrender.com/api";
 }
 
-const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || resolveDefaultApiBase();
+const rawBase = resolveDefaultApiBase();
 const API_BASE = rawBase.endsWith("/api") ? rawBase : `${rawBase.replace(/\/+$/, "")}/api`;
 
 export const AUTH_TOKEN_KEY = "finance_analyzer_token";
@@ -225,4 +230,5 @@ export async function askAI(documentId, findingId = null, question = "Why was th
 
 export async function fetchReport(documentId) {
   if (USE_MOCK) return apiFetch(FIXTURE_DASHBOARD);
+  return apiFetch(`${API_BASE}/documents/${encodeURIComponent(documentId)}/report`);
 }
