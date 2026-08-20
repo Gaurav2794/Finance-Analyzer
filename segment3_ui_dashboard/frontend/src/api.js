@@ -5,6 +5,7 @@
  * and Protected API Request Execution.
  */
 
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || false;
 const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
 const API_BASE = rawBase.endsWith("/api") ? rawBase : `${rawBase.replace(/\/+$/, "")}/api`;
 

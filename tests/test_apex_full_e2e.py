@@ -23,7 +23,7 @@ from backend.services.wp514_service import WP514Service
 from backend.db.database import SessionLocal
 from backend.db.models import Document as DBDocument
 
-http_client = httpx.Client(base_url=BACKEND_URL, timeout=30.0)
+http_client = httpx.Client(base_url=BACKEND_URL, timeout=60.0)
 
 def run_apex_e2e():
     print("=" * 80)

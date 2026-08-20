@@ -22,7 +22,21 @@ OUTPUTS_DIR.mkdir(parents=True, exist_ok=True)
 SUPPORTED_EXTENSIONS = {".pdf", ".xlsx", ".xls", ".csv", ".md", ".txt"}
 
 # ── CORS ─────────────────────────────────────────────────────────────────────
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173,http://127.0.0.1:5174,*").split(",")
+_frontend_env = os.getenv("FRONTEND_URL", "")
+_cors_env = os.getenv("CORS_ORIGINS", "")
+_raw_origins = []
+if _frontend_env:
+    _raw_origins.extend([o.strip() for o in _frontend_env.split(",") if o.strip()])
+if _cors_env:
+    _raw_origins.extend([o.strip() for o in _cors_env.split(",") if o.strip()])
+if not _raw_origins:
+    _raw_origins = [
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+    ]
+CORS_ORIGINS = [o for o in _raw_origins if o != "*"]
 
 # ── API settings ──────────────────────────────────────────────────────────────
 API_PREFIX = "/api"

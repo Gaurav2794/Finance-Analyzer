@@ -16,7 +16,11 @@ from sqlalchemy.orm import declarative_base, sessionmaker, Session
 REPO_ROOT = Path(__file__).resolve().parent.parent.parent
 
 # Database URL from environment; defaults to sqlite file in repository root
-DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{REPO_ROOT}/finance_analyzer.db")
+raw_db_url = os.getenv("DATABASE_URL", f"sqlite:///{REPO_ROOT}/finance_analyzer.db")
+if raw_db_url.startswith("postgres://"):
+    DATABASE_URL = raw_db_url.replace("postgres://", "postgresql://", 1)
+else:
+    DATABASE_URL = raw_db_url
 
 # SQLite needs connect_args={"check_same_thread": False} for multi-threaded FastAPI
 connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite") else {}
