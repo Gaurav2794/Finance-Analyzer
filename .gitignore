@@ -59,3 +59,8 @@ screenshots/
 *.db
 *.sqlite
 *.sqlite3
+
+backend.log
+outputs/COMPARE_*
+outputs/TEST_E2E_*
+

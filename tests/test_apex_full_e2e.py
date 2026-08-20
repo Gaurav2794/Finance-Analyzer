@@ -103,7 +103,7 @@ def run_apex_e2e():
 
         # Wait for pipeline completion
         print("    [*] Waiting for Segment 1 & Segment 2 pipeline to complete...")
-        page.wait_for_selector("text=Apex Auto Mobility", timeout=40000)
+        page.wait_for_selector("text=Financial Statement", timeout=35000)
         print("    [✓] Apex document uploaded and pipeline COMPLETED.")
         results["Apex upload"] = "PASS"
 
