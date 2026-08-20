@@ -6,7 +6,18 @@
  */
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true" || false;
-const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || "http://localhost:8000/api";
+
+function resolveDefaultApiBase() {
+  if (typeof window !== "undefined" && window.location) {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") {
+      return `http://${host}:8000/api`;
+    }
+  }
+  return "http://localhost:8000/api";
+}
+
+const rawBase = import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE || resolveDefaultApiBase();
 const API_BASE = rawBase.endsWith("/api") ? rawBase : `${rawBase.replace(/\/+$/, "")}/api`;
 
 export const AUTH_TOKEN_KEY = "finance_analyzer_token";
